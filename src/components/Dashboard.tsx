@@ -45,6 +45,7 @@ interface DashboardProps {
   onBackToMain?: () => void;
   onStartExam?: () => void;
   isActive?: boolean;
+  viewMode?: 'all' | 'flashcards' | 'stats';
 }
 
 interface CategoryAccuracy {
@@ -110,7 +111,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenApiKeyModal, 
   onBackToMain, 
   onStartExam,
-  isActive 
+  isActive,
+  viewMode = 'all'
 }) => {
   // Flashcard state
   const [flashcards] = useState<Flashcard[]>(MOCK_FLASHCARDS);
@@ -432,7 +434,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold transition shadow-sm"
             title="Return to Main Practice Exam Page"
           >
-            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <ArrowLeft className="w-4 h-4 text-blue-400" />
             <span>← Back to Practice Exam</span>
           </button>
         )}
@@ -441,7 +443,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {onStartExam && (
             <button
               onClick={onStartExam}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-blue-500 hover:bg-blue-400 text-slate-950 transition shadow-sm"
               title="Launch Practice Test"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -463,7 +465,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
             title="Manage Gemini AI API Key"
           >
-            <Key className="w-3.5 h-3.5 text-emerald-400" />
+            <Key className="w-3.5 h-3.5 text-blue-400" />
             <span>API Key</span>
           </button>
         </div>
@@ -471,27 +473,51 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* SUCCESS / STATUS BANNER */}
       {statusMessage && (
-        <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-2xl text-xs font-medium flex items-center justify-between animate-fade-in shadow-sm">
+        <div className="p-3.5 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-2xl text-xs font-medium flex items-center justify-between animate-fade-in shadow-sm">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
             <span>{statusMessage}</span>
           </div>
           <button 
             onClick={() => setStatusMessage(null)} 
-            className="text-emerald-400 hover:text-white ml-2 text-sm font-bold"
+            className="text-blue-400 hover:text-white ml-2 text-sm font-bold"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* DASHBOARD HERO HEADER */}
-      <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* FLASHCARDS DEDICATED HEADER */}
+      {viewMode === 'flashcards' && (
+        <div className="bg-[#0b142d] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#182958] relative overflow-hidden">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5">
+              <Rotate3d className="w-3.5 h-3.5" />
+              Interactive Vocabulary Flashcards
+            </span>
+            <span className="text-xs text-slate-400 font-medium">
+              {flashcards.length} Total High-Frequency Terms
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-white tracking-tight">
+            3D Business Vocabulary & Collocation Cards
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+            Master ICAP high-frequency business word pairs, auditing terminology, and legal English with active recall, audio pronunciation, Urdu translations, and mastery tracking.
+          </p>
+        </div>
+      )}
+
+      {/* STATS & ANALYTICS SECTIONS */}
+      {(viewMode === 'all' || viewMode === 'stats') && (
+        <>
+          {/* DASHBOARD HERO HEADER */}
+          <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5">
                 <BarChart3 className="w-3.5 h-3.5" />
                 Performance Analytics & Preparation Tracking
               </span>
@@ -510,7 +536,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center gap-3 self-start md:self-auto flex-shrink-0">
             <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-center min-w-[120px]">
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Readiness</div>
-              <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-0.5">
+              <div className="text-2xl sm:text-3xl font-black text-blue-400 mt-0.5">
                 {totalAttempts > 0 ? `${readinessIndex}%` : '--'}
               </div>
               <div className="text-[10px] text-slate-400 font-medium mt-0.5">
@@ -525,7 +551,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Target className="w-5 h-5 text-emerald-500" />
+            <Target className="w-5 h-5 text-blue-500" />
             <span>Overall Preparation Progress</span>
           </h2>
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -539,14 +565,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span>Readiness</span>
-              <BrainCircuit className="w-4 h-4 text-emerald-500" />
+              <BrainCircuit className="w-4 h-4 text-blue-500" />
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
               {totalAttempts > 0 ? `${readinessIndex}%` : '0%'}
             </div>
             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
               <div 
-                className="bg-emerald-500 h-1.5 rounded-full transition-all duration-700" 
+                className="bg-blue-500 h-1.5 rounded-full transition-all duration-700" 
                 style={{ width: `${Math.max(readinessIndex, 4)}%` }}
               />
             </div>
@@ -565,7 +591,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {totalAttempts}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
-              <span className="text-emerald-500 font-bold">{fullExamsCount} Full</span>
+              <span className="text-blue-500 font-bold">{fullExamsCount} Full</span>
               <span>•</span>
               <span>{totalAttempts - fullExamsCount} Modular</span>
             </div>
@@ -584,7 +610,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {totalAttempts > 0 ? `${avgPercentage}%` : '--'}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Best: <strong className="text-emerald-500 font-bold">{totalAttempts > 0 ? `${bestPercentage}%` : '--'}</strong>
+              Best: <strong className="text-blue-500 font-bold">{totalAttempts > 0 ? `${bestPercentage}%` : '--'}</strong>
             </div>
             <div className="text-[10px] text-slate-400">
               {avgPercentage >= 65 ? 'CEFR Band B2/C' : avgPercentage >= 50 ? 'CEFR Band B1' : 'Needs Practice'}
@@ -612,10 +638,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span>Answers</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <CheckCircle2 className="w-4 h-4 text-blue-500" />
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
-              {totalCorrectAnswers} <span className="text-xs font-medium text-emerald-500">✓</span>
+              {totalCorrectAnswers} <span className="text-xs font-medium text-blue-500">✓</span>
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-bold">
               <span className="text-rose-500">{totalIncorrectAnswers} ✗ wrong</span>
@@ -632,13 +658,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span>Pass Rate</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <ShieldCheck className="w-4 h-4 text-blue-500" />
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
               {totalAttempts > 0 ? `${passRate}%` : '--'}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              <strong className="text-emerald-500 font-bold">{passedAttempts}</strong> of {totalAttempts} passed
+              <strong className="text-blue-500 font-bold">{passedAttempts}</strong> of {totalAttempts} passed
             </div>
             <div className="text-[10px] text-slate-400">
               Benchmark: ≥ 50%
@@ -654,7 +680,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              <TrendingUp className="w-5 h-5 text-blue-500" />
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                 Topics Needing Improvement & Diagnostic Heatmap
               </h2>
@@ -670,8 +696,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               onClick={() => setTopicFilter('all')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
                 topicFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
               }`}
             >
               All Topics ({aggregatedTopics.length})
@@ -706,12 +732,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               onClick={() => setTopicFilter('strong')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 ${
                 topicFilter === 'strong'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100'
               }`}
             >
               <span>🟢 Mastered (≥ 75%)</span>
-              <span className="text-[10px] px-1.5 py-0.2 bg-emerald-500/20 rounded-full font-extrabold">
+              <span className="text-[10px] px-1.5 py-0.2 bg-blue-500/20 rounded-full font-extrabold">
                 {aggregatedTopics.filter(t => t.status === 'Strong').length}
               </span>
             </button>
@@ -724,8 +750,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             const isWeak = topic.status === 'Weak';
             const isModerate = topic.status === 'Moderate';
 
-            let barColor = 'from-emerald-500 to-teal-400';
-            let badgeBg = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300';
+            let barColor = 'from-blue-500 to-cyan-400';
+            let badgeBg = 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300';
             let borderStyle = 'border-slate-200 dark:border-slate-800';
 
             if (isWeak) {
@@ -778,7 +804,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                 {/* Target Recommendation / Actionable Tip */}
                 <div className="text-[11px] p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 flex items-start gap-2 leading-relaxed">
-                  <Info className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
                   <span>
                     <strong className="text-slate-800 dark:text-slate-200">Study Tip:</strong> {topic.recommendation}
                   </span>
@@ -796,7 +822,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-500" />
+              <Award className="w-5 h-5 text-blue-500" />
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                 Exam Attempts & Comprehensive Test History
               </h2>
@@ -812,50 +838,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-slate-400 px-1.5 text-[11px]">Filter:</span>
               <button
                 onClick={() => setAttemptFilterMode('all')}
-                className={`px-2.5 py-1 rounded-lg transition ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   attemptFilterMode === 'all' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold' 
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'bg-white dark:bg-slate-700 text-[#0a1636] dark:text-white shadow-xs font-bold border border-slate-200 dark:border-transparent' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 font-semibold'
                 }`}
               >
                 All ({examHistory.length})
               </button>
               <button
                 onClick={() => setAttemptFilterMode('full')}
-                className={`px-2.5 py-1 rounded-lg transition ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   attemptFilterMode === 'full' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold' 
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'bg-white dark:bg-slate-700 text-[#0a1636] dark:text-white shadow-xs font-bold border border-slate-200 dark:border-transparent' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 font-semibold'
                 }`}
               >
                 Full (1h50m)
               </button>
               <button
                 onClick={() => setAttemptFilterMode('core')}
-                className={`px-2.5 py-1 rounded-lg transition ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   attemptFilterMode === 'core' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold' 
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'bg-white dark:bg-slate-700 text-[#0a1636] dark:text-white shadow-xs font-bold border border-slate-200 dark:border-transparent' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 font-semibold'
                 }`}
               >
                 Core
               </button>
               <button
                 onClick={() => setAttemptFilterMode('reading')}
-                className={`px-2.5 py-1 rounded-lg transition ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   attemptFilterMode === 'reading' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold' 
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'bg-white dark:bg-slate-700 text-[#0a1636] dark:text-white shadow-xs font-bold border border-slate-200 dark:border-transparent' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 font-semibold'
                 }`}
               >
                 Reading
               </button>
               <button
                 onClick={() => setAttemptFilterMode('writing')}
-                className={`px-2.5 py-1 rounded-lg transition ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   attemptFilterMode === 'writing' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold' 
-                    : 'text-slate-600 dark:text-slate-300'
+                    ? 'bg-white dark:bg-slate-700 text-[#0a1636] dark:text-white shadow-xs font-bold border border-slate-200 dark:border-transparent' 
+                    : 'text-slate-700 dark:text-slate-300 hover:text-blue-600 font-semibold'
                 }`}
               >
                 Writing
@@ -865,7 +891,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <select
               value={attemptSortOrder}
               onChange={(e) => setAttemptSortOrder(e.target.value as any)}
-              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-none focus:ring-2 focus:ring-emerald-500"
+              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="newest">Newest First</option>
               <option value="highest">Highest Score</option>
@@ -877,7 +903,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Test Attempts List */}
         {processedExamAttempts.length === 0 ? (
           <div className="text-center py-12 px-4 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
               <GraduationCap className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -889,7 +915,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {onStartExam && (
               <button
                 onClick={onStartExam}
-                className="mt-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition shadow-md inline-flex items-center gap-2"
+                className="mt-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-extrabold text-xs transition shadow-md inline-flex items-center gap-2"
               >
                 <Play className="w-4 h-4 fill-current" />
                 <span>Start Full Exam (1 Hour 50 Minutes)</span>
@@ -922,7 +948,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wide uppercase ${
                           attempt.testMode === 'full' 
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' 
+                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40' 
                             : 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
                         }`}>
                           {modeLabel}
@@ -945,7 +971,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <div className="flex items-center gap-2 self-start sm:self-center">
                       <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide ${
                         attempt.isPassed 
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' 
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300 dark:border-blue-800' 
                           : 'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
                       }`}>
                         {attempt.isPassed ? '✓ PASSED' : '⚠️ NEEDS WORK'}
@@ -977,7 +1003,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">
                         Percentage
                       </span>
-                      <div className="text-lg font-black text-emerald-500">
+                      <div className="text-lg font-black text-blue-500">
                         {attempt.percentage}%
                       </div>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400">
@@ -990,7 +1016,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">
                         Correct Answers
                       </span>
-                      <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <div className="text-lg font-black text-blue-600 dark:text-blue-400 flex items-center gap-1">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>{correctCount}</span>
                         <span className="text-xs font-normal text-slate-400">/ {totalQ}</span>
@@ -1026,7 +1052,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span className="text-[11px] font-bold text-slate-400 mr-1">Section Scores:</span>
                     
                     <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                       Grammar: <strong className="text-slate-900 dark:text-white font-bold">{attempt.grammarScore ?? 0}</strong>/25
                     </span>
 
@@ -1047,7 +1073,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                     <button
                       onClick={() => setExpandedAttemptId(isExpanded ? null : attempt.id)}
-                      className="ml-auto text-xs font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-emerald-500/10 transition"
+                      className="ml-auto text-xs font-bold text-blue-500 hover:text-blue-400 flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-blue-500/10 transition"
                     >
                       <span>{isExpanded ? 'Hide Topic Details' : 'View Topic Details'}</span>
                       {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -1100,14 +1126,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
       </div>
+    </>
+  )}
 
       {/* SECTION 4: BUSINESS VOCABULARY & COLLOCATION FLASHCARD ENGINE */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      {(viewMode === 'all' || viewMode === 'flashcards') && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">
                 Collocation Flashcard Engine
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -1152,18 +1181,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Flip Card Stage */}
             <div
               onClick={() => setIsFlipped(!isFlipped)}
-              className="w-full min-h-[300px] cursor-pointer rounded-3xl border-2 transition-all duration-300 transform perspective-1000 shadow-lg p-6 sm:p-8 flex flex-col justify-between relative bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800 hover:border-emerald-500/50 select-none"
+              className="w-full min-h-[300px] cursor-pointer rounded-3xl border-2 transition-all duration-300 transform perspective-1000 shadow-lg p-6 sm:p-8 flex flex-col justify-between relative bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800 hover:border-blue-500/50 select-none"
             >
               {!isFlipped ? (
                 /* FRONT OF CARD */
                 <div className="flex flex-col justify-between h-full space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
                       {currentCard.category}
                     </span>
                     <button
                       onClick={(e) => handleSpeakPhrase(e, currentCard.phrase)}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 transition"
+                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-400 transition"
                       title="Audio Pronunciation"
                     >
                       <Volume2 className="w-4 h-4" />
@@ -1174,17 +1203,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <h3 className="text-2xl sm:text-3xl font-display font-extrabold text-white tracking-tight">
                       "{currentCard.phrase}"
                     </h3>
-                    <p className="text-xs sm:text-sm font-mono text-emerald-400 mt-2">
+                    <p className="text-xs sm:text-sm font-mono text-blue-400 mt-2">
                       {currentCard.pronunciation}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-800">
                     <span className="flex items-center gap-1">
-                      <Rotate3d className="w-3.5 h-3.5 text-emerald-400" /> Click to reveal definition & Urdu
+                      <Rotate3d className="w-3.5 h-3.5 text-blue-400" /> Click to reveal definition & Urdu
                     </span>
                     {masteredCards[currentCard.id] && (
-                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <span className="text-blue-400 font-bold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Mastered
                       </span>
                     )}
@@ -1194,7 +1223,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 /* BACK OF CARD */
                 <div className="flex flex-col justify-between h-full space-y-4 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
                       Accounting Definition
                     </span>
                     <button
@@ -1204,7 +1233,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       }}
                       className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 ${
                         masteredCards[currentCard.id]
-                          ? 'bg-emerald-500 text-slate-950'
+                          ? 'bg-blue-500 text-slate-950'
                           : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                       }`}
                     >
@@ -1219,12 +1248,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     </p>
 
                     <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-300">
-                      <strong className="text-emerald-400 block mb-1">CA Context Example:</strong>
+                      <strong className="text-blue-400 block mb-1">CA Context Example:</strong>
                       "{currentCard.exampleSentence}"
                     </div>
 
-                    <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-xs space-y-1">
-                      <div className="text-emerald-300 font-urdu text-sm">
+                    <div className="p-3 rounded-xl bg-blue-950/60 border border-blue-500/30 text-xs space-y-1">
+                      <div className="text-blue-300 font-urdu text-sm">
                         {currentCard.urduMeaning}
                       </div>
                       <div className="text-slate-400 text-[11px]">
@@ -1253,7 +1282,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={() => handleToggleMastered(currentCard.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   masteredCards[currentCard.id]
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
                     : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -1272,7 +1301,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
 
-      </div>
+        </div>
+      )}
 
       {/* SECTION 5: PRIVACY & SYSTEM STORAGE MANAGEMENT */}
       <div className="bg-slate-100 dark:bg-slate-900/60 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400">

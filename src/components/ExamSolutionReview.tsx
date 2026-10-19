@@ -19,7 +19,9 @@ import {
   Award
 } from 'lucide-react';
 import { AptisTestSet, StudentExamAnswers, WritingEvaluation } from '../types';
+import { useTheme } from '../context/ThemeContext';
 import { APTIS_TEST_SET_1 } from '../data/aptisMockData';
+import { cleanArtifacts } from '../data/pdfGrammarPool';
 import { 
   evaluateExamWritingTaskSync, 
   evaluateExamWritingTask, 
@@ -40,6 +42,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
   testMode = 'full',
   writingEvaluation
 }) => {
+  const { theme } = useTheme();
   const [activeSection, setActiveSection] = useState<'all' | 'grammar' | 'vocab' | 'reading' | 'writing'>('all');
   const [filterMode, setFilterMode] = useState<'all' | 'incorrectOnly'>('all');
   const [showUrdu, setShowUrdu] = useState<boolean>(true);
@@ -301,7 +304,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
@@ -334,7 +337,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
             onClick={() => setShowUrdu(!showUrdu)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition ${
               showUrdu
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
                 : 'bg-slate-800 border-slate-700 text-slate-400'
             }`}
           >
@@ -348,9 +351,11 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
       <div className="flex flex-wrap items-center gap-2 pb-2">
         <button
           onClick={() => setActiveSection('all')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
             activeSection === 'all'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+              : theme === 'light'
+              ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
               : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border border-slate-700/60'
           }`}
         >
@@ -362,15 +367,19 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           <>
             <button
               onClick={() => setActiveSection('grammar')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                 activeSection === 'grammar'
-                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                  : theme === 'light'
+                  ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                   : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border border-slate-700/60'
               }`}
             >
               <span>1. Grammar (25 Qs)</span>
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                activeSection === 'grammar' ? 'bg-slate-950/40 text-slate-900 font-black' : 'bg-slate-900 text-emerald-400'
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                activeSection === 'grammar' 
+                  ? 'bg-blue-800/50 text-white' 
+                  : (theme === 'light' ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'bg-slate-900 text-blue-400')
               }`}>
                 {correctGrammarCount}/25
               </span>
@@ -378,15 +387,19 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
 
             <button
               onClick={() => setActiveSection('vocab')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                 activeSection === 'vocab'
-                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                  : theme === 'light'
+                  ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                   : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border border-slate-700/60'
               }`}
             >
               <span>2. Vocabulary (25 Qs)</span>
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                activeSection === 'vocab' ? 'bg-slate-950/40 text-slate-900 font-black' : 'bg-slate-900 text-teal-400'
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                activeSection === 'vocab' 
+                  ? 'bg-blue-800/50 text-white' 
+                  : (theme === 'light' ? 'bg-cyan-50 text-cyan-800 border border-cyan-200' : 'bg-slate-900 text-cyan-400')
               }`}>
                 {correctVocabCount}/25
               </span>
@@ -397,15 +410,19 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         {(testMode === 'full' || testMode === 'reading') && (
           <button
             onClick={() => setActiveSection('reading')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
               activeSection === 'reading'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                 : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border border-slate-700/60'
             }`}
           >
             <span>3. Reading (4 Tasks)</span>
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-              activeSection === 'reading' ? 'bg-slate-950/40 text-slate-900 font-black' : 'bg-slate-900 text-blue-400'
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              activeSection === 'reading' 
+                ? 'bg-blue-800/50 text-white' 
+                : (theme === 'light' ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'bg-slate-900 text-blue-400')
             }`}>
               {correctReadingCount}/{totalReading}
             </span>
@@ -415,15 +432,19 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         {(testMode === 'full' || testMode === 'writing') && (
           <button
             onClick={() => setActiveSection('writing')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
               activeSection === 'writing'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/25 ring-2 ring-amber-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-amber-50 hover:text-amber-800 shadow-xs'
                 : 'bg-slate-800/80 hover:bg-slate-750 text-slate-300 border border-slate-700/60'
             }`}
           >
             <span>4. Writing Tasks & Model Answers</span>
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-              activeSection === 'writing' ? 'bg-slate-950/40 text-slate-900 font-black' : 'bg-slate-900 text-amber-400'
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              activeSection === 'writing' 
+                ? 'bg-amber-800/50 text-white' 
+                : (theme === 'light' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-slate-900 text-amber-400')
             }`}>
               4 Parts
             </span>
@@ -438,7 +459,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         <div className="space-y-4 pt-4 border-t border-slate-800">
           <div className="flex items-center justify-between bg-slate-850 p-4 rounded-2xl border border-slate-750">
             <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">
+              <span className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-xs">
                 1
               </span>
               <div>
@@ -451,7 +472,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs font-mono font-bold text-emerald-400">
+              <span className="text-xs font-mono font-bold text-blue-400">
                 Score: {correctGrammarCount} / {totalGrammar} ({Math.round((correctGrammarCount / totalGrammar) * 100)}%)
               </span>
             </div>
@@ -477,7 +498,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-850/60 border-slate-700/60'
                         : isCorrect
-                        ? 'bg-emerald-950/15 border-emerald-500/30'
+                        ? 'bg-blue-950/15 border-blue-500/30'
                         : 'bg-rose-950/15 border-rose-500/30'
                     }`}
                   >
@@ -500,8 +521,8 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                             <span>Not Attempted</span>
                           </span>
                         ) : isCorrect ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                            <CheckCircle2 className="w-3 h-3 text-blue-400" />
                             <span>Correct (+1 mark)</span>
                           </span>
                         ) : (
@@ -516,19 +537,20 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     {/* Question Prompt */}
                     <div className="py-3">
                       <p className="text-sm font-semibold text-white leading-relaxed">
-                        {q.question}
+                        {cleanArtifacts(q.question)}
                       </p>
                     </div>
 
                     {/* Options Grid with Visual Marking */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-3">
                       {q.options.map((opt, optIdx) => {
+                        const cleanOpt = cleanArtifacts(opt);
                         const isStudentChoice = studentSelection === optIdx;
                         const isTheCorrectOption = optIdx === q.correctIndex;
 
                         let optClasses = 'bg-slate-800/60 border-slate-700/60 text-slate-300';
                         if (isTheCorrectOption) {
-                          optClasses = 'bg-emerald-900/30 border-emerald-500/60 text-emerald-200 font-bold';
+                          optClasses = 'bg-blue-900/30 border-blue-500/60 text-blue-200 font-bold';
                         } else if (isStudentChoice && !isTheCorrectOption) {
                           optClasses = 'bg-rose-900/30 border-rose-500/60 text-rose-200 line-through';
                         }
@@ -542,13 +564,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                               <span className="w-5 h-5 rounded-md bg-slate-900/80 font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
                                 {String.fromCharCode(65 + optIdx)}
                               </span>
-                              <span>{opt}</span>
+                              <span>{cleanOpt}</span>
                             </div>
 
                             {/* Label for this option */}
                             <div className="shrink-0">
                               {isTheCorrectOption && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-slate-950">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-slate-950">
                                   <Check className="w-3 h-3" /> Correct Answer
                                 </span>
                               )}
@@ -558,7 +580,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                                 </span>
                               )}
                               {isStudentChoice && isTheCorrectOption && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-400 text-slate-950">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-400 text-slate-950">
                                   <Check className="w-3 h-3" /> Your Choice (Correct)
                                 </span>
                               )}
@@ -574,7 +596,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                         <span className="text-slate-400 font-medium">Your Selected Answer:</span>
                         {isAnswered ? (
                           <span className={`font-mono font-bold px-2 py-0.5 rounded ${
-                            isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                            isCorrect ? 'bg-blue-500/20 text-blue-300' : 'bg-rose-500/20 text-rose-300'
                           }`}>
                             {q.options[studentSelection]} {isCorrect ? '✓' : '✗'}
                           </span>
@@ -585,7 +607,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
 
                       <div className="flex items-center gap-2">
                         <span className="text-slate-400 font-medium">Official Correct Answer:</span>
-                        <span className="font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                        <span className="font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
                           {q.options[q.correctIndex]}
                         </span>
                       </div>
@@ -594,7 +616,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     {/* Solution & Detailed Explanation */}
                     <div className="mt-3 pt-3 border-t border-slate-750/70 space-y-2">
                       <div className="text-xs text-slate-300 leading-relaxed bg-slate-800/40 p-3 rounded-xl border border-slate-700/50">
-                        <span className="font-bold text-emerald-400 block mb-1">📖 Grammatical Solution & Rule:</span>
+                        <span className="font-bold text-blue-400 block mb-1">📖 Grammatical Solution & Rule:</span>
                         {q.englishExplanation}
                       </div>
 
@@ -620,7 +642,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         <div className="space-y-6 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between bg-slate-850 p-4 rounded-2xl border border-slate-750">
             <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-400 font-bold flex items-center justify-center text-xs">
+              <span className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-xs">
                 2
               </span>
               <div>
@@ -633,7 +655,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs font-mono font-bold text-teal-400">
+              <span className="text-xs font-mono font-bold text-cyan-400">
                 Score: {correctVocabCount} / {totalVocab} ({Math.round((correctVocabCount / totalVocab) * 100)}%)
               </span>
             </div>
@@ -642,7 +664,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           {/* Task 1: Word Matching */}
           <div className="space-y-3 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold text-teal-300 uppercase tracking-wider">
+              <h5 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Task 1: Word Matching (Synonyms) — Questions 26 to 30
               </h5>
               <span className="text-xs font-mono text-slate-400 font-bold">{correctVocab1}/5 correct</span>
@@ -663,14 +685,14 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-white">Q{26 + idx}. Target: <span className="text-teal-300 underline font-mono">{item.targetWord}</span></span>
+                      <span className="font-bold text-white">Q{26 + idx}. Target: <span className="text-cyan-300 underline font-mono">{item.targetWord}</span></span>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">✗ Incorrect</span>
                       )}
@@ -679,13 +701,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? studentVal : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Synonym:</span>
-                        <span className="font-mono font-bold text-emerald-400">{item.correctMatch}</span>
+                        <span className="font-mono font-bold text-blue-400">{item.correctMatch}</span>
                       </div>
                     </div>
 
@@ -702,7 +724,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           {/* Task 2: Definitions */}
           <div className="space-y-3 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold text-teal-300 uppercase tracking-wider">
+              <h5 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Task 2: Definitions Matching — Questions 31 to 35
               </h5>
               <span className="text-xs font-mono text-slate-400 font-bold">{correctVocab2}/5 correct</span>
@@ -723,7 +745,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
@@ -731,7 +753,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       <span className="font-bold text-white">Q{31 + idx}.</span>
                       <p className="text-slate-300 italic flex-1 text-[11px]">"{item.definition}"</p>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 shrink-0">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 shrink-0">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 shrink-0">✗ Incorrect</span>
                       )}
@@ -740,13 +762,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? studentVal : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Term:</span>
-                        <span className="font-mono font-bold text-emerald-400">{item.correctWord}</span>
+                        <span className="font-mono font-bold text-blue-400">{item.correctWord}</span>
                       </div>
                     </div>
 
@@ -763,7 +785,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           {/* Task 3: Collocations */}
           <div className="space-y-3 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold text-teal-300 uppercase tracking-wider">
+              <h5 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Task 3: Word Pairs & Preposition Collocations — Questions 36 to 40
               </h5>
               <span className="text-xs font-mono text-slate-400 font-bold">{correctVocab3}/5 correct</span>
@@ -784,7 +806,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
@@ -792,7 +814,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       <span className="font-bold text-white">Q{36 + idx}.</span>
                       <p className="text-slate-200 font-medium flex-1">{item.sentence}</p>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 shrink-0">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 shrink-0">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 shrink-0">✗ Incorrect</span>
                       )}
@@ -801,13 +823,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? item.options[studentChoiceIdx] : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Collocation:</span>
-                        <span className="font-mono font-bold text-emerald-400">{item.options[item.correctIndex]}</span>
+                        <span className="font-mono font-bold text-blue-400">{item.options[item.correctIndex]}</span>
                       </div>
                     </div>
 
@@ -824,7 +846,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           {/* Task 4: Sentence Completion */}
           <div className="space-y-3 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold text-teal-300 uppercase tracking-wider">
+              <h5 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Task 4: Sentence Completion — Questions 41 to 45
               </h5>
               <span className="text-xs font-mono text-slate-400 font-bold">{correctVocab4}/5 correct</span>
@@ -845,7 +867,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
@@ -853,7 +875,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       <span className="font-bold text-white">Q{41 + idx}.</span>
                       <p className="text-slate-200 font-medium flex-1">{item.sentence}</p>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 shrink-0">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 shrink-0">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 shrink-0">✗ Incorrect</span>
                       )}
@@ -862,13 +884,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? item.options[studentChoiceIdx] : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Answer:</span>
-                        <span className="font-mono font-bold text-emerald-400">{item.options[item.correctIndex]}</span>
+                        <span className="font-mono font-bold text-blue-400">{item.options[item.correctIndex]}</span>
                       </div>
                     </div>
 
@@ -885,7 +907,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           {/* Task 5: Context Matching */}
           <div className="space-y-3 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
             <div className="flex items-center justify-between">
-              <h5 className="text-xs font-bold text-teal-300 uppercase tracking-wider">
+              <h5 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Task 5: Words in Context / Advanced Synonyms — Questions 46 to 50
               </h5>
               <span className="text-xs font-mono text-slate-400 font-bold">{correctVocab5}/5 correct</span>
@@ -906,14 +928,14 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-white">Q{46 + idx}. Target: <span className="text-teal-300 underline font-mono">{item.targetWord}</span></span>
+                      <span className="font-bold text-white">Q{46 + idx}. Target: <span className="text-cyan-300 underline font-mono">{item.targetWord}</span></span>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300">✗ Incorrect</span>
                       )}
@@ -922,13 +944,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? studentVal : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Match:</span>
-                        <span className="font-mono font-bold text-emerald-400">{item.correctMatch}</span>
+                        <span className="font-mono font-bold text-blue-400">{item.correctMatch}</span>
                       </div>
                     </div>
 
@@ -993,14 +1015,14 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Gap {idx + 1}</span>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300">✗ Incorrect</span>
                       )}
@@ -1009,13 +1031,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Selection:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? p.options[studentVal] : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Answer:</span>
-                        <span className="font-mono font-bold text-emerald-400">{p.options[p.correctIndex]}</span>
+                        <span className="font-mono font-bold text-blue-400">{p.options[p.correctIndex]}</span>
                       </div>
                     </div>
 
@@ -1055,7 +1077,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div
                       key={pos}
                       className={`p-2.5 rounded-lg border text-xs flex items-start gap-2 ${
-                        isCorrectPos ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                        isCorrectPos ? 'bg-blue-950/20 border-blue-500/40 text-blue-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
                       }`}
                     >
                       <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-slate-800 text-white">
@@ -1069,14 +1091,14 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               </div>
 
               {/* Official Correct Sequence */}
-              <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-2">
-                <span className="text-xs font-bold text-emerald-300 block mb-2">Official Chronological Sequence:</span>
+              <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-2">
+                <span className="text-xs font-bold text-blue-300 block mb-2">Official Chronological Sequence:</span>
                 {testSet.reading.section2.correctOrder.map((origIdx, pos) => (
                   <div
                     key={pos}
-                    className="p-2.5 rounded-lg border border-emerald-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
+                    className="p-2.5 rounded-lg border border-blue-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
                   >
-                    <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-emerald-500 text-slate-950">
+                    <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-blue-500 text-slate-950">
                       {pos + 1}
                     </span>
                     <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.sentences[origIdx]}</p>
@@ -1088,7 +1110,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
 
             {/* Explanation */}
             <div className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-750">
-              <span className="font-bold text-emerald-400 block mb-1">Cohesion & Chronology Analysis:</span>
+              <span className="font-bold text-blue-400 block mb-1">Cohesion & Chronology Analysis:</span>
               {testSet.reading.section2.explanation}
             </div>
 
@@ -1128,7 +1150,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
@@ -1136,7 +1158,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       <span className="font-bold text-white">{idx + 1}.</span>
                       <p className="text-slate-200 font-medium flex-1">{q.statement}</p>
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 shrink-0">✓ Correct</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 shrink-0">✓ Correct</span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 shrink-0">✗ Incorrect</span>
                       )}
@@ -1145,13 +1167,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Choice:</span>
-                        <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-mono font-bold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? `Person ${studentVal}` : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Person:</span>
-                        <span className="font-mono font-bold text-emerald-400">
+                        <span className="font-mono font-bold text-blue-400">
                           Person {q.correctPersonId} ({correctPersonObj?.name})
                         </span>
                       </div>
@@ -1197,14 +1219,14 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                       !isAnswered
                         ? 'bg-slate-800/40 border-slate-700/50'
                         : isCorrect
-                        ? 'bg-emerald-950/20 border-emerald-500/30'
+                        ? 'bg-blue-950/20 border-blue-500/30'
                         : 'bg-rose-950/20 border-rose-500/30'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white text-sm">Paragraph {p.paragraphNumber}</span>
                       {isCorrect ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✓ Correct Heading</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">✓ Correct Heading</span>
                       ) : (
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">✗ Incorrect Heading</span>
                       )}
@@ -1217,13 +1239,13 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     <div className="space-y-1.5 bg-slate-900/80 p-3 rounded-lg border border-slate-750">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Your Chosen Heading:</span>
-                        <span className={`font-semibold ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        <span className={`font-semibold ${isCorrect ? 'text-blue-300' : 'text-rose-300'}`}>
                           {isAnswered ? studentHeadingText : '(Not answered)'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Correct Heading:</span>
-                        <span className="font-semibold text-emerald-400">{correctHeadingText}</span>
+                        <span className="font-semibold text-blue-400">{correctHeadingText}</span>
                       </div>
                     </div>
 
@@ -1284,7 +1306,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               {writingEvaluation && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-400">Estimated Band:</span>
-                  <span className="px-3 py-1 rounded-xl text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="px-3 py-1 rounded-xl text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/40">
                     {writingEvaluation.bandRating}
                   </span>
                 </div>
@@ -1307,7 +1329,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                 </div>
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Tone Register</span>
-                  <span className="text-base font-bold text-emerald-300">{writingEvaluation.toneRegister}</span>
+                  <span className="text-base font-bold text-blue-300">{writingEvaluation.toneRegister}</span>
                 </div>
               </div>
             )}
@@ -1316,7 +1338,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1 text-xs">
                 <p className="text-slate-300 leading-relaxed font-sans">{writingEvaluation.summaryFeedback}</p>
                 {showUrdu && writingEvaluation.urduSummary && (
-                  <p className="text-emerald-400 font-urdu text-[11px] leading-relaxed pt-1 border-t border-slate-850">
+                  <p className="text-blue-400 font-urdu text-[11px] leading-relaxed pt-1 border-t border-slate-850">
                     {writingEvaluation.urduSummary}
                   </p>
                 )}
@@ -1351,7 +1373,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                         <span className="text-[10px] uppercase text-slate-500 font-bold">Your Response:</span>
                         <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-bold ${
                           !userText ? 'text-slate-500' :
-                          isOverLimit ? 'bg-rose-950/60 text-rose-300 border border-rose-800/60' : 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/60'
+                          isOverLimit ? 'bg-rose-950/60 text-rose-300 border border-rose-800/60' : 'bg-blue-950/60 text-blue-300 border border-blue-800/60'
                         }`}>
                           {wordCount} words {isOverLimit ? '(⚠ Exceeds 1-5 words)' : '(✓ OK)'}
                         </span>
@@ -1369,7 +1391,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                           <div key={mIdx} className="text-[11px] text-slate-300 flex items-center justify-between gap-2">
                             <span className="line-through text-rose-400 font-mono">"{m.original}"</span>
                             <ArrowRight className="w-3 h-3 text-slate-500 shrink-0" />
-                            <span className="text-emerald-400 font-mono font-bold">"{m.replacement}"</span>
+                            <span className="text-blue-400 font-mono font-bold">"{m.replacement}"</span>
                             <span className="text-[10px] text-slate-400 italic truncate" title={m.explanation}>({m.explanation})</span>
                           </div>
                         ))}
@@ -1377,9 +1399,9 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     )}
 
                     {/* Benchmark Sample Answer */}
-                    <div className="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1">
-                      <span className="text-[10px] uppercase text-emerald-400 font-bold block">Benchmark Sample Answer:</span>
-                      <p className="font-mono text-emerald-300">"{q.sampleAnswer}"</p>
+                    <div className="p-2.5 rounded-lg bg-blue-950/20 border border-blue-500/30 space-y-1">
+                      <span className="text-[10px] uppercase text-blue-400 font-bold block">Benchmark Sample Answer:</span>
+                      <p className="font-mono text-blue-300">"{q.sampleAnswer}"</p>
                     </div>
                   </div>
                 );
@@ -1410,8 +1432,8 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
             ) : (
               <div className="p-4 rounded-xl bg-slate-900 border border-slate-750 space-y-2 text-xs">
                 <span className="text-slate-400 italic block">(No response entered for Part 2)</span>
-                <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-emerald-200 font-mono">
-                  <span className="text-[10px] uppercase text-emerald-400 font-bold block mb-1">Examiner Model Solution:</span>
+                <div className="p-3 rounded-lg bg-blue-950/20 border border-blue-500/30 text-blue-200 font-mono">
+                  <span className="text-[10px] uppercase text-blue-400 font-bold block mb-1">Examiner Model Solution:</span>
                   "{testSet.writing.part2.sampleAnswer}"
                 </div>
               </div>
@@ -1448,8 +1470,8 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
                     ) : (
                       <div className="space-y-2">
                         <span className="text-slate-400 italic block">(No response entered for this chat)</span>
-                        <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 font-mono text-emerald-200">
-                          <span className="text-[10px] uppercase text-emerald-400 font-bold block mb-1">Examiner Model Solution:</span>
+                        <div className="p-3 rounded-lg bg-blue-950/20 border border-blue-500/30 font-mono text-blue-200">
+                          <span className="text-[10px] uppercase text-blue-400 font-bold block mb-1">Examiner Model Solution:</span>
                           "{chat.sampleAnswer}"
                         </div>
                       </div>
@@ -1504,7 +1526,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
             {/* Task 4B: Formal Email */}
             <div className="space-y-3 pt-3 border-t border-slate-800">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-300 uppercase tracking-wide">Task 4B: Formal Email to Leadership / President (120–150 words)</span>
+                <span className="text-xs font-bold text-blue-300 uppercase tracking-wide">Task 4B: Formal Email to Leadership / President (120–150 words)</span>
                 <span className="text-[11px] text-slate-400 font-mono">
                   {(safeWritingPart4BAnswer || '').trim().split(/\s+/).filter(Boolean).length} words (Target: 120–150)
                 </span>
@@ -1523,8 +1545,8 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               ) : (
                 <div className="p-4 rounded-xl bg-slate-900 border border-slate-750 space-y-2 text-xs">
                   <span className="text-slate-400 italic block">(No response entered for Task 4B)</span>
-                  <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-emerald-200 font-mono">
-                    <span className="text-[10px] uppercase text-emerald-400 font-bold block mb-1">Model Formal Response (Professional CA Register):</span>
+                  <div className="p-3 rounded-lg bg-blue-950/20 border border-blue-500/30 text-blue-200 font-mono">
+                    <span className="text-[10px] uppercase text-blue-400 font-bold block mb-1">Model Formal Response (Professional CA Register):</span>
                     "{testSet.writing.part4.taskB.sampleAnswer}"
                   </div>
                 </div>

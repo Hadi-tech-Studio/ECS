@@ -25,18 +25,18 @@ const THEME_OPTIONS: ThemeOption[] = [
     name: 'Crisp Light',
     shortName: 'Light',
     icon: Sun,
-    colorPreview: '#ffffff',
-    borderPreview: '#94a3b8',
-    description: 'Crisp high-contrast light theme with crystal clear legibility'
+    colorPreview: '#f0f4fa',
+    borderPreview: '#2563eb',
+    description: 'Crisp navy & white light theme with crystal clear legibility'
   },
   {
     id: 'slate',
-    name: 'Slate Dark',
+    name: 'Navy Dark',
     shortName: 'Dark',
     icon: Moon,
-    colorPreview: '#0f172a',
-    borderPreview: '#334155',
-    description: 'Deep navy & slate dark theme for comfortable low-light studying'
+    colorPreview: '#060b18',
+    borderPreview: '#1d3368',
+    description: 'Deep navy dark theme inspired by reference design'
   }
 ];
 

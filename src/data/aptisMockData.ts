@@ -1,4 +1,5 @@
 import { AptisTestSet, MarkingScaleLevel } from '../types';
+import { PDF_READING_SECTION_4_POOL } from './pdfReadingSection4Pool';
 
 export const APTIS_MARKING_SCALES: MarkingScaleLevel[] = [
   {
@@ -638,79 +639,26 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
         }
       ]
     },
-    section4: {
-      id: 's1-r-sec4',
-      title: 'Section 4: Long Text Comprehension & Paragraph Headings',
-      topic: 'The Evolution of Professional Accountancy in the Digital Age',
-      introduction: 'Read the passage below. Match each numbered paragraph (1-5) to the most suitable heading from the list.',
-      headings: [
-        'A. The Shift from Manual Bookkeeping to Strategic Advisory',
-        'B. Emerging Cybersecurity Threats in Cloud Accounting',
-        'C. The Essential Role of Continuous Lifelong Learning',
-        'D. Artificial Intelligence and Automated Data Processing',
-        'E. The Unchanging Importance of Professional Ethics'
-      ],
-      paragraphs: [
-        {
-          id: 'p-1',
-          paragraphNumber: 1,
-          text: 'Historically, the primary responsibility of an accountant was the meticulous recording of transactions in physical journals and balancing endless columns of figures. Today, modern enterprise software performs routine bookkeeping tasks in milliseconds. As a consequence, accountants are no longer mere scorekeepers; they have transitioned into strategic financial advisors who interpret complex data to guide high-level executive decisions.',
-          correctHeadingIndex: 0, // A
-          explanation: 'Paragraph 1 focuses on the transition from manual ledger recording to strategic financial guidance (Heading A).',
-          urduExplanation: 'پیراگراف 1 کا موضوع روایتی کھاتہ نویسی سے نکل کر اسٹریٹجک مشیر بننے کا سفر ہے (Heading A)۔'
-        },
-        {
-          id: 'p-2',
-          paragraphNumber: 2,
-          text: 'The integration of artificial intelligence and machine learning is reshaping the audit profession. Machine algorithms can now analyze millions of transactions in seconds, flagging unusual journal entries and anomalous payment patterns with remarkable accuracy. This automation frees audit professionals from repetitive manual sampling, allowing them to focus on high-risk areas.',
-          correctHeadingIndex: 3, // D
-          explanation: 'Paragraph 2 describes how machine learning and AI process massive transaction data and detect anomalies (Heading D).',
-          urduExplanation: 'پیراگراف 2 میں مصنوعی ذہانت (AI) اور خودکار ڈیٹا پروسیسنگ کا تفصیلی ذکر ہے (Heading D)۔'
-        },
-        {
-          id: 'p-3',
-          paragraphNumber: 3,
-          text: 'However, storing vast amounts of financial and client information in cloud databases creates unprecedented vulnerabilities. Cybercriminals increasingly target accounting firms to intercept bank accounts, payroll registers, and intellectual property. Firms must implement robust multi-factor authentication, end-to-end encryption, and rigorous vulnerability assessments to safeguard client trust.',
-          correctHeadingIndex: 1, // B
-          explanation: 'Paragraph 3 discusses vulnerabilities, cloud threats, cyberattacks, and encryption measures (Heading B).',
-          urduExplanation: 'پیراگراف 3 کلاؤڈ ڈیٹا اور سائبر سیکیورٹی کے نئے خطرات پر روشنی ڈالتا ہے (Heading B)۔'
-        },
-        {
-          id: 'p-4',
-          paragraphNumber: 4,
-          text: 'Given the rapid pace of technological disruption, technical expertise gained during initial qualification quickly becomes obsolete. Contemporary accountants must embrace continuous professional development. Mastering data analytics tools, programming fundamentals, and evolving international tax legislation is now an ongoing career necessity rather than an optional bonus.',
-          correctHeadingIndex: 2, // C
-          explanation: 'Paragraph 4 emphasizes that qualifications become outdated and accountants must continually learn new analytical skills (Heading C).',
-          urduExplanation: 'پیراگراف 4 مسلسل سیکھنے (Continuous Lifelong Learning) کی اہمیت واضح کرتا ہے (Heading C)۔'
-        },
-        {
-          id: 'p-5',
-          paragraphNumber: 5,
-          text: 'Despite the arrival of algorithms and digital tools, the human core of the profession remains constant. Objectivity, integrity, and professional skepticism cannot be automated. When financial statements are scrutinized, society relies on the independent judgment and moral compass of the certified accountant to uphold truth and fair representation.',
-          correctHeadingIndex: 4, // E
-          explanation: 'Paragraph 5 underscores that moral compass, integrity, objectivity, and professional ethics remain irreplaceable (Heading E).',
-          urduExplanation: 'پیراگراف 5 بتاتا ہے کہ اخلاقیات، دیانتداری اور دیانتدارانہ فیصلہ سازی ہمیشہ ناقابل تبدیل رہے گی (Heading E)۔'
-        }
-      ]
-    }
+    section4: PDF_READING_SECTION_4_POOL[0]
   },
+
   writing: {
-    themeName: 'City Book & Professional Reading Club',
+    themeName: 'City Book & Academic Reading Society',
     part1: {
       id: 'w-p1',
-      context: 'You are filling in an application form to join the City Book & Professional Reading Club. Answer 5 quick questions in 1–5 words each.',
+      context: 'You are filling in an application form to join the City Book & Academic Reading Society. Answer 5 quick questions in 1–5 words each.',
       questions: [
         {
           id: 'q1',
           prompt: 'What is your current occupation or course of study?',
           maxWords: 5,
-          sampleAnswer: 'Trainee Chartered Accountant'
+          sampleAnswer: 'Undergraduate University Student'
         },
         {
           id: 'q2',
           prompt: 'What genre of books do you enjoy reading most?',
           maxWords: 5,
-          sampleAnswer: 'Business biographies and economics'
+          sampleAnswer: 'Science biographies and history'
         },
         {
           id: 'q3',
@@ -734,11 +682,11 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
     },
     part2: {
       id: 'w-p2',
-      formName: 'Club Membership Profile',
+      formName: 'Society Membership Profile',
       prompt: 'Please tell us about your personal reading interests and why you decided to join our club. (Write 20–30 words)',
       minWords: 20,
       maxWords: 30,
-      sampleAnswer: 'I have a strong passion for financial economics and leadership literature. I joined this club to connect with fellow professionals and exchange inspiring insights on modern corporate strategies.'
+      sampleAnswer: 'I have a strong passion for technology innovation and leadership literature. I joined this club to connect with fellow members and exchange inspiring insights on modern community initiatives.'
     },
     part3: {
       id: 'w-p3',
@@ -758,10 +706,10 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
           id: 'chat-2',
           memberName: 'David (Discussion Coordinator)',
           avatarInitials: 'DM',
-          message: 'We are organizing our monthly book selection poll next week. What is one business or personal development book that you think every young professional should read, and why?',
+          message: 'We are organizing our monthly book selection poll next week. What is one personal development book that you think every young student should read, and why?',
           minWords: 30,
           maxWords: 40,
-          sampleAnswer: 'I highly recommend "Thinking, Fast and Slow" by Daniel Kahneman. It provides brilliant psychological insights into cognitive biases, which helps accountants and managers make rational and objective financial decisions.'
+          sampleAnswer: 'I highly recommend "Thinking, Fast and Slow" by Daniel Kahneman. It provides brilliant psychological insights into cognitive biases, which helps learners make rational and objective life decisions.'
         },
         {
           id: 'chat-3',
@@ -770,30 +718,30 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
           message: 'We are planning our first in-person weekend meetup at the central library cafe. Would you prefer a weekend morning breakfast discussion or a weekday evening session?',
           minWords: 30,
           maxWords: 40,
-          sampleAnswer: 'I would definitely prefer a Saturday morning breakfast meetup. Weekend mornings are much more relaxed for thoughtful discussions, as weekday evenings are often occupied with overtime audit duties and deadlines.'
+          sampleAnswer: 'I would definitely prefer a Saturday morning breakfast meetup. Weekend mornings are much more relaxed for thoughtful discussions, as weekday evenings are often occupied with late classes and study commitments.'
         }
       ]
     },
     part4: {
-      id: 'w-p4-audit-leave-01',
-      clubName: 'Chartered Accountants Trainee Council & Professional Development Forum',
-      scenarioTopic: 'Audit Trainee Busy-Season Hours & Pre-Exam Study Leave Curtailment',
-      communicationPurpose: 'Filing a formal representation to negotiate policy compromise and preserve exam revision time',
-      recipientTitle: 'Chairman of Trainee Development & Welfare Committee',
-      recipientName: 'Mr. Tariq Mahmud, FCA',
-      friendName: 'Ahmed',
-      contextNotice: 'You have just received this official internal directive from the Firm Training Committee:\n\n"MEMORANDUM: Ref TC/2026/04\nTo: All Trainee Chartered Accountants\nDue to tight statutory audit deadlines for listed financial institutions, all approved pre-examination study leaves for the upcoming ICAP CAF assessments are hereby curtailed from fifteen working days to three days. In addition, trainees are required to work mandatory 10-hour shifts across upcoming weekends without compensatory leave."',
+      id: 'w-p4-pdf-01',
+      clubName: 'College Student Council & Cultural Society',
+      scenarioTopic: 'Topic #1: Request for Sponsorship for a College Event',
+      communicationPurpose: 'Request for Sponsorship for a College Event',
+      recipientTitle: 'Head of Corporate Affairs & Brand Partnerships',
+      recipientName: 'Mr. Salman Qureshi',
+      friendName: 'Nida',
+      contextNotice: 'MEMORANDUM: Ref CS/2026/01\nTo: Event Organizing Committee\nThe College Annual Inter-University Science and Arts Festival is scheduled for next month. The executive committee requires each project lead to reach out to esteemed corporate organizations to secure platinum or gold event sponsorships and merchandise backing.\n\n[Writing Section Tasks based on Official PDF Topics #1 & #43]',
       taskA: {
-        prompt: 'Write an email to your fellow trainee friend (Ahmed). Share your reaction to the sudden reduction in study leaves and weekend shift requirements, explain how it impacts your exam preparation, and suggest how you two can coordinate a shared study timetable. (Write 40–60 words)',
+        prompt: '[Informal Email Topic #43: Sharing Your Experience of a College Event]\nWrite an email to your friend (Nida). Tell her about your fun experience at yesterday’s college cultural festival, mention the acoustic music concert, and say you missed her there. (Write 40–60 words)',
         minWords: 40,
         maxWords: 60,
-        sampleAnswer: 'Hi Ahmed,\n\nDid you see the latest circular from the Training Committee? Slashing our pre-exam study leaves from fifteen days to just three—and forcing weekend shifts—is devastating! My CAF revision schedule is completely wrecked. Let’s meet for coffee this evening to combine our audit summaries and divide revision topics so we can survive this busy season.\n\nBest,\nYour Friend'
+        sampleAnswer: 'Hi Nida,\n\nYou really missed out on an incredible cultural festival yesterday! The campus courtyard was lit up with fairy lights and food stalls from all four provinces. The live acoustic band performance at the end had everyone singing along. I really wished you were there with us! Let’s go together next year.\n\nWarmly,\nYour Friend'
       },
       taskB: {
-        prompt: 'Write a formal email to the Chairman of the Trainee Development & Welfare Committee (Mr. Tariq Mahmud, FCA). Express your serious concern regarding the drastic reduction of pre-examination study leaves, explain how this policy will adversely affect trainees\' examination performance and professional wellbeing, and propose a constructive compromise such as staggered remote shifts or compensatory study hours. (Write 120–150 words)',
+        prompt: '[Formal Email Topic #1: Request for Sponsorship for a College Event]\nWrite a formal email to the Head of Corporate Affairs (Mr. Salman Qureshi). Introduce the upcoming annual college festival, articulate the mutual visibility and promotional benefits your institution offers to corporate sponsors, and request a meeting to discuss sponsorship tiers. (Write 120–150 words)',
         minWords: 120,
         maxWords: 150,
-        sampleAnswer: 'Dear Mr. Mahmud,\n\nI am writing on behalf of the trainee cohort to formally communicate our grave concern regarding Memorandum TC/2026/04, which curtails approved pre-examination study leaves to three days and mandates weekend shifts.\n\nWhile we fully appreciate the statutory pressures of the listed audit deadlines, this abrupt directive severely jeopardizes our preparation for the upcoming ICAP examinations. Trainees have methodically scheduled their revision syllabi around the standard fifteen-day leave entitlement. Eliminating this dedicated study period will inevitably result in diminished academic performance and elevated burnout.\n\nMay we respectfully suggest a balanced compromise? The firm could implement a staggered scheduling model where trainees support client field engagements during critical audit phases in exchange for flexible morning study hours. Alternatively, allocating compensatory revision days immediately following audit sign-off would preserve both client deliverables and trainee development.\n\nThank you for your understanding and guidance.\n\nYours sincerely,\nChartered Accountancy Trainee'
+        sampleAnswer: 'Dear Mr. Qureshi,\n\nI am writing on behalf of the College Student Council to cordially invite your esteemed organization to partner with us as a primary corporate sponsor for our upcoming Annual Inter-University Science and Arts Festival, scheduled for next month.\n\nOur annual festival attracts more than three thousand university students, young innovators, and faculty members from across the country. Sponsoring this prominent youth event will offer your enterprise substantial brand visibility through nationwide promotional campaigns, banner placements across campus pavilions, and direct engagement during our flagship innovation exhibitions.\n\nWe would be honored to discuss our tiered sponsorship packages and explore how we can tailor our promotional platforms to meet your marketing objectives. Could we schedule a brief fifteen-minute meeting or virtual call early next week?\n\nThank you for your valuable time and consideration.\n\nYours sincerely,\nEvent Organizing Lead'
       }
     }
   }
@@ -1386,62 +1334,9 @@ export const APTIS_TEST_SET_2: AptisTestSet = {
         }
       ]
     },
-    section4: {
-      id: 's2-r-sec4',
-      title: 'Section 4: Long Text Comprehension & Headings',
-      topic: 'Corporate Social Responsibility and Modern Enterprise',
-      introduction: 'Match each paragraph (1-5) to the most appropriate heading.',
-      headings: [
-        'A. Aligning Corporate Profit with Societal Welfare',
-        'B. The Dangers of Greenwashing and Deceptive Advertising',
-        'C. Engaging Local Communities through Philanthropy',
-        'D. Employee Well-being and Inclusive Workplace Culture',
-        'E. Measuring Non-Financial Value and Long-Term Impact'
-      ],
-      paragraphs: [
-        {
-          id: 's2-p-1',
-          paragraphNumber: 1,
-          text: 'For decades, classical economics argued that the sole obligation of a business was maximizing shareholder profit. However, forward-thinking enterprises now recognize that financial success and societal welfare are deeply interconnected. Creating shared value means addressing societal challenges while building competitive business models.',
-          correctHeadingIndex: 0,
-          explanation: 'Paragraph 1 focuses on connecting corporate profit with societal benefit (Heading A).',
-          urduExplanation: 'پیراگراف 1 کا تعلق کاروباری منافع اور سماجی فلاح کے باہمی ملاپ سے ہے (Heading A)۔'
-        },
-        {
-          id: 's2-p-2',
-          paragraphNumber: 2,
-          text: 'Unfortunately, some corporations engage in cosmetic environmentalism to mislead consumers. Known as "greenwashing," this practice involves spending more money on advertising eco-friendly claims than on actual environmental sustainability. Regulatory authorities and discerning consumers are increasingly imposing heavy penalties on such deceptive practices.',
-          correctHeadingIndex: 1,
-          explanation: 'Paragraph 2 highlights deceptive environmental claims and greenwashing (Heading B).',
-          urduExplanation: 'پیراگراف 2 میں دھوکہ دہی پر مبنی اشتہار بازی اور گرین واشنگ کا ذکر ہے (Heading B)۔'
-        },
-        {
-          id: 's2-p-3',
-          paragraphNumber: 3,
-          text: 'Meaningful corporate responsibility also begins with how an organization treats its own internal workforce. Fostering mental health initiatives, ensuring equitable pay structures, and providing ergonomic workstations enhance employee morale and drastically reduce staff turnover rates.',
-          correctHeadingIndex: 3,
-          explanation: 'Paragraph 3 details internal employee welfare, mental health, and fair workplace culture (Heading D).',
-          urduExplanation: 'پیراگراف 3 ملازمین کی فلاح و بہبود اور کام کے ماحول سے متعلق ہے (Heading D)۔'
-        },
-        {
-          id: 's2-p-4',
-          paragraphNumber: 4,
-          text: 'Building trust with local residents near manufacturing plants requires active grassroots engagement. Supporting regional schools, sponsoring clean water facilities, and funding youth sports programs foster genuine goodwill and secure a strong social license to operate.',
-          correctHeadingIndex: 2,
-          explanation: 'Paragraph 4 focuses on community engagement, local schools, clean water, and philanthropy (Heading C).',
-          urduExplanation: 'پیراگراف 4 مقامی کمیونٹی اور فلاحی کاموں کے ذریعے اعتماد سازی پر مبنی ہے (Heading C)۔'
-        },
-        {
-          id: 's2-p-5',
-          paragraphNumber: 5,
-          text: 'Ultimately, accounting systems must evolve to quantify intangible non-financial achievements. Developing robust impact metrics allows corporate leaders to demonstrate to stakeholders how ethical practices safeguard brand resilience and generate sustained value over future decades.',
-          correctHeadingIndex: 4,
-          explanation: 'Paragraph 5 emphasizes quantifying intangible value and long-term impact metrics (Heading E).',
-          urduExplanation: 'پیراگراف 5 طویل مدتی اثرات اور غیر مالیاتی کامیابیوں کی پیمائش پر مرکوز ہے (Heading E)۔'
-        }
-      ]
-    }
+    section4: PDF_READING_SECTION_4_POOL[1]
   },
+
   writing: {
     themeName: 'International Travel & Cultural Society',
     part1: {

@@ -39,6 +39,11 @@ import {
   EXPANDED_PART4_EMAIL_POOL 
 } from '../data/expandedPart4EmailPool';
 import { 
+  selectFreshPdfReadingSection4, 
+  isReadingSection4AccountingOrBanned, 
+  PDF_READING_SECTION_4_POOL 
+} from '../data/pdfReadingSection4Pool';
+import { 
   UNIQUE_GRAMMAR_POOL, 
   EXPANDED_VOCAB_MATCHING_POOL, 
   EXPANDED_VOCAB_DEFINITIONS_POOL, 
@@ -50,8 +55,20 @@ import {
   mapToIcapCategory
 } from '../data/examQuestionPool';
 import { ICAP_CORE_CATEGORIES, IcapCoreCategory, ICAP_ECS_CURATED_GRAMMAR_POOL } from '../data/icapCoreGrammarPool';
+import { GENERAL_ENGLISH_CORE_POOL } from '../data/generalEnglishCorePool';
 import { generateProceduralGrammarMCQs, ADDITIONAL_CURATED_GRAMMAR_POOL } from '../data/expandedGrammarPool';
 import { APTIS_TEST_SET_1 } from '../data/aptisMockData';
+import { 
+  selectOfficialPdfVocabulary, 
+  clearSeenPdfVocabIds 
+} from '../data/pdfVocabularyPool';
+import { 
+  select25GrammarQuestionsFromPdf, 
+  getSeenPdfGrammarIds, 
+  getSeenPdfBaseKeys,
+  PDF_GRAMMAR_POOL,
+  OFFICIAL_GRAMMAR_DISTRIBUTION
+} from '../data/pdfGrammarPool';
 import { 
   isQuestionSubstantiallySimilar, 
   recordQuestionsToStudentHistory, 
@@ -236,6 +253,7 @@ export function clearExamHistoryAndTracking(): void {
   ['vm', 'vd', 'vc', 'vs', 'vx'].forEach(prefix => {
     localStorage.removeItem(`icap_seen_vocab_${prefix}_ids`);
   });
+  clearSeenPdfVocabIds();
   clearStudentQuestionHistory();
   window.dispatchEvent(new CustomEvent('icap_exam_reset'));
   window.dispatchEvent(new Event('storage'));
@@ -251,11 +269,44 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
+export function isAccountingOrBusinessGrammar(q: GrammarQuestion): boolean {
+  if (q.id.startsWith('ecs-') || q.id.startsWith('cg-') || q.id.startsWith('pool-g-')) return true;
+  const lower = (q.question + ' ' + (q.englishExplanation || '')).toLowerCase();
+  return (
+    lower.includes('audit') ||
+    lower.includes('voucher') ||
+    lower.includes('ledger') ||
+    lower.includes('cfo') ||
+    lower.includes('secp') ||
+    lower.includes('depreciat') ||
+    lower.includes('statutory') ||
+    lower.includes('reconcil') ||
+    lower.includes('fiduciary') ||
+    lower.includes('materiality') ||
+    lower.includes('engagement partner') ||
+    lower.includes('internal control') ||
+    lower.includes('substantive test') ||
+    lower.includes('chartered accountant') ||
+    lower.includes('trial balance') ||
+    lower.includes('tax ') ||
+    lower.includes('taxes') ||
+    lower.includes('taxation') ||
+    lower.includes('receivable') ||
+    lower.includes('balance sheet') ||
+    lower.includes('fiscal') ||
+    lower.includes('net profit') ||
+    lower.includes('financial statement') ||
+    lower.includes('financial record') ||
+    lower.includes('shareholder') ||
+    lower.includes('corporate tax') ||
+    lower.includes('inventory shortage')
+  );
+}
+
 // Pre-process master static grammar pools once at module evaluation for blazing fast execution
-const preprocessedMasterGrammarPool: GrammarQuestion[] = [
-  ...ICAP_ECS_CURATED_GRAMMAR_POOL,
-  ...UNIQUE_GRAMMAR_POOL,
-  ...ADDITIONAL_CURATED_GRAMMAR_POOL
+export const preprocessedGeneralGrammarPool: GrammarQuestion[] = [
+  ...GENERAL_ENGLISH_CORE_POOL,
+  ...UNIQUE_GRAMMAR_POOL.filter(q => !isAccountingOrBusinessGrammar(q))
 ]
   .filter(q => !/(?:\[[A-D]\]|\([A-D]\)|\[[a-d]\]|\([a-d]\))\s+[a-zA-Z0-9]/.test(q.question))
   .map(q => ({
@@ -263,17 +314,45 @@ const preprocessedMasterGrammarPool: GrammarQuestion[] = [
     category: mapToIcapCategory(q.category, q.question)
   }));
 
-const preprocessedCategoriesMap = new Map<IcapCoreCategory, GrammarQuestion[]>();
+export const preprocessedBusinessGrammarPool: GrammarQuestion[] = [
+  ...ICAP_ECS_CURATED_GRAMMAR_POOL,
+  ...ADDITIONAL_CURATED_GRAMMAR_POOL,
+  ...UNIQUE_GRAMMAR_POOL.filter(q => isAccountingOrBusinessGrammar(q))
+]
+  .filter(q => !/(?:\[[A-D]\]|\([A-D]\)|\[[a-d]\]|\([a-d]\))\s+[a-zA-Z0-9]/.test(q.question))
+  .map(q => ({
+    ...q,
+    category: mapToIcapCategory(q.category, q.question)
+  }));
+
+const preprocessedGeneralCategoriesMap = new Map<IcapCoreCategory, GrammarQuestion[]>();
+const preprocessedBusinessCategoriesMap = new Map<IcapCoreCategory, GrammarQuestion[]>();
+
 for (const cat of ICAP_CORE_CATEGORIES) {
-  preprocessedCategoriesMap.set(cat, []);
+  preprocessedGeneralCategoriesMap.set(cat, []);
+  preprocessedBusinessCategoriesMap.set(cat, []);
 }
-for (const q of preprocessedMasterGrammarPool) {
+
+for (const q of preprocessedGeneralGrammarPool) {
   const cat = q.category as IcapCoreCategory;
-  if (!preprocessedCategoriesMap.has(cat)) {
-    preprocessedCategoriesMap.set(cat, []);
+  if (!preprocessedGeneralCategoriesMap.has(cat)) {
+    preprocessedGeneralCategoriesMap.set(cat, []);
   }
-  preprocessedCategoriesMap.get(cat)!.push(q);
+  preprocessedGeneralCategoriesMap.get(cat)!.push(q);
 }
+
+for (const q of preprocessedBusinessGrammarPool) {
+  const cat = q.category as IcapCoreCategory;
+  if (!preprocessedBusinessCategoriesMap.has(cat)) {
+    preprocessedBusinessCategoriesMap.set(cat, []);
+  }
+  preprocessedBusinessCategoriesMap.get(cat)!.push(q);
+}
+
+const preprocessedMasterGrammarPool: GrammarQuestion[] = [
+  ...preprocessedGeneralGrammarPool,
+  ...preprocessedBusinessGrammarPool
+];
 
 // Warm buffer of pre-assembled, pre-verified test sets for instantaneous 0ms test opens
 const testSetWarmCache = new Map<string, DynamicGenerationResult>();
@@ -456,7 +535,9 @@ function selectFreshReadingSection<T extends { id: string; title: string }>(
 }
 
 /**
- * Selects 5 unseen vocabulary items, validating each and ensuring no repeat or similar questions
+ * Selects 5 unseen vocabulary items, ensuring predominantly general English contexts
+ * (everyday life, education, health, technology, environment, travel, hobbies, social issues, work, relationships, general knowledge)
+ * along with occasional accounting and business topics, with minimal repetition across attempts.
  */
 function selectFreshVocabItems<T extends { id: string }>(
   pool: T[], 
@@ -468,26 +549,66 @@ function selectFreshVocabItems<T extends { id: string }>(
   const storageKey = `icap_seen_vocab_${categoryPrefix}_ids`;
   const seen = getSeenKeys(storageKey);
 
-  // Filter pool for valid, unseen, non-similar items
-  const candidates = pool.filter(item => {
+  const isBiz = (item: T): boolean => {
+    if (item.id.includes('-biz-') || item.id.includes('pool-01') || item.id.includes('pool-02')) return true;
+    const txt = textExtractor(item).toLowerCase();
+    return (
+      txt.includes('audit') ||
+      txt.includes('depreciat') ||
+      txt.includes('balance sheet') ||
+      txt.includes('liquidity') ||
+      txt.includes('fiduciary') ||
+      txt.includes('materiality') ||
+      txt.includes('solvency') ||
+      txt.includes('statutory') ||
+      txt.includes('reconcile') ||
+      txt.includes('due diligence') ||
+      txt.includes('internal control')
+    );
+  };
+
+  const generalPool = pool.filter(item => !isBiz(item));
+  const businessPool = pool.filter(item => isBiz(item));
+
+  // In each 5-item vocabulary task, select 4 general English items + 1 occasional business item (if available)
+  const targetBiz = businessPool.length > 0 ? 1 : 0;
+  const targetGeneral = count - targetBiz;
+
+  const filterCandidates = (subPool: T[]) => subPool.filter(item => {
     if (seen.has(item.id)) return false;
     const text = textExtractor(item);
     const sim = isQuestionSubstantiallySimilar(text, 'vocab', undefined, 0.60);
     return !sim.isSimilar;
   });
 
-  let selected: T[] = [];
-  if (candidates.length >= count) {
-    selected = shuffleArray(candidates).slice(0, count);
+  const unseenGeneral = filterCandidates(generalPool);
+  const unseenBiz = filterCandidates(businessPool);
+
+  const selected: T[] = [];
+
+  // 1. Pick general items (unseen first, then random from general pool)
+  if (unseenGeneral.length >= targetGeneral) {
+    selected.push(...shuffleArray(unseenGeneral).slice(0, targetGeneral));
   } else {
-    selected = [...candidates];
-    const remainingNeeded = count - selected.length;
-    const poolOthers = pool.filter(p => !selected.some(s => s.id === p.id));
-    const fillers = shuffleArray(poolOthers).slice(0, remainingNeeded);
-    selected = [...selected, ...fillers];
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(storageKey);
+    selected.push(...unseenGeneral);
+    const remainingGen = targetGeneral - selected.length;
+    const otherGen = generalPool.filter(p => !selected.some(s => s.id === p.id));
+    selected.push(...shuffleArray(otherGen).slice(0, remainingGen));
+  }
+
+  // 2. Pick occasional business item (unseen first, then random from business pool)
+  if (targetBiz > 0) {
+    if (unseenBiz.length > 0) {
+      selected.push(shuffleArray(unseenBiz)[0]);
+    } else if (businessPool.length > 0) {
+      selected.push(shuffleArray(businessPool)[0]);
     }
+  }
+
+  // 3. Guarantee exactly count (5) items under any condition
+  if (selected.length < count) {
+    const others = pool.filter(p => !selected.some(s => s.id === p.id));
+    selected.push(...shuffleArray(others).slice(0, count - selected.length));
   }
 
   markSeenKeys(storageKey, selected.map(s => s.id), pool.length + 10);
@@ -536,188 +657,28 @@ function generateDynamicTestSetInternal(options?: {
   const seenIds = getSeenQuestionIds();
   const attemptNumber = history.length + 1;
 
-  // 1. Build comprehensive master grammar pool using fast preprocessed cache
-  let fullGrammarPool: GrammarQuestion[] = preprocessedMasterGrammarPool;
+  // 1. Select exactly 25 Grammar MCQs strictly from the official PDF pool
+  // Topic distribution:
+  // - Tenses: 4
+  // - Modal Verbs: 2
+  // - Active and Passive Voice: 2
+  // - Gerunds and Infinitives: 3
+  // - Adverbs: 3
+  // - Conditionals: 3
+  // - Prepositions: 3
+  // - Collocation: 1
+  // - Connectors: 2
+  // - Comparatives: 2
+  // Difficulty: exactly 10 Easy, 10 Moderate (Medium), 5 Hard. Total = 25.
+  // Excludes all accounting/corporate topics. Random selection, avoiding repetition across attempts.
+  const selectedGrammarQuestions = select25GrammarQuestionsFromPdf(
+    getSeenPdfGrammarIds(),
+    getSeenPdfBaseKeys()
+  );
 
-  if (optionsObj?.aiGrammarItems && optionsObj.aiGrammarItems.length > 0) {
-    const validAi = optionsObj.aiGrammarItems
-      .filter(q => !/(?:\[[A-D]\]|\([A-D]\)|\[[a-d]\]|\([a-d]\))\s+[a-zA-Z0-9]/.test(q.question))
-      .map(q => ({
-        ...q,
-        category: mapToIcapCategory(q.category, q.question)
-      }));
-    fullGrammarPool = [...validAi, ...preprocessedMasterGrammarPool];
-  }
-
-  const unseenCount = fullGrammarPool.filter(q => !seenIds.has(q.id)).length;
-  if (unseenCount < 40) {
-    const freshProcedural = generateProceduralGrammarMCQs(60, seenIds).map(q => ({
-      ...q,
-      category: mapToIcapCategory(q.category, q.question)
-    }));
-    fullGrammarPool = [...fullGrammarPool, ...freshProcedural];
-  }
-
-  // Use pre-indexed categories or fast bucket map
-  const categoriesMap = new Map<IcapCoreCategory, GrammarQuestion[]>();
-  for (const cat of ICAP_CORE_CATEGORIES) {
-    categoriesMap.set(cat, [...(preprocessedCategoriesMap.get(cat) || [])]);
-  }
-  if (fullGrammarPool !== preprocessedMasterGrammarPool) {
-    for (const q of fullGrammarPool) {
-      const cat = (q.category as IcapCoreCategory) || mapToIcapCategory(q.category, q.question);
-      if (!preprocessedMasterGrammarPool.includes(q)) {
-        if (!categoriesMap.has(cat)) categoriesMap.set(cat, []);
-        categoriesMap.get(cat)!.push(q);
-      }
-    }
-  }
-
-  const selectedGrammarQuestions: GrammarQuestion[] = [];
-  const selectedIds = new Set<string>();
-
-  let easyCount = 0;
-  let mediumCount = 0;
-  let hardCount = 0;
-  const maxEasy = 8;
-  const maxHard = 9;
-
-  // Helper to validate and verify non-similarity before accepting any grammar question
-  const tryAddGrammarQuestion = (q: GrammarQuestion, allowDifficultyFlex: boolean = false, skipSimilarity: boolean = false): boolean => {
-    if (selectedIds.has(q.id)) return false;
-
-    // 1. Validate structure and ensure NO answer choices inside question statement
-    const val = validateGrammarQuestion(q);
-    if (!val.valid) return false;
-
-    // 2. Double check that no option labels are embedded in question text
-    if (/(?:\[[A-D]\]|\([A-D]\)|\[[a-d]\]|\([a-d]\))\s+[a-zA-Z0-9]/.test(q.question)) {
-      return false;
-    }
-
-    // 3. Check semantic similarity against student history to prevent repeats
-    if (!skipSimilarity) {
-      const sim = isQuestionSubstantiallySimilar(q.question, 'grammar-mcq', q.options, 0.55);
-      if (sim.isSimilar) {
-        return false;
-      }
-    }
-
-    // 4. Balance difficulty according to ICAP syllabus unless flex mode
-    if (!allowDifficultyFlex) {
-      if (q.difficulty === 'Easy' && easyCount >= maxEasy) return false;
-      if (q.difficulty === 'Hard' && hardCount >= maxHard) return false;
-    }
-
-    selectedGrammarQuestions.push(q);
-    selectedIds.add(q.id);
-
-    if (q.difficulty === 'Easy') easyCount++;
-    else if (q.difficulty === 'Hard') hardCount++;
-    else mediumCount++;
-
-    return true;
-  };
-
-  // Step 1: Ensure round-robin representation across all 12 syllabus categories
-  // Round 1: Select 1 high-quality question for each of the 12 categories (12 questions total)
-  for (const cat of ICAP_CORE_CATEGORIES) {
-    const poolForCat = categoriesMap.get(cat) || [];
-    // Prioritize unseen questions first to prevent repetition across attempts
-    const unseen = poolForCat.filter(q => !seenIds.has(q.id) && !selectedIds.has(q.id));
-    const seen = poolForCat.filter(q => !selectedIds.has(q.id));
-    const candidates = unseen.length > 0 ? shuffleArray(unseen) : shuffleArray(seen);
-
-    for (const q of candidates) {
-      if (tryAddGrammarQuestion(q)) {
-        break;
-      }
-    }
-  }
-
-  // Round 2: Select a second question for each of the 12 categories (up to 24 questions)
-  for (const cat of ICAP_CORE_CATEGORIES) {
-    if (selectedGrammarQuestions.length >= 24) break;
-    const poolForCat = categoriesMap.get(cat) || [];
-    const unseen = poolForCat.filter(q => !seenIds.has(q.id) && !selectedIds.has(q.id));
-    const seen = poolForCat.filter(q => !selectedIds.has(q.id));
-    const candidates = unseen.length > 0 ? shuffleArray(unseen) : shuffleArray(seen);
-
-    for (const q of candidates) {
-      if (tryAddGrammarQuestion(q)) {
-        break;
-      }
-    }
-  }
-
-  // Round 3: Pick the 25th question from high-yield core areas (Verbs, Tenses, Parts of Speech, Modal Conditionals)
-  const highYieldCategories: IcapCoreCategory[] = ['Verbs', 'Tenses', 'Parts of Speech', 'Modal Conditionals'];
-  for (const cat of shuffleArray(highYieldCategories)) {
-    if (selectedGrammarQuestions.length >= 25) break;
-    const poolForCat = categoriesMap.get(cat) || [];
-    const unseen = poolForCat.filter(q => !seenIds.has(q.id) && !selectedIds.has(q.id));
-    const seen = poolForCat.filter(q => !selectedIds.has(q.id));
-    const candidates = unseen.length > 0 ? shuffleArray(unseen) : shuffleArray(seen);
-    for (const q of candidates) {
-      if (tryAddGrammarQuestion(q)) {
-        break;
-      }
-    }
-  }
-
-  // Step 2: Fallback fill to reach exactly 25 questions if any candidate was filtered
-  if (selectedGrammarQuestions.length < 25) {
-    const remainingCandidates = shuffleArray(
-      fullGrammarPool.filter(q => !selectedIds.has(q.id))
-    );
-    for (const q of remainingCandidates) {
-      if (selectedGrammarQuestions.length >= 25) break;
-      tryAddGrammarQuestion(q, false);
-    }
-  }
-
-  // Step 3: Flex difficulty if still under 25
-  if (selectedGrammarQuestions.length < 25) {
-    const remainingCandidates = shuffleArray(
-      fullGrammarPool.filter(q => !selectedIds.has(q.id))
-    );
-    for (const q of remainingCandidates) {
-      if (selectedGrammarQuestions.length >= 25) break;
-      tryAddGrammarQuestion(q, true);
-    }
-  }
-
-  // Step 4: Procedural generation fallback to guarantee 25 questions under all conditions
-  if (selectedGrammarQuestions.length < 25) {
-    const proceduralExtras = generateProceduralGrammarMCQs(40, selectedIds).map(q => ({
-      ...q,
-      category: mapToIcapCategory(q.category, q.question)
-    }));
-    for (const p of proceduralExtras) {
-      if (selectedGrammarQuestions.length >= 25) break;
-      tryAddGrammarQuestion(p, true);
-    }
-  }
-
-  // Step 5: Absolute guarantee fallback - if still under 25, add any valid pool questions (skip similarity)
-  if (selectedGrammarQuestions.length < 25) {
-    for (const q of shuffleArray(fullGrammarPool)) {
-      if (selectedGrammarQuestions.length >= 25) break;
-      tryAddGrammarQuestion(q, true, true);
-    }
-  }
-
-  // Step 6: If still under 25, generate fresh procedural questions directly
-  if (selectedGrammarQuestions.length < 25) {
-    const proceduralDirect = generateProceduralGrammarMCQs(30, selectedIds).map(q => ({
-      ...q,
-      category: mapToIcapCategory(q.category, q.question)
-    }));
-    for (const p of proceduralDirect) {
-      if (selectedGrammarQuestions.length >= 25) break;
-      tryAddGrammarQuestion(p, true, true);
-    }
-  }
+  const easyCount = selectedGrammarQuestions.filter(q => q.difficulty === 'Easy').length;
+  const hardCount = selectedGrammarQuestions.filter(q => q.difficulty === 'Hard').length;
+  const mediumCount = selectedGrammarQuestions.length - easyCount - hardCount;
 
   // Final shuffle of selected grammar questions so sequence is fresh
   const finalGrammar = shuffleArray(selectedGrammarQuestions).map((q, idx) => ({
@@ -740,37 +701,13 @@ function generateDynamicTestSetInternal(options?: {
   const originalSelectedIds = finalGrammar.map(q => q.id.replace(/^dyn-g-\d+-/, ''));
   markQuestionsSeen(originalSelectedIds);
 
-  // 2. Select Vocabulary Tasks 1-5 (Fresh non-repeating items from expanded pools)
-  const rawVocabMatching: VocabWordMatchItem[] = selectFreshVocabItems(
-    EXPANDED_VOCAB_MATCHING_POOL, 
-    5, 
-    'vm',
-    item => `${item.targetWord} ${item.options.join(' ')}`
-  );
-  const rawVocabDef: VocabDefinitionItem[] = selectFreshVocabItems(
-    EXPANDED_VOCAB_DEFINITIONS_POOL, 
-    5, 
-    'vd',
-    item => `${item.definition} ${item.correctWord}`
-  );
-  const rawVocabColloc: VocabCollocationItem[] = selectFreshVocabItems(
-    EXPANDED_VOCAB_COLLOCATIONS_POOL, 
-    5, 
-    'vc',
-    item => `${item.sentence}`
-  );
-  const rawVocabSentence = selectFreshVocabItems(
-    EXPANDED_VOCAB_SENTENCE_POOL, 
-    5, 
-    'vs',
-    item => `${item.sentence}`
-  );
-  const rawVocabContext: VocabWordMatchItem[] = selectFreshVocabItems(
-    EXPANDED_VOCAB_CONTEXT_POOL, 
-    5, 
-    'vx',
-    item => `${item.targetWord} ${item.options.join(' ')}`
-  );
+  // 2. Select Vocabulary Tasks 1-5 strictly from official PDF 1,000 Vocabulary Pool (2 Easy, 2 Moderate, 1 Difficult per task)
+  const officialPdfVocab = selectOfficialPdfVocabulary();
+  const rawVocabMatching: VocabWordMatchItem[] = officialPdfVocab.vocabWordMatching;
+  const rawVocabDef: VocabDefinitionItem[] = officialPdfVocab.vocabDefinitions;
+  const rawVocabColloc: VocabCollocationItem[] = officialPdfVocab.vocabCollocations;
+  const rawVocabSentence: VocabCollocationItem[] = officialPdfVocab.vocabSentenceCompletion;
+  const rawVocabContext: VocabWordMatchItem[] = officialPdfVocab.vocabContextMatching;
 
   // Normalize options for grammar and vocabulary with random distribution (no option position bias)
   const normalizedGrammar = finalGrammar.map(q => shuffleMCQOptions(q));
@@ -879,20 +816,15 @@ function generateDynamicTestSetInternal(options?: {
     selectedWriting = { ...EXPANDED_WRITING_MODULES[0] };
   }
 
-  // CRITICAL: Ensure Part 4 is ALWAYS a truly new, non-repeating ICAP ECS email writing task
-  // Vary scenario, purpose, recipient, and context; never repeat default or previously seen tasks
+  // CRITICAL: Ensure Part 4 is ALWAYS a truly new, non-repeating email writing task strictly using official PDF topics (1-30 Formal, 31-50 Informal)
+  // Guarantees a different random topic for every new test and avoids repetition across attempts
   const part4SeenKey = 'icap_seen_part4_scenarios';
   const part4Seen = getSeenKeys(part4SeenKey);
 
   if (optionsObj?.aiWritingPart4 && !isPart4DefaultOrBanned(optionsObj.aiWritingPart4)) {
     selectedWriting.part4 = { ...optionsObj.aiWritingPart4 };
-  } else if (
-    isPart4DefaultOrBanned(selectedWriting.part4) ||
-    part4Seen.has(selectedWriting.part4.id) ||
-    part4Seen.has(selectedWriting.part4.scenarioTopic || '') ||
-    part4Seen.has(selectedWriting.part4.clubName) ||
-    isQuestionSubstantiallySimilar(selectedWriting.part4.contextNotice, 'writing-task', undefined, 0.45).isSimilar
-  ) {
+  } else {
+    // Select a fresh, non-repeating email task strictly from the attached PDF topics
     const freshPart4 = selectFreshPart4EmailTask(part4Seen);
     selectedWriting.part4 = { ...freshPart4 };
   }
@@ -1078,11 +1010,7 @@ export async function generateAiEnrichedTestSet(options?: {
   try {
     const promises: Promise<any>[] = [];
 
-    if (mode === 'full' || mode === 'core') {
-      promises.push(
-        generateAiGrammarQuestions(6).then(res => { aiGrammar = res; }).catch(() => {})
-      );
-    }
+    // Grammar questions are strictly sourced from the official PDF pool (100% adherence to syllabus and PDF items)
     if (mode === 'full' || mode === 'reading') {
       promises.push(
         generateAiReadingSection1().then(res => { if (res) aiReading1 = res; }).catch(() => {})

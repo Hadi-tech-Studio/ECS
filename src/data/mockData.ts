@@ -331,49 +331,52 @@ export const READING_MODULE_QUESTIONS: Question[] = [
 
 export const MOCK_WRITING_SCENARIOS: WritingScenario[] = [
   {
-    id: 'sc-1',
-    title: 'Audit Delay Notification Email',
-    role: 'Audit Senior',
-    recipient: 'Mr. Tariq Mehmood, Audit Engagement Partner',
-    scenario: 'You are leading the year-end inventory audit at Apex Chemicals Ltd. Due to warehouse safety clearances and unexpected ERP system downtime, physical inventory verification will be delayed by 48 hours. Write a concise, professional 120–150 word formal email to your Audit Partner explaining the delay, highlighting mitigating steps taken, and requesting an extension on the working paper submission deadline.',
+    id: 'sc-pdf-1',
+    title: 'Request for Sponsorship for a College Event (Topic #1)',
+    role: 'College Student Council Lead',
+    recipient: 'Mr. Salman Qureshi, Head of Corporate Affairs',
+    scenario: 'Your college is organizing the Annual Inter-University Science and Arts Festival next month. Write a formal 120–150 word email to the Head of Corporate Affairs requesting sponsorship for the event, highlighting the mutual branding advantages and asking for a meeting to discuss sponsorship tiers.',
     requiredWordCount: { min: 120, max: 150 },
     keyPoints: [
-      'State purpose of the email clearly in the opening sentence.',
-      'State specific reasons: chemical warehouse safety protocol & ERP server outage.',
-      'Describe risk mitigation measures (night shift team deployed, partial count completed).',
-      'Request formal 48-hour deadline adjustment with courtesy.',
-      'Maintain formal CA tone without emotional excuses.'
+      'State the purpose of the email clearly in the opening sentence.',
+      'Specify event dates, scope, and anticipated student turnout.',
+      'Highlight concrete corporate visibility and marketing benefits.',
+      'Politely request a brief meeting or video call next week.',
+      'Maintain an exemplary formal business tone and proper sign-off.'
     ],
-    sampleModelAnswer: `Dear Mr. Tariq,\n\nI am writing to formally apprise you of an unforeseen 48-hour delay in concluding the physical inventory verification at Apex Chemicals Ltd.\n\nThe delay stems from mandatory environmental safety inspections in the hazardous storage facility, compounded by temporary ERP server downtime at the client's premises. Consequently, full access to warehouse sub-ledgers was restricted yesterday.\n\nTo mitigate downstream scheduling impact, our audit team has completed preliminary testing on high-value items and scheduled weekend double-shifts with warehouse supervisors. We project completing the physical count by Tuesday noon.\n\nIn light of these developments, I respectfully request a 48-hour extension for submitting the finalized inventory working papers, now targeted for Wednesday close of business. Thank you for your continued guidance.\n\nYours sincerely,\nAudit Senior`
+    sampleModelAnswer: `Dear Mr. Qureshi,\n\nI am writing on behalf of the College Student Council to cordially invite your esteemed organization to partner with us as a primary corporate sponsor for our upcoming Annual Inter-University Science and Arts Festival, scheduled for next month.\n\nOur annual festival attracts more than three thousand university students, young innovators, and faculty members from across the country. Sponsoring this prominent youth event will offer your enterprise substantial brand visibility through nationwide promotional campaigns, banner placements across campus pavilions, and direct engagement during our flagship innovation exhibitions.\n\nWe would be honored to discuss our tiered sponsorship packages and explore how we can tailor our promotional platforms to meet your marketing objectives. Could we schedule a brief fifteen-minute meeting or virtual call early next week?\n\nThank you for your valuable time and consideration.\n\nYours sincerely,\nEvent Organizing Lead`
   },
   {
-    id: 'sc-2',
-    title: 'Management Letter Inquiry on Internal Controls',
-    role: 'Statutory Auditor',
-    recipient: 'Chief Financial Officer, Horizon Textiles Ltd',
-    scenario: 'During the interim audit, your team observed that petty cash vouchers exceeding PKR 50,000 lacked dual managerial approvals, violating internal controls. Write a 120–150 word formal email requesting an explanation from the CFO and recommending corrective control measures.',
+    id: 'sc-pdf-7',
+    title: 'Complaint About Poor Service (Topic #7)',
+    role: 'Event Logistics Coordinator',
+    recipient: 'Mr. Naveed Anwar, Customer Experience Director',
+    scenario: 'During your recent corporate conference booking at a convention center, high-speed internet remained offline and catering arrived three hours late without explanation. Write a 120–150 word formal complaint email explaining the disruption, describing the service failures, and requesting a partial refund.',
     requiredWordCount: { min: 120, max: 150 },
     keyPoints: [
-      'Acknowledge ongoing interim audit cooperation.',
-      'Clearly describe the control deviation (unapproved petty cash disbursements).',
-      'Cite potential risk of unauthorized expenditures.',
-      'Recommend dual-authorization policy reinforcement.',
-      'Request management response within 3 business days.'
-    ]
+      'Cite booking reference and event date in opening.',
+      'Describe specific service failures factually (network outage, late catering).',
+      'Explain adverse impact on attendees and event schedule.',
+      'Request concrete redress (partial refund and written explanation).',
+      'Maintain a firm, professional, non-emotional register.'
+    ],
+    sampleModelAnswer: `Dear Mr. Anwar,\n\nI am writing to formally register my serious dissatisfaction regarding the substandard service experienced during our corporate workshop booking at your convention center on October 10th (Booking Reference CC-8942).\n\nDespite confirming high-speed dedicated internet connectivity and technical support two weeks in advance, the conference hall network remained offline throughout the entire morning session. Consequently, our keynote speaker was unable to broadcast her virtual presentation to international delegates. Furthermore, the pre-ordered executive catering arrived three hours late without any prior communication or apology from your duty staff, causing immense embarrassment to our organizers.\n\nThis experience fell far below the professional hospitality standards advertised by your facility. I respectfully request an official investigation into these failures, a formal written apology, and a thirty percent partial refund on our facility rental invoice.\n\nI look forward to your prompt response.\n\nYours sincerely,\nEvent Manager`
   },
   {
-    id: 'sc-3',
-    title: 'Bank Confirmation Follow-up Memo',
-    role: 'Audit Team Lead',
-    recipient: 'Senior Branch Manager, National Commercial Bank',
-    scenario: 'Your firm has not received the standard bank confirmation letter for client Falcon Logistics for the year ended December 31, 2025. Write a 120–150 word urgent formal reminder requesting immediate dispatch of the direct bank certificate under ISA 505.',
+    id: 'sc-pdf-15',
+    title: 'Request for Extension of a Deadline (Topic #15)',
+    role: 'Academic Research Lead',
+    recipient: 'Dr. Sarah Mansoor, Course Director',
+    scenario: 'Due to severe cloud server corruption and an unexpected team medical emergency, your capstone research submission will be delayed. Write a formal 120–150 word email requesting a 72-hour submission extension, explaining the extenuating factors, and detailing your completed progress.',
     requiredWordCount: { min: 120, max: 150 },
     keyPoints: [
-      'Reference initial confirmation dispatch date & client authorization letter.',
-      'Cite statutory reporting deadlines under Companies Act.',
-      'Request direct transmission to audit firm email/address.',
-      'Provide audit team contact details for verification.'
-    ]
+      'Politely request a specific 72-hour extension upfront.',
+      'Explain the extenuating technical and medical setbacks objectively.',
+      'Highlight that eighty percent of work is already completed.',
+      'Reference attached incident logs and medical documents.',
+      'Maintain respectful deference to academic standards.'
+    ],
+    sampleModelAnswer: `Dear Dr. Mansoor,\n\nI am writing to respectfully request a seventy-two-hour extension on the submission deadline for our term capstone research project, originally due this Friday, October 24th.\n\nOver the past week, two unforeseen setbacks significantly impeded our final project testing. First, our cloud simulation database suffered a severe server outage that erased four days of indexed test iterations. Concurrently, our lead programmer was hospitalized with acute viral fever, leaving our remaining team members to reconstruct the corrupted simulation models independently. We have already completed eighty percent of the analytical documentation and project report.\n\nA seventy-two-hour extension until Monday at 5:00 PM would enable our team to thoroughly validate the restored simulation data and deliver a rigorous capstone submission matching your standards. Medical certificates and cloud incident logs are attached for your review.\n\nThank you for your compassionate understanding.\n\nYours sincerely,\nProject Team Lead`
   }
 ];
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, XCircle, BookOpen, Languages, Sparkles, Check, HelpCircle } from 'lucide-react';
 import { AptisTestSet, StudentExamAnswers } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface AptisAnswerKeyModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
   initialTab = 'core',
   studentAnswers
 }) => {
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<'core' | 'reading' | 'writing'>(initialTab);
   const [showUrdu, setShowUrdu] = useState<boolean>(true);
 
@@ -46,13 +48,13 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
         {/* Header */}
         <div className="p-6 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-white">Official Answer Key & Explanations</h3>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
                   {testSet.title}
                 </span>
               </div>
@@ -67,7 +69,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
               onClick={() => setShowUrdu(!showUrdu)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
                 showUrdu
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                  ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
                   : 'bg-slate-800 border-slate-700 text-slate-400'
               }`}
             >
@@ -84,39 +86,59 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 bg-slate-900/90 px-6 pt-3 gap-2">
+        <div className={`flex border-b px-6 pt-3 gap-2 ${
+          theme === 'light' ? 'border-[#cbd8ec] bg-[#f0f4fa]' : 'border-slate-800 bg-slate-900/90'
+        }`}>
           <button
             onClick={() => setActiveTab('core')}
-            className={`pb-3 px-4 font-semibold text-xs border-b-2 transition flex items-center gap-2 ${
+            className={`pb-3 px-4 text-xs transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'core'
-                ? 'border-emerald-400 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? theme === 'light'
+                  ? 'border-b-2 border-blue-600 text-blue-800 font-extrabold bg-white rounded-t-xl shadow-xs'
+                  : 'border-b-2 border-blue-400 text-blue-400 font-bold'
+                : theme === 'light'
+                ? 'border-b-2 border-transparent text-[#0a1636] hover:text-blue-700 font-bold'
+                : 'border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-semibold'
             }`}
           >
             <span>1. Core Test (Grammar & Vocab)</span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">50 Items</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              theme === 'light' ? 'bg-blue-100 text-blue-900 border border-blue-200' : 'bg-slate-800 text-slate-300'
+            }`}>50 Items</span>
           </button>
           <button
             onClick={() => setActiveTab('reading')}
-            className={`pb-3 px-4 font-semibold text-xs border-b-2 transition flex items-center gap-2 ${
+            className={`pb-3 px-4 text-xs transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'reading'
-                ? 'border-emerald-400 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? theme === 'light'
+                  ? 'border-b-2 border-blue-600 text-blue-800 font-extrabold bg-white rounded-t-xl shadow-xs'
+                  : 'border-b-2 border-blue-400 text-blue-400 font-bold'
+                : theme === 'light'
+                ? 'border-b-2 border-transparent text-[#0a1636] hover:text-blue-700 font-bold'
+                : 'border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-semibold'
             }`}
           >
             <span>2. Reading Test</span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">4 Sections</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              theme === 'light' ? 'bg-blue-100 text-blue-900 border border-blue-200' : 'bg-slate-800 text-slate-300'
+            }`}>4 Sections</span>
           </button>
           <button
             onClick={() => setActiveTab('writing')}
-            className={`pb-3 px-4 font-semibold text-xs border-b-2 transition flex items-center gap-2 ${
+            className={`pb-3 px-4 text-xs transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'writing'
-                ? 'border-emerald-400 text-emerald-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? theme === 'light'
+                  ? 'border-b-2 border-amber-600 text-amber-900 font-extrabold bg-white rounded-t-xl shadow-xs'
+                  : 'border-b-2 border-blue-400 text-blue-400 font-bold'
+                : theme === 'light'
+                ? 'border-b-2 border-transparent text-[#0a1636] hover:text-amber-800 font-bold'
+                : 'border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-semibold'
             }`}
           >
             <span>3. Writing Sample Model Answers</span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">4 Parts</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+              theme === 'light' ? 'bg-amber-100 text-amber-900 border border-amber-200' : 'bg-slate-800 text-slate-300'
+            }`}>4 Parts</span>
           </button>
         </div>
 
@@ -130,7 +152,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
               {/* Part 1: Grammar */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-slate-800/80 px-4 py-2.5 rounded-xl border border-slate-700">
-                  <h4 className="font-bold text-sm text-emerald-300">Part 1: Grammar (25 Questions)</h4>
+                  <h4 className="font-bold text-sm text-blue-300">Part 1: Grammar (25 Questions)</h4>
                   <span className="text-xs text-slate-400">Time: 12.5 mins approx</span>
                 </div>
 
@@ -143,7 +165,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                     return (
                       <div key={q.id} className="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-2">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-xs font-mono font-bold text-emerald-400">Q{idx + 1}.</span>
+                          <span className="text-xs font-mono font-bold text-blue-400">Q{idx + 1}.</span>
                           <span className="text-[11px] font-semibold text-slate-400 truncate max-w-[200px]">{q.category}</span>
                         </div>
                         <p className="text-xs text-slate-300 font-medium">{q.question}</p>
@@ -152,7 +174,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                           <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-750 text-xs flex items-center justify-between">
                             <span className="text-slate-400">Your Selection:</span>
                             {hasAnswered ? (
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {q.options[studentChoice]} {isCorrect ? '✓' : '✗'}
                               </span>
                             ) : (
@@ -162,9 +184,9 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                         )}
 
                         <div className="flex items-center gap-2 pt-1 border-t border-slate-700/40">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
                           <span className="text-xs font-bold text-white">
-                            Correct: <span className="text-emerald-300 font-mono underline">{q.options[q.correctIndex]}</span>
+                            Correct: <span className="text-blue-300 font-mono underline">{q.options[q.correctIndex]}</span>
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-400 leading-relaxed">{q.englishExplanation}</p>
@@ -182,7 +204,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
               {/* Part 2: Vocabulary */}
               <div className="space-y-4 pt-4 border-t border-slate-800">
                 <div className="flex items-center justify-between bg-slate-800/80 px-4 py-2.5 rounded-xl border border-slate-700">
-                  <h4 className="font-bold text-sm text-emerald-300">Part 2: Vocabulary (25 Questions / 5 Tasks)</h4>
+                  <h4 className="font-bold text-sm text-blue-300">Part 2: Vocabulary (25 Questions / 5 Tasks)</h4>
                   <span className="text-xs text-slate-400">Time: 12.5 mins approx</span>
                 </div>
 
@@ -197,12 +219,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                         <div key={item.id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-300">Q{26 + idx}. {item.targetWord}</span>
-                            <span className="text-emerald-300 font-bold font-mono">➜ {item.correctMatch}</span>
+                            <span className="text-blue-300 font-bold font-mono">➜ {item.correctMatch}</span>
                           </div>
                           {studentAnswers && (
                             <div className="text-[11px] flex items-center justify-between pt-1">
                               <span className="text-slate-400">You chose:</span>
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {studentVal || '(None)'} {isCorrect ? '✓' : '✗'}
                               </span>
                             </div>
@@ -226,12 +248,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                           <p className="text-slate-400 italic font-medium text-[11px]">"{item.definition}"</p>
                           <div className="flex items-center justify-between font-bold">
                             <span className="text-slate-300">Q{31 + idx}</span>
-                            <span className="text-emerald-300 font-mono">Answer: {item.correctWord}</span>
+                            <span className="text-blue-300 font-mono">Answer: {item.correctWord}</span>
                           </div>
                           {studentAnswers && (
                             <div className="text-[11px] flex items-center justify-between pt-1">
                               <span className="text-slate-400">You chose:</span>
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {studentVal || '(None)'} {isCorrect ? '✓' : '✗'}
                               </span>
                             </div>
@@ -255,12 +277,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                           <p className="text-slate-300 text-[11px]">{item.sentence}</p>
                           <div className="flex items-center justify-between font-bold">
                             <span className="text-slate-400">Q{36 + idx}</span>
-                            <span className="text-emerald-300 font-mono">Correct: {item.options[item.correctIndex]}</span>
+                            <span className="text-blue-300 font-mono">Correct: {item.options[item.correctIndex]}</span>
                           </div>
                           {studentAnswers && (
                             <div className="text-[11px] flex items-center justify-between pt-1">
                               <span className="text-slate-400">You chose:</span>
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {studentIdx !== undefined ? item.options[studentIdx] : '(None)'} {isCorrect ? '✓' : '✗'}
                               </span>
                             </div>
@@ -284,12 +306,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                           <p className="text-slate-300 text-[11px]">{item.sentence}</p>
                           <div className="flex items-center justify-between font-bold">
                             <span className="text-slate-400">Q{41 + idx}</span>
-                            <span className="text-emerald-300 font-mono">Correct: {item.options[item.correctIndex]}</span>
+                            <span className="text-blue-300 font-mono">Correct: {item.options[item.correctIndex]}</span>
                           </div>
                           {studentAnswers && (
                             <div className="text-[11px] flex items-center justify-between pt-1">
                               <span className="text-slate-400">You chose:</span>
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {studentIdx !== undefined ? item.options[studentIdx] : '(None)'} {isCorrect ? '✓' : '✗'}
                               </span>
                             </div>
@@ -312,12 +334,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                         <div key={item.id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-300">Q{46 + idx}. {item.targetWord}</span>
-                            <span className="text-emerald-300 font-bold font-mono">➜ {item.correctMatch}</span>
+                            <span className="text-blue-300 font-bold font-mono">➜ {item.correctMatch}</span>
                           </div>
                           {studentAnswers && (
                             <div className="text-[11px] flex items-center justify-between pt-1">
                               <span className="text-slate-400">You chose:</span>
-                              <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                                 {studentVal || '(None)'} {isCorrect ? '✓' : '✗'}
                               </span>
                             </div>
@@ -339,7 +361,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
               
               {/* Section 1 */}
               <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-emerald-300">{testSet.reading.section1.title}</h4>
+                <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section1.title}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                   {testSet.reading.section1.paragraphs.map((p, idx) => {
                     const studentChoice = safeReadingSec1Answers[p.gapId];
@@ -348,12 +370,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                       <div key={p.gapId} className="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-300">Gap {idx + 1}:</span>
-                          <span className="text-emerald-400 font-mono font-bold">{p.options[p.correctIndex]}</span>
+                          <span className="text-blue-400 font-mono font-bold">{p.options[p.correctIndex]}</span>
                         </div>
                         {studentAnswers && (
                           <div className="text-[11px] flex items-center justify-between pt-1">
                             <span className="text-slate-400">You chose:</span>
-                            <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                               {studentChoice !== undefined ? p.options[studentChoice] : '(None)'} {isCorrect ? '✓' : '✗'}
                             </span>
                           </div>
@@ -370,7 +392,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
 
               {/* Section 2 */}
               <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-emerald-300">{testSet.reading.section2.title}</h4>
+                <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section2.title}</h4>
                 <p className="text-xs text-slate-400">Topic: {testSet.reading.section2.topic}</p>
                 
                 {safeReadingSec2Order && (
@@ -383,7 +405,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                           <span
                             key={pos}
                             className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${
-                              isCorrectPos ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                              isCorrectPos ? 'bg-blue-950/40 border-blue-500/40 text-blue-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
                             }`}
                           >
                             Step {pos + 1}: Sent #{origIdx + 1} {isCorrectPos ? '✓' : '✗'}
@@ -398,7 +420,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                   <div className="text-xs font-bold text-white mb-1">Correct Chronological Order:</div>
                   {testSet.reading.section2.correctOrder.map((origIdx, orderNum) => (
                     <div key={orderNum} className="flex items-start gap-2.5 text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700/60">
-                      <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-bold flex items-center justify-center shrink-0 text-[11px]">
+                      <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center shrink-0 text-[11px]">
                         {orderNum + 1}
                       </span>
                       <p className="text-slate-200">{testSet.reading.section2.sentences[origIdx]}</p>
@@ -414,7 +436,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
 
               {/* Section 3 */}
               <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-emerald-300">{testSet.reading.section3.title}</h4>
+                <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section3.title}</h4>
                 <p className="text-xs text-slate-400">{testSet.reading.section3.topic}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                   {testSet.reading.section3.questions.map((q, idx) => {
@@ -426,13 +448,13 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                         {studentAnswers && (
                           <div className="text-[11px] flex items-center justify-between pt-1">
                             <span className="text-slate-400">You chose:</span>
-                            <span className={`font-mono font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`font-mono font-bold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                               {studentVal ? `Person ${studentVal}` : '(None)'} {isCorrect ? '✓' : '✗'}
                             </span>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-1 border-t border-slate-700/40">
-                          <span className="text-emerald-400 font-bold font-mono">Matched Person: {q.correctPersonId}</span>
+                          <span className="text-blue-400 font-bold font-mono">Matched Person: {q.correctPersonId}</span>
                         </div>
                         <p className="text-[11px] text-slate-400">{q.explanation}</p>
                         {showUrdu && <p className="text-[10px] text-amber-300/90">{q.urduExplanation}</p>}
@@ -444,7 +466,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
 
               {/* Section 4 */}
               <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-emerald-300">{testSet.reading.section4.title}</h4>
+                <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section4.title}</h4>
                 <p className="text-xs text-slate-400">{testSet.reading.section4.topic}</p>
                 <div className="space-y-3 pt-2">
                   {testSet.reading.section4.paragraphs.map((p) => {
@@ -454,12 +476,12 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                       <div key={p.id} className="p-3.5 bg-slate-800/80 rounded-xl border border-slate-700 text-xs space-y-2">
                         <div className="flex items-center justify-between font-bold">
                           <span className="text-white">Paragraph {p.paragraphNumber}</span>
-                          <span className="text-emerald-400 font-mono">{testSet.reading.section4.headings[p.correctHeadingIndex]}</span>
+                          <span className="text-blue-400 font-mono">{testSet.reading.section4.headings[p.correctHeadingIndex]}</span>
                         </div>
                         {studentAnswers && (
                           <div className="text-[11px] flex items-center justify-between pt-1">
                             <span className="text-slate-400">You chose:</span>
-                            <span className={`font-semibold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`font-semibold ${isCorrect ? 'text-blue-400' : 'text-rose-400'}`}>
                               {studentVal !== undefined ? testSet.reading.section4.headings[studentVal] : '(None)'} {isCorrect ? '✓' : '✗'}
                             </span>
                           </div>
@@ -479,8 +501,8 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
           {/* TAB 3: WRITING MODEL ANSWERS */}
           {activeTab === 'writing' && (
             <div className="space-y-6">
-              <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-2xl">
-                <h4 className="font-bold text-sm text-emerald-300">Writing Theme: {testSet.writing.themeName}</h4>
+              <div className="bg-blue-950/20 border border-blue-500/30 p-4 rounded-2xl">
+                <h4 className="font-bold text-sm text-blue-300">Writing Theme: {testSet.writing.themeName}</h4>
                 <p className="text-xs text-slate-400 mt-1">
                   Examiner Benchmark Model Responses demonstrating CEFR Band B2 / C1 vocabulary, coherence, and correct tone register.
                 </p>
@@ -501,7 +523,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                             <span className="font-mono text-cyan-300">{studentVal || '(Blank / Not answered)'}</span>
                           </div>
                         )}
-                        <p className="font-bold text-emerald-300 font-mono">Benchmark Model: "{q.sampleAnswer}"</p>
+                        <p className="font-bold text-blue-300 font-mono">Benchmark Model: "{q.sampleAnswer}"</p>
                       </div>
                     );
                   })}
@@ -518,7 +540,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                     <span className="font-mono text-cyan-300">{safeWritingPart2Answer || '(Blank / Not answered)'}</span>
                   </div>
                 )}
-                <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-emerald-300 font-mono leading-relaxed">
+                <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-blue-300 font-mono leading-relaxed">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-bold mb-1">Benchmark Model:</span>
                   "{testSet.writing.part2.sampleAnswer}"
                 </div>
@@ -541,7 +563,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                             <span className="font-mono text-cyan-300">{studentVal || '(Blank / Not answered)'}</span>
                           </div>
                         )}
-                        <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-700/60 text-emerald-300 font-mono">
+                        <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-700/60 text-blue-300 font-mono">
                           <span className="text-[10px] text-slate-500 uppercase tracking-wide block mb-1">Model Response:</span>
                           "{chat.sampleAnswer}"
                         </div>
@@ -575,14 +597,14 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
 
                 {/* 4B */}
                 <div className="space-y-2 pt-2 border-t border-slate-700/40">
-                  <span className="text-xs font-bold text-emerald-300 uppercase tracking-wide">Task 4B: Formal Email to President (120–150 words)</span>
+                  <span className="text-xs font-bold text-blue-300 uppercase tracking-wide">Task 4B: Formal Email to President (120–150 words)</span>
                   {studentAnswers && (
                     <div className="p-3 rounded-xl bg-slate-900 border border-slate-750 text-xs text-slate-300">
                       <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold mb-1">Your Formal Email:</span>
                       <span className="font-mono text-cyan-300 whitespace-pre-line">{safeWritingPart4BAnswer || '(Blank / Not answered)'}</span>
                     </div>
                   )}
-                  <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-emerald-200 font-mono whitespace-pre-line leading-relaxed">
+                  <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-blue-200 font-mono whitespace-pre-line leading-relaxed">
                     <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-bold mb-1">Benchmark Model:</span>
                     {testSet.writing.part4.taskB.sampleAnswer}
                   </div>
@@ -599,7 +621,7 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
           <span>ICAP ECS • CA Journey Aptis Preparation Engine</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl transition shadow"
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold rounded-xl transition shadow"
           >
             Close Answer Key
           </button>

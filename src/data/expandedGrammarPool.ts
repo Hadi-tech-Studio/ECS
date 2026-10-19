@@ -560,19 +560,22 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Conditionals & Prudence',
       difficulty: 'Hard' as const,
       make: (i: number) => {
-        const nouns = ['external auditor', 'forensic examiner', 'tax partner', 'compliance manager', 'credit analyst'];
-        const actions = ['reconciled the bank statements', 'verified the inventory vouchers', 'scrutinized the ledger postings', 'inspected the shipping logs', 'audited the fixed asset register'];
-        const noun = nouns[i % nouns.length];
-        const action = actions[(i + 1) % actions.length];
+        const scenarios = [
+          { noun: 'meteorological team', action: 'issued storm warnings', outcome: 'the coastal flooding' },
+          { noun: 'medical research team', action: 'published the clinical trial results', outcome: 'the new treatment protocol' },
+          { noun: 'software engineering team', action: 'patched the network vulnerability', outcome: 'the cyber security breach' },
+          { noun: 'external auditor', action: 'verified the inventory vouchers', outcome: 'the financial discrepancy' }
+        ];
+        const sc = scenarios[i % scenarios.length];
         return {
           id: `proc-g-cond-${Date.now()}-${i}`,
           category: 'Conditionals & Prudence',
           difficulty: 'Hard' as const,
-          question: `If the ${noun} had ${action} in a timely manner, the financial discrepancy _______ during the year-end audit.`,
-          options: ['would have been caught', 'will be caught', 'has been caught', 'would catch'],
+          question: `If the ${sc.noun} had ${sc.action} in a timely manner, _______ could have been averted.`,
+          options: [sc.outcome, `the ${sc.outcome}`, `preventing ${sc.outcome}`, `to avert ${sc.outcome}`],
           correctIndex: 0,
-          englishExplanation: 'Third conditional in the passive voice requires "would have been + past participle" in the main clause.',
-          urduExplanation: 'ماضی کے غیر حقیقی کنڈیشنل پیسو فقرے میں مین کلاز میں "would have been caught" آتا ہے۔'
+          englishExplanation: 'Third conditional structure requires appropriate causal subject/object completion.',
+          urduExplanation: 'تھرڈ کنڈیشنل جملے کی ساخت کے مطابق درست فقرہ مکمل کیا گیا ہے۔'
         };
       }
     },
@@ -581,15 +584,15 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       difficulty: 'Hard' as const,
       make: (i: number) => {
         const adverbs = ['Rarely', 'Seldom', 'Scarcely', 'Hardly'];
-        const entities = ['the audit firm', 'the statutory regulator', 'the compliance bureau', 'the revenue board'];
+        const entities = ['has the university witnessed', 'have researchers observed', 'did the expedition team encounter', 'has the tech firm experienced'];
         const adv = adverbs[i % adverbs.length];
         const ent = entities[i % entities.length];
         return {
           id: `proc-g-inv-${Date.now()}-${i}`,
           category: 'Inversion & Emphasis',
           difficulty: 'Hard' as const,
-          question: `${adv} _______ such comprehensive transparency in corporate governance disclosures.`,
-          options: [`has ${ent} encountered`, `${ent} has encountered`, `${ent} encountered`, `did ${ent} encountered`],
+          question: `${adv} _______ such remarkable dedication among student volunteers during community service.`,
+          options: [ent, ent.replace('has ', '').replace('have ', '').replace('did ', ''), `that ${ent}`, `when ${ent}`],
           correctIndex: 0,
           englishExplanation: `Sentence starting with limiting adverb "${adv}" requires subject-auxiliary inversion.`,
           urduExplanation: `جملہ جب "${adv}" سے شروع ہو تو امدادی فعل فاعل سے پہلے لایا جاتا ہے۔`
@@ -600,15 +603,18 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Modals & Prudence',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const docs = ['The statutory balance sheet', 'The cash flow statement', 'The inventory verification report', 'The tax computation schedule'];
-        const reasons = ['all account balances match the general ledger', 'the bank reconciliation shows zero variance', 'the supporting vouchers have been validated', 'the audit partner has signed the clearance sheet'];
-        const doc = docs[i % docs.length];
-        const reason = reasons[i % reasons.length];
+        const statements = [
+          { doc: 'The medical examination report', reason: 'all vital signs are completely normal' },
+          { doc: 'The architectural blueprint', reason: 'the structural load calculations have been verified' },
+          { doc: 'The travel itinerary', reason: 'all flight bookings and hotel reservations are confirmed' },
+          { doc: 'The annual financial budget', reason: 'all projected revenues match operational expenditures' }
+        ];
+        const st = statements[i % statements.length];
         return {
           id: `proc-g-mod-${Date.now()}-${i}`,
           category: 'Modals & Prudence',
           difficulty: 'Medium' as const,
-          question: `${doc} is ready for submission; since ${reason}, the figures _______ accurate.`,
+          question: `${st.doc} is complete; since ${st.reason}, the details _______ accurate.`,
           options: ['must be', 'can have been', 'might not be', 'ought to'],
           correctIndex: 0,
           englishExplanation: '"Must be" represents a high-probability logical deduction backed by verifiable evidence.',
@@ -620,19 +626,21 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Subject-Verb Agreement',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const singles = ['The audit engagement senior', 'The tax department manager', 'The compliance inspector', 'The financial controller'];
-        const plurals = ['the trainees', 'the junior associates', 'the audit assistants', 'the ledger clerks'];
-        const single = singles[i % singles.length];
-        const plural = plurals[i % plurals.length];
+        const pairs = [
+          { single: 'The lead research scientist', plural: 'the laboratory assistants' },
+          { single: 'The project manager', plural: 'the team members' },
+          { single: 'Neither the head teacher nor', plural: 'the assistant instructors' }
+        ];
+        const p = pairs[i % pairs.length];
         return {
           id: `proc-g-sva-${Date.now()}-${i}`,
           category: 'Subject-Verb Agreement',
           difficulty: 'Medium' as const,
-          question: `Neither ${single} nor ${plural} _______ authorized to sign the final audit memorandum without partner consent.`,
+          question: `Neither ${p.single.toLowerCase()} nor ${p.plural} _______ present at the conference yesterday.`,
           options: ['were', 'was', 'is', 'has been'],
           correctIndex: 0,
           englishExplanation: 'In "neither... nor" constructions, the verb agrees with the nearest noun subject (plural requires "were").',
-          urduExplanation: '"Neither... nor" میں فعل کا فیصلہ "nor" کے قریب ترین اسم کے مطابق کیا جاتا ہے۔'
+          urduExplanation: '"Neither... nor" میں فعل کا فیصلہ قریب ترین اسم کے مطابق کیا جاتا ہے۔'
         };
       }
     },
@@ -640,19 +648,17 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Gerunds & Infinitives',
       difficulty: 'Easy' as const,
       make: (i: number) => {
-        const verbs = ['look forward to', 'are committed to', 'have dedicated themselves to'];
-        const obj = ['finalizing', 'auditing', 'inspecting', 'reviewing'];
-        const vb = verbs[i % verbs.length];
-        const ob = obj[i % obj.length];
+        const activities = ['learning a new language', 'practicing daily meditation', 'organizing community workshops', 'traveling abroad'];
+        const act = activities[i % activities.length];
         return {
           id: `proc-g-ger-${Date.now()}-${i}`,
           category: 'Gerunds & Infinitives',
           difficulty: 'Easy' as const,
-          question: `All members of the accounting team ${vb} _______ the statutory return well before the fiscal filing deadline.`,
-          options: [ob, `to ${ob.replace(/ing$/, 'e').replace(/tting$/, 't')}`, 'finalized', 'have finalized'],
+          question: `Many students find _______ to be an enriching experience that broadens their cultural horizons.`,
+          options: [act, `to ${act}`, act.replace('ing', 'e'), `for ${act}`],
           correctIndex: 0,
-          englishExplanation: `Phrasal expressions like "${vb}" conclude with a preposition requiring a gerund ("-ing").`,
-          urduExplanation: `پریپوزیشنل فقروں کے بعد ہمیشہ جیرنڈ یعنی \'-ing\' والی فارم آتی ہے۔`
+          englishExplanation: 'Gerund phrases function smoothly as objects of verbs like "find".',
+          urduExplanation: 'جیرنڈ فقرے فعل کے بعد مفعول کے طور پر استعمال ہوتے ہیں۔'
         };
       }
     },
@@ -660,17 +666,17 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Subjunctive & Formal Recommendations',
       difficulty: 'Hard' as const,
       make: (i: number) => {
-        const verbs = ['recommended', 'insisted', 'demanded', 'stipulated'];
+        const verbs = ['recommended', 'insisted', 'demanded', 'requested'];
         const v = verbs[i % verbs.length];
         return {
           id: `proc-g-sub-${Date.now()}-${i}`,
           category: 'Subjunctive & Formal Recommendations',
           difficulty: 'Hard' as const,
-          question: `The corporate governance board ${v} that every subsidiary company _______ an independent audit committee immediately.`,
-          options: ['establish', 'establishes', 'established', 'would establish'],
+          question: `The school board ${v} that every teacher _______ professional development training annually.`,
+          options: ['complete', 'completes', 'completed', 'would complete'],
           correctIndex: 0,
-          englishExplanation: 'Mandative subjunctive after verbs of recommendation requires the bare base form ("establish").',
-          urduExplanation: 'رسمی سبجنکٹیو میں تجویز دینے والے فعل کے بعد بنیادی فارم ("establish") آتی ہے۔'
+          englishExplanation: 'Mandative subjunctive after recommendation verbs requires the bare base form ("complete").',
+          urduExplanation: 'رسمی سبجنکٹیو میں تجویز دینے والے فعل کے بعد بنیادی فارم ("complete") آتی ہے۔'
         };
       }
     },
@@ -678,168 +684,111 @@ export function generateProceduralGrammarMCQs(count: number, avoidIds: Set<strin
       category: 'Conjunctions & Connectors',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const clauses = [
-          { clause: 'the manufacturing plant operated under severe power rationing', noun: 'the severe power rationing' },
-          { clause: 'the foreign exchange market experienced intense volatility', noun: 'the intense foreign exchange volatility' },
-          { clause: 'freight shipping costs increased substantially', noun: 'substantial increases in freight shipping costs' }
-        ];
-        const c = clauses[i % clauses.length];
         return {
           id: `proc-g-con-${Date.now()}-${i}`,
           category: 'Conjunctions & Connectors',
           difficulty: 'Medium' as const,
-          question: `_______ ${c.clause}, the enterprise managed to achieve its budgeted sales targets.`,
-          options: ['Although', 'Despite', 'However', 'In spite of'],
+          question: `_______ heavy rainfall and stormy weather conditions, the outdoor science expedition proceeded successfully.`,
+          options: ['Despite', 'Although', 'However', 'Because'],
           correctIndex: 0,
-          englishExplanation: '"Although" correctly introduces a finite subordinate clause with subject and verb.',
-          urduExplanation: 'مکمل کلاز (فاعل + فعل) کو متعارف کرانے کے لیے "Although" کا استعمال ہوتا ہے۔'
+          englishExplanation: '"Despite" is correctly followed by a noun phrase ("heavy rainfall...").',
+          urduExplanation: '"Despite" کے بعد نام یا فقرہ آتا ہے جبکہ "Although" کے بعد مکمل کلاز آتا ہے۔'
         };
       }
     },
-    // Category: Error Identification (Crucial ICAP ECS Question Type)
-    // Category: Synonyms (Contextual Business Vocabulary)
     {
       category: 'Synonyms',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const synonymItems = [
-          { word: 'substantiate', syn: 'corroborate', options: ['corroborate', 'dispute', 'contradict', 'abandon'], reason: '"Substantiate" means to support or prove with authentic evidence.' },
-          { word: 'mitigate', syn: 'alleviate', options: ['alleviate', 'intensify', 'exacerbate', 'worsen'], reason: '"Mitigate" means to make less severe or serious.' },
-          { word: 'stringent', syn: 'rigorous', options: ['rigorous', 'lax', 'flexible', 'negligent'], reason: '"Stringent" denotes strict, precise and exacting regulations.' },
-          { word: 'prudent', syn: 'judicious', options: ['judicious', 'reckless', 'hasty', 'negligent'], reason: '"Prudent" means acting with care and sound foresight.' },
-          { word: 'scrutinize', syn: 'examine thoroughly', options: ['examine thoroughly', 'casually skim', 'dismiss lightly', 'overlook'], reason: '"Scrutinize" means to inspect with critical, detailed care.' }
+        const items = [
+          { word: 'resilient', syn: 'hardy', options: ['hardy', 'fragile', 'weak', 'brittle'], reason: '"Resilient" means able to withstand or recover quickly from difficult conditions.' },
+          { word: 'beneficial', syn: 'advantageous', options: ['advantageous', 'harmful', 'detrimental', 'hurtful'], reason: '"Beneficial" means resulting in good or helpful outcomes.' },
+          { word: 'meticulous', syn: 'thorough', options: ['thorough', 'careless', 'sloppy', 'hasty'], reason: '"Meticulous" means showing great attention to detail.' }
         ];
-        const s = synonymItems[i % synonymItems.length];
+        const it = items[i % items.length];
         return {
           id: `proc-g-syn-${Date.now()}-${i}`,
           category: 'Synonyms',
           difficulty: 'Medium' as const,
-          question: `In professional auditing and corporate reporting, the term "${s.word}" is closest in meaning to _______.`,
-          options: s.options,
+          question: `In general English usage, the word "${it.word}" is closest in meaning to _______.`,
+          options: it.options,
           correctIndex: 0,
-          englishExplanation: s.reason,
-          urduExplanation: `کارپوریٹ تناظر میں لفظ "${s.word}" کا درست مترادف "${s.syn}" ہے۔`
+          englishExplanation: it.reason,
+          urduExplanation: `لفظ "${it.word}" کا درست مترادف "${it.syn}" ہے۔`
         };
       }
     },
-    // Category: Antonyms (Contextual Business Vocabulary)
     {
       category: 'Antonyms',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const antonymItems = [
-          { word: 'prudent', ant: 'reckless', options: ['reckless', 'cautious', 'vigilant', 'methodical'], reason: 'The antonym of "prudent" (cautious, sensible) is "reckless".' },
-          { word: 'robust', ant: 'fragile', options: ['fragile', 'durable', 'sturdy', 'resilient'], reason: 'The antonym of "robust" (strong and firm) is "fragile".' },
-          { word: 'transparent', ant: 'opaque', options: ['opaque', 'clear', 'candid', 'unveiled'], reason: 'The antonym of "transparent" (open and verifiable) is "opaque".' },
-          { word: 'material', ant: 'immaterial', options: ['immaterial', 'significant', 'substantial', 'weighty'], reason: 'In accounting, the opposite of "material" (significant) is "immaterial".' },
-          { word: 'mandatory', ant: 'voluntary', options: ['voluntary', 'compulsory', 'statutory', 'obligatory'], reason: 'The antonym of "mandatory" (required by regulation) is "voluntary".' }
+        const items = [
+          { word: 'abundant', ant: 'scarce', options: ['scarce', 'plentiful', 'ample', 'copious'], reason: 'The antonym of abundant (plentiful) is scarce.' },
+          { word: 'transparent', ant: 'opaque', options: ['opaque', 'clear', 'lucid', 'apparent'], reason: 'The antonym of transparent is opaque.' }
         ];
-        const a = antonymItems[i % antonymItems.length];
+        const it = items[i % items.length];
         return {
           id: `proc-g-ant-${Date.now()}-${i}`,
           category: 'Antonyms',
           difficulty: 'Medium' as const,
-          question: `In statutory compliance and finance, the direct antonym (opposite meaning) of "${a.word}" is _______.`,
-          options: a.options,
+          question: `The direct antonym (opposite meaning) of the word "${it.word}" is _______.`,
+          options: it.options,
           correctIndex: 0,
-          englishExplanation: a.reason,
-          urduExplanation: `حسابداری اور قانون میں لفظ "${a.word}" کا درست متضاد "${a.ant}" ہے۔`
+          englishExplanation: it.reason,
+          urduExplanation: `لفظ "${it.word}" کا متضاد "${it.ant}" ہے۔`
         };
       }
     },
-    // Category: Active / Passive (Reporting and Impersonal Passives)
     {
       category: 'Active / Passive',
       difficulty: 'Hard' as const,
       make: (i: number) => {
-        const passives = [
-          { subject: 'The company\'s statutory records', verb: 'to have been altered', options: ['to have been altered', 'to alter', 'having altered', 'altering'], reason: 'The perfect passive infinitive ("to have been altered") expresses a past action performed on the records.' },
-          { subject: 'Unallocated investment expenditures', verb: 'to have been routed', options: ['to have been routed', 'to route', 'having routed', 'routing'], reason: 'Reporting passive with perfect passive infinitive indicates prior transfer.' },
-          { subject: 'The quarterly reconciliation schedule', verb: 'to have been verified', options: ['to have been verified', 'to verify', 'having verified', 'verifying'], reason: 'Passive infinitive structure denotes completed past verification.' }
-        ];
-        const p = passives[i % passives.length];
         return {
           id: `proc-g-pass-${Date.now()}-${i}`,
           category: 'Active / Passive',
           difficulty: 'Hard' as const,
-          question: `${p.subject} appeared _______ prior to the surprise inspection by the compliance regulators.`,
-          options: p.options,
+          question: `The historic library building _______ by community volunteers during the summer restoration project.`,
+          options: ['was renovated', 'renovated', 'has renovated', 'renovating'],
           correctIndex: 0,
-          englishExplanation: p.reason,
-          urduExplanation: 'ماضی کے واقعے کو رپورٹ کرنے کے لیے Perfect Passive Infinitive کی ساخت درست ہے۔'
+          englishExplanation: 'Passive voice in past simple ("was renovated") correctly highlights the recipient of the action.',
+          urduExplanation: 'ماضی میں ہونے والے کام کے لیے Passive voice میں "was renovated" استعمال ہوتا ہے۔'
         };
       }
     },
-    // Category: Relative Clauses
     {
       category: 'Relative Clauses',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const rels = [
-          { text: 'The regulatory institution to _______ the formal disclosure was submitted has confirmed receipt.', pronoun: 'which', options: ['which', 'whom', 'that', 'where'], reason: 'Preposition "to" governing an institution requires the relative pronoun "which".' },
-          { text: 'The senior compliance officer _______ inspected the warehouse detected discrepancies in stock counts.', pronoun: 'who', options: ['who', 'which', 'whom', 'whose'], reason: 'The subject pronoun referring to a person is "who".' },
-          { text: 'The enterprise established a digital reporting structure _______ subsidiaries submit real-time cash positions.', pronoun: 'whereby', options: ['whereby', 'whereof', 'whereat', 'whereon'], reason: '"Whereby" (meaning by which or through which) links systems to their operational procedures.' }
-        ];
-        const r = rels[i % rels.length];
         return {
           id: `proc-g-rel-${Date.now()}-${i}`,
           category: 'Relative Clauses',
           difficulty: 'Medium' as const,
-          question: r.text,
-          options: r.options,
+          question: `The scientist _______ breakthrough research on renewable energy won international acclaim.`,
+          options: ['whose', 'who', 'whom', 'which'],
           correctIndex: 0,
-          englishExplanation: r.reason,
-          urduExplanation: 'جملے کی ساخت اور پریپوزیشن کے مطابق درست Relative Pronoun کا انتخاب کیا گیا ہے۔'
+          englishExplanation: 'Relative pronoun "whose" indicates possession linking the scientist to their research.',
+          urduExplanation: 'ملکیت یا تعلق ظاہر کرنے کے لیے relative pronoun "whose" استعمال ہوتا ہے۔'
         };
       }
     },
-    // Category: Articles
     {
       category: 'Articles',
       difficulty: 'Medium' as const,
       make: (i: number) => {
-        const arts = [
-          { text: 'Auditors must always exercise _______ professional prudence when assessing going concern assumptions.', correct: 'zero article (no article)', options: ['zero article (no article)', 'the', 'a', 'an'], reason: '"Professional prudence" is an abstract uncountable noun and takes zero article.' },
-          { text: 'The engagement director requested _______ independent appraisal of the investment property.', correct: 'an', options: ['an', 'a', 'the', 'zero article (no article)'], reason: '"Independent" begins with a vowel sound, requiring "an".' },
-          { text: 'The treasury division secured _______ European commercial line of credit yesterday.', correct: 'a', options: ['a', 'an', 'the', 'zero article (no article)'], reason: '"European" begins with the consonant glide /j/, requiring "a".' }
-        ];
-        const a = arts[i % arts.length];
         return {
           id: `proc-g-art-${Date.now()}-${i}`,
           category: 'Articles',
           difficulty: 'Medium' as const,
-          question: a.text,
-          options: a.options,
+          question: `Mount Kilimanjaro is the highest peak in _______ Tanzania.`,
+          options: ['zero article (no article)', 'the', 'a', 'an'],
           correctIndex: 0,
-          englishExplanation: a.reason,
-          urduExplanation: 'آئی کیپ سلیبس کے مطابق آرٹیکل کے استعمال کا درست اصول لاگو کیا گیا ہے۔'
-        };
-      }
-    },
-    // Category: Collocations
-    {
-      category: 'Collocations',
-      difficulty: 'Medium' as const,
-      make: (i: number) => {
-        const collocList = [
-          { text: 'The audit committee members were finally able to _______ a consensus on the materiality threshold.', correct: 'reach', options: ['reach', 'arrive', 'strike', 'draw'], reason: '"Reach a consensus" is the standard formal collocation.' },
-          { text: 'The emergence of hidden tax liabilities _______ doubt on the valuation of the target business.', correct: 'cast', options: ['cast', 'drew', 'threw', 'made'], reason: 'In accounting and law, one "casts doubt on" an assertion.' },
-          { text: 'The listed corporation is statutorily required to _______ with all environmental protection directives.', correct: 'comply', options: ['comply', 'abide', 'conform', 'adhere'], reason: 'The verb "comply" is paired with the preposition "with" ("comply with").' }
-        ];
-        const c = collocList[i % collocList.length];
-        return {
-          id: `proc-g-col-${Date.now()}-${i}`,
-          category: 'Collocations',
-          difficulty: 'Medium' as const,
-          question: c.text,
-          options: c.options,
-          correctIndex: 0,
-          englishExplanation: c.reason,
-          urduExplanation: 'حسابداری اور دفتری انگریزی کے مستند کلوکیشن کا انتخاب کیا گیا ہے۔'
+          englishExplanation: 'Most country names (like Tanzania) take zero article.',
+          urduExplanation: 'زیادہ تر ممالک کے ناموں سے پہلے کوئی آرٹیکل نہیں آتا۔'
         };
       }
     }
   ];
+
 
   const generated: GrammarQuestion[] = [];
   let index = 0;

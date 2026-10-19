@@ -76,11 +76,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [accent, setAccentState] = useState<AccentColor>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(ACCENT_STORAGE_KEY);
-      if (saved === 'emerald' || saved === 'blue' || saved === 'red' || saved === 'purple' || saved === 'teal') {
+      if (saved === 'blue' || saved === 'red' || saved === 'purple' || saved === 'teal') {
         return saved;
       }
+      if (saved === 'emerald') {
+        localStorage.setItem(ACCENT_STORAGE_KEY, 'blue');
+        return 'blue';
+      }
     }
-    return 'emerald';
+    return 'blue';
   });
 
   const setTheme = (newTheme: SiteTheme) => {

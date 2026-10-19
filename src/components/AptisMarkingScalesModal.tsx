@@ -43,7 +43,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-200">
           
           <div className="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/60 text-xs text-slate-300 space-y-2">
-            <div className="flex items-center gap-2 font-bold text-emerald-400">
+            <div className="flex items-center gap-2 font-bold text-blue-400">
               <ShieldCheck className="w-4 h-4" />
               <span>Assessment & Scoring Overview</span>
             </div>
@@ -59,7 +59,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
                 key={scale.band}
                 className={`p-5 rounded-2xl border transition ${
                   scale.band.startsWith('C')
-                    ? 'bg-emerald-950/20 border-emerald-500/40'
+                    ? 'bg-blue-950/20 border-blue-500/40'
                     : scale.band === 'B2'
                     ? 'bg-blue-950/20 border-blue-500/40'
                     : scale.band === 'B1'
@@ -71,7 +71,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-xl text-xs font-extrabold uppercase font-mono tracking-wider ${
                       scale.band.startsWith('C')
-                        ? 'bg-emerald-500 text-slate-950'
+                        ? 'bg-blue-500 text-slate-950'
                         : scale.band === 'B2'
                         ? 'bg-blue-500 text-white'
                         : scale.band === 'B1'
@@ -81,7 +81,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
                       CEFR Band {scale.band}
                     </span>
                     <span className="text-xs font-semibold text-slate-300">
-                      Standard Score: <span className="font-mono text-emerald-400">{scale.numericScore} / 50</span>
+                      Standard Score: <span className="font-mono text-blue-400">{scale.numericScore} / 50</span>
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-400">
@@ -92,7 +92,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
                     <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
                       Grammar Proficiency
                     </span>
                     <p className="text-slate-400 leading-relaxed pl-5">{scale.grammarDescription}</p>
@@ -100,7 +100,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
 
                   <div className="space-y-1">
                     <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
                       Vocabulary Command
                     </span>
                     <p className="text-slate-400 leading-relaxed pl-5">{scale.vocabularyDescription}</p>
@@ -134,7 +134,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
           <span>ICAP ECS Course • Aptis Marking Scales</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl transition shadow"
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold rounded-xl transition shadow"
           >
             Close Scales
           </button>

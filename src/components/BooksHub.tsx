@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { callGeminiAPI } from '../lib/api-handler';
 import ReactMarkdown from 'react-markdown';
+import { useTheme } from '../context/ThemeContext';
 
 interface BooksHubProps {
   onBackToMain: () => void;
@@ -52,6 +53,7 @@ export const BooksHub: React.FC<BooksHubProps> = ({
   onBackToMain,
   onOpenApiKeyModal
 }) => {
+  const { theme } = useTheme();
   // Navigation / Tab state inside Books Hub
   const [activeSubTab, setActiveSubTab] = useState<'library' | 'bookmarks' | 'progress' | 'ai-tutor'>('library');
 
@@ -271,13 +273,13 @@ Please provide an authoritative, high-yield explanation with:
       
       {/* Top Banner & Header */}
       <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5" />
                 ICAP ECS Digital Library & Reader
               </span>
@@ -287,7 +289,7 @@ Please provide an authoritative, high-yield explanation with:
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white font-display">
-              Books & Master Notes <span className="text-emerald-400">Library</span>
+              Books & Master Notes <span className="text-blue-400">Library</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -301,7 +303,7 @@ Please provide an authoritative, high-yield explanation with:
               onClick={onBackToMain}
               className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition cursor-pointer"
             >
-              <Home className="w-4 h-4 text-emerald-400" />
+              <Home className="w-4 h-4 text-blue-400" />
               <span>Back to Practice Test</span>
             </button>
           </div>
@@ -312,7 +314,7 @@ Please provide an authoritative, high-yield explanation with:
           <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700/50">
             <div className="text-[11px] text-slate-400 font-medium">Available Books</div>
             <div className="text-lg sm:text-xl font-bold text-white mt-0.5 flex items-center gap-1.5">
-              <BookMarked className="w-4 h-4 text-emerald-400" />
+              <BookMarked className="w-4 h-4 text-blue-400" />
               <span>{BOOKS_DATA.length} {BOOKS_DATA.length === 1 ? 'Official Book' : 'Editions'}</span>
             </div>
           </div>
@@ -327,8 +329,8 @@ Please provide an authoritative, high-yield explanation with:
 
           <div className="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-700/50">
             <div className="text-[11px] text-slate-400 font-medium">Your Reading Progress</div>
-            <div className="text-lg sm:text-xl font-bold text-emerald-300 mt-0.5 flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-emerald-400" />
+            <div className="text-lg sm:text-xl font-bold text-blue-300 mt-0.5 flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-blue-400" />
               <span>{overallProgressPercentage}% Complete</span>
             </div>
           </div>
@@ -344,30 +346,36 @@ Please provide an authoritative, high-yield explanation with:
       </div>
 
       {/* Module Navigation Sub-Tabs */}
-      <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+      <div className={`flex items-center justify-between gap-2 border-b pb-2 overflow-x-auto ${
+        theme === 'light' ? 'border-[#cbd8ec]' : 'border-slate-800'
+      }`}>
         <div className="flex items-center gap-1.5 sm:gap-2">
           
           <button
             onClick={() => setActiveSubTab('library')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeSubTab === 'library'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                 : 'bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/60'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Official Study Text ({BOOKS_DATA.length})</span>
+            <BookOpen className={`w-4 h-4 ${activeSubTab === 'library' ? 'text-white' : (theme === 'light' ? 'text-blue-600' : 'text-slate-300')}`} />
+            <span>Official Study Text</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('bookmarks')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeSubTab === 'bookmarks'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                 : 'bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/60'
             }`}
           >
-            <Bookmark className="w-4 h-4" />
+            <Bookmark className={`w-4 h-4 ${activeSubTab === 'bookmarks' ? 'text-white' : (theme === 'light' ? 'text-blue-600' : 'text-slate-300')}`} />
             <span>My Bookmarks ({bookmarks.length})</span>
           </button>
 
@@ -375,11 +383,13 @@ Please provide an authoritative, high-yield explanation with:
             onClick={() => setActiveSubTab('progress')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeSubTab === 'progress'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                 : 'bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/60'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className={`w-4 h-4 ${activeSubTab === 'progress' ? 'text-white' : (theme === 'light' ? 'text-blue-600' : 'text-slate-300')}`} />
             <span>Reading Progress</span>
           </button>
 
@@ -387,11 +397,13 @@ Please provide an authoritative, high-yield explanation with:
             onClick={() => setActiveSubTab('ai-tutor')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeSubTab === 'ai-tutor'
-                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-500/40'
+                : theme === 'light'
+                ? 'bg-white text-[#0a1636] border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
                 : 'bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-700/60'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-emerald-300" />
+            <Sparkles className={`w-4 h-4 ${activeSubTab === 'ai-tutor' ? 'text-white' : (theme === 'light' ? 'text-blue-600' : 'text-blue-300')}`} />
             <span>AI Concept Explainer</span>
           </button>
 
@@ -413,7 +425,7 @@ Please provide an authoritative, high-yield explanation with:
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search across all books, chapters, grammar rules, vocabulary, takeaways, or Urdu notes..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
               {searchQuery && (
                 <button
@@ -431,12 +443,12 @@ Please provide an authoritative, high-yield explanation with:
               {/* Level Filter */}
               <div className="flex items-center gap-2">
                 <span className="text-slate-400 font-semibold flex items-center gap-1">
-                  <GraduationCap className="w-3.5 h-3.5 text-emerald-400" /> Module:
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-400" /> Module:
                 </span>
                 <select
                   value={selectedLevel}
                   onChange={(e) => setSelectedLevel(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-400"
                 >
                   <option value="all">All ECS Modules</option>
                   <option value="ICAP ECS">ICAP ECS Core</option>
@@ -451,7 +463,7 @@ Please provide an authoritative, high-yield explanation with:
                 <select
                   value={selectedSubject}
                   onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-400 max-w-[200px]"
+                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-400 max-w-[200px]"
                 >
                   <option value="all">All Syllabus Areas</option>
                   <option value="Comprehensive Master Notes">Comprehensive Master Notes</option>
@@ -466,7 +478,7 @@ Please provide an authoritative, high-yield explanation with:
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                  className="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-400"
                 >
                   <option value="all">All Formats</option>
                   <option value="Study Text">Study Text</option>
@@ -506,7 +518,7 @@ Please provide an authoritative, high-yield explanation with:
                   setSelectedType('all');
                   setSearchQuery('');
                 }}
-                className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition"
+                className="px-4 py-2 rounded-xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400 transition"
               >
                 Show All Books
               </button>
@@ -521,7 +533,7 @@ Please provide an authoritative, high-yield explanation with:
                 return (
                   <div
                     key={book.id}
-                    className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl hover:border-emerald-500/40 transition-all duration-300 flex flex-col group"
+                    className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl hover:border-blue-500/40 transition-all duration-300 flex flex-col group"
                   >
                     {/* Book Card Cover Banner */}
                     <div className={`p-6 bg-gradient-to-br ${book.coverGradient} relative text-white space-y-3 min-h-[140px] flex flex-col justify-between`}>
@@ -537,10 +549,10 @@ Please provide an authoritative, high-yield explanation with:
                       </div>
 
                       <div>
-                        <span className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider block">
+                        <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">
                           {book.subject}
                         </span>
-                        <h3 className="text-lg font-bold leading-snug text-white font-display group-hover:text-emerald-200 transition-colors">
+                        <h3 className="text-lg font-bold leading-snug text-white font-display group-hover:text-blue-200 transition-colors">
                           {book.title}
                         </h3>
                       </div>
@@ -575,11 +587,11 @@ Please provide an authoritative, high-yield explanation with:
                             <span className="text-slate-400 font-medium">
                               {percent > 0 ? `${completedCount}/${book.chapters.length} Chs read` : 'Not started'}
                             </span>
-                            <span className="font-mono font-bold text-emerald-400">{percent}%</span>
+                            <span className="font-mono font-bold text-blue-400">{percent}%</span>
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
+                              className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
                               style={{ width: `${percent}%` }}
                             />
                           </div>
@@ -593,7 +605,7 @@ Please provide an authoritative, high-yield explanation with:
                             setReadingBook(book);
                             setTargetChapterId(progress?.lastReadChapterId);
                           }}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 shadow-md shadow-emerald-500/20 transition cursor-pointer"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400 shadow-md shadow-blue-500/20 transition cursor-pointer"
                         >
                           <BookOpen className="w-4 h-4" />
                           <span>{percent > 0 ? 'Resume Reading' : 'Open Reader'}</span>
@@ -656,7 +668,7 @@ Please provide an authoritative, high-yield explanation with:
                 </p>
                 <button
                   onClick={() => setActiveSubTab('library')}
-                  className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400"
+                  className="px-4 py-2 rounded-xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400"
                 >
                   Browse Books Library
                 </button>
@@ -673,7 +685,7 @@ Please provide an authoritative, high-yield explanation with:
                     >
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-[11px] text-slate-400">
-                          <span className="font-semibold text-emerald-400 truncate max-w-[200px]">{bm.bookTitle}</span>
+                          <span className="font-semibold text-blue-400 truncate max-w-[200px]">{bm.bookTitle}</span>
                           <span>{bm.createdAt}</span>
                         </div>
 
@@ -701,7 +713,7 @@ Please provide an authoritative, high-yield explanation with:
                               setTargetChapterId(bm.chapterId);
                             }
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500 hover:text-slate-950 text-xs font-bold transition cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 hover:bg-blue-500 hover:text-slate-950 text-xs font-bold transition cursor-pointer"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
                           <span>Jump to Chapter</span>
@@ -732,7 +744,7 @@ Please provide an authoritative, high-yield explanation with:
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-emerald-400" />
+                  <BarChart3 className="w-5 h-5 text-blue-400" />
                   Reading Progress & Chapter Completion Matrix
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -764,7 +776,7 @@ Please provide an authoritative, high-yield explanation with:
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
                             {book.level}
                           </span>
                           <span className="text-xs text-slate-400">{book.type}</span>
@@ -775,7 +787,7 @@ Please provide an authoritative, high-yield explanation with:
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono font-bold text-emerald-400">
+                        <span className="text-xs font-mono font-bold text-blue-400">
                           {completedIds.length} / {book.chapters.length} Chs ({percent}%)
                         </span>
                         <button
@@ -783,7 +795,7 @@ Please provide an authoritative, high-yield explanation with:
                             setReadingBook(book);
                             setTargetChapterId(prog?.lastReadChapterId);
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400 cursor-pointer"
                         >
                           Read
                         </button>
@@ -801,7 +813,7 @@ Please provide an authoritative, high-yield explanation with:
                             onClick={() => handleUpdateProgress(book.id, ch.id, !isDone)}
                             className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 transition cursor-pointer ${
                               isDone
-                                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200 font-semibold'
+                                ? 'bg-blue-950/40 border-blue-500/40 text-blue-200 font-semibold'
                                 : 'bg-slate-900 border-slate-750 text-slate-300 hover:border-slate-600'
                             }`}
                           >
@@ -809,7 +821,7 @@ Please provide an authoritative, high-yield explanation with:
                               Ch {ch.number}: {ch.title}
                             </span>
                             <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-xs font-bold border ${
-                              isDone ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'border-slate-600 text-slate-400'
+                              isDone ? 'bg-blue-500 text-slate-950 border-blue-400' : 'border-slate-600 text-slate-400'
                             }`}>
                               {isDone ? '✓' : ''}
                             </span>
@@ -832,7 +844,7 @@ Please provide an authoritative, high-yield explanation with:
           <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6">
             
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-emerald-400">
+              <div className="flex items-center gap-2 text-blue-400">
                 <Sparkles className="w-5 h-5" />
                 <span className="text-xs font-bold uppercase tracking-wider">AI Concept Explainer & Study Tutor</span>
               </div>
@@ -840,7 +852,7 @@ Please provide an authoritative, high-yield explanation with:
                 Instant Academic Clarity for ICAP ECS Candidates
               </h3>
               <p className="text-xs text-slate-300 max-w-2xl">
-                Have a tricky grammar rule, audit vocabulary question, or writing rubric inquiry? Ask your dedicated AI tutor powered by Gemini 2.5 Flash.
+                Have a tricky grammar rule, vocabulary question, or writing rubric inquiry? Ask your dedicated AI tutor for instant academic guidance.
               </p>
             </div>
 
@@ -862,9 +874,9 @@ Please provide an authoritative, high-yield explanation with:
                       setAiTutorPrompt(promptText);
                       handleRunAiTutor(promptText);
                     }}
-                    className="p-3 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/40 text-left text-xs text-slate-200 transition space-y-1 cursor-pointer"
+                    className="p-3 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/40 text-left text-xs text-slate-200 transition space-y-1 cursor-pointer"
                   >
-                    <div className="font-semibold text-emerald-300">💡 Inquiry #{i + 1}</div>
+                    <div className="font-semibold text-blue-300">💡 Inquiry #{i + 1}</div>
                     <div className="line-clamp-2 text-slate-300">{promptText}</div>
                   </button>
                 ))}
@@ -885,7 +897,7 @@ Please provide an authoritative, high-yield explanation with:
                   onChange={(e) => setAiTutorPrompt(e.target.value)}
                   placeholder="Ask any English communication, grammar, vocabulary, or ICAP exam question..."
                   rows={3}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs sm:text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 resize-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs sm:text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 resize-none"
                 />
               </div>
 
@@ -893,7 +905,7 @@ Please provide an authoritative, high-yield explanation with:
                 <button
                   type="button"
                   onClick={onOpenApiKeyModal}
-                  className="text-xs text-slate-400 hover:text-emerald-400 underline"
+                  className="text-xs text-slate-400 hover:text-blue-400 underline"
                 >
                   Configure Gemini Key
                 </button>
@@ -901,7 +913,7 @@ Please provide an authoritative, high-yield explanation with:
                 <button
                   type="submit"
                   disabled={isAiTutorLoading || !aiTutorPrompt.trim()}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 shadow-md shadow-emerald-500/20 disabled:opacity-50 transition cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400 shadow-md shadow-blue-500/20 disabled:opacity-50 transition cursor-pointer"
                 >
                   {isAiTutorLoading ? (
                     <>
@@ -922,7 +934,7 @@ Please provide an authoritative, high-yield explanation with:
             {aiTutorResponse && (
               <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <span className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-blue-400 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" /> Official AI Tutor Response
                   </span>
                   <button
@@ -956,7 +968,7 @@ Please provide an authoritative, high-yield explanation with:
             
             <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
               <div>
-                <span className="text-xs font-mono font-bold text-emerald-400">{previewBook.level} • {previewBook.type}</span>
+                <span className="text-xs font-mono font-bold text-blue-400">{previewBook.level} • {previewBook.type}</span>
                 <h3 className="text-lg font-bold">{previewBook.title}</h3>
                 <p className="text-xs text-slate-400">{previewBook.subtitle}</p>
               </div>
@@ -986,7 +998,7 @@ Please provide an authoritative, high-yield explanation with:
                     {ch.subtitle && (
                       <div className="text-[11px] text-slate-400 italic">{ch.subtitle}</div>
                     )}
-                    <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-2 pt-0.5">
+                    <div className="text-[10px] text-blue-400 font-mono flex items-center gap-2 pt-0.5">
                       <span>{ch.readingTimeMinutes} mins read</span>
                       <span>•</span>
                       <span>{ch.wordCount} words</span>
@@ -999,7 +1011,7 @@ Please provide an authoritative, high-yield explanation with:
                       setTargetChapterId(ch.id);
                       setPreviewBook(null);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500 hover:text-slate-950 text-xs font-bold shrink-0 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 hover:bg-blue-500 hover:text-slate-950 text-xs font-bold shrink-0 transition cursor-pointer"
                   >
                     Read
                   </button>
@@ -1014,7 +1026,7 @@ Please provide an authoritative, high-yield explanation with:
                   setTargetChapterId(undefined);
                   setPreviewBook(null);
                 }}
-                className="w-full py-2.5 rounded-2xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 shadow-md cursor-pointer"
+                className="w-full py-2.5 rounded-2xl bg-blue-500 text-slate-950 text-xs font-bold hover:bg-blue-400 shadow-md cursor-pointer"
               >
                 Open Full Book
               </button>

@@ -15,7 +15,9 @@ import {
   ArrowRight,
   Info
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { BookChapter } from '../types';
+import { SmartNotesPDFView } from './SmartNotesPDFView';
 
 interface PDFRendererProps {
   chapter: BookChapter;
@@ -64,16 +66,16 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
     : 'bg-amber-950/25 border-amber-500/40 text-amber-200';
 
   const greenBoxBg = isSepia
-    ? 'bg-[#eaf5ee] border-emerald-500/40 text-emerald-950'
+    ? 'bg-[#eaf5ee] border-blue-500/40 text-blue-950'
     : isLight
-    ? 'bg-emerald-50/90 border-emerald-300 text-emerald-900'
-    : 'bg-emerald-950/25 border-emerald-500/40 text-emerald-200';
+    ? 'bg-blue-50/90 border-blue-300 text-blue-900'
+    : 'bg-blue-950/25 border-blue-500/40 text-blue-200';
 
   // Render Page Header
   const renderPageHeader = (pageNumber: number, customSub?: string) => (
     <div className="flex items-center justify-between pb-3 mb-6 border-b border-inherit text-xs opacity-70 font-semibold select-none">
       <span className="flex items-center gap-1.5">
-        <span className="font-bold uppercase tracking-wider text-emerald-500">ICAP ECS Master</span>
+        <span className="font-bold uppercase tracking-wider text-blue-500">ICAP ECS Master</span>
         <span>•</span>
         <span>{customSub || 'Core Theoretical Notes & Solved Examples'}</span>
       </span>
@@ -116,7 +118,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
       {(solution || reason) && (
         <div className={`p-3.5 rounded-xl border ${solvedInnerBg} text-xs space-y-1 mt-2`}>
           {solution && (
-            <div className="font-bold text-emerald-600 flex items-center gap-1">
+            <div className="font-bold text-blue-600 flex items-center gap-1">
               <span>Solution:</span>
               <span className="text-inherit">{solution}</span>
             </div>
@@ -134,7 +136,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
   // Render Teacher / Tip Box (Yellow/Amber or Green exactly like PDF)
   const renderTipBox = (title: string, content: string, color: 'amber' | 'green' = 'amber') => (
-    <div className={`p-4 rounded-xl border-l-4 ${color === 'amber' ? 'border-l-amber-500 ' + tipBoxBg : 'border-l-emerald-500 ' + greenBoxBg} text-xs space-y-1 shadow-xs`}>
+    <div className={`p-4 rounded-xl border-l-4 ${color === 'amber' ? 'border-l-amber-500 ' + tipBoxBg : 'border-l-blue-500 ' + greenBoxBg} text-xs space-y-1 shadow-xs`}>
       <span className="font-bold uppercase tracking-wider flex items-center gap-1.5">
         <Lightbulb className="w-3.5 h-3.5 shrink-0" /> {title}
       </span>
@@ -147,9 +149,9 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
     <div className="space-y-12 select-text font-sans">
 
       {/* =========================================================
-          CHAPTER 1: GRAMMAR FOUNDATION
+          CHAPTER 1: GRAMMAR FOUNDATION (Official Book)
           ========================================================= */}
-      {chapter.number === 1 && (
+      {chapter.id.startsWith('ecs-ch-') && chapter.number === 1 && (
         <div className="space-y-10">
           
           {/* Document Overview Section Box (Page 1 in PDF) */}
@@ -158,7 +160,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             
             <div className="p-6 rounded-2xl bg-[#0e2746] text-white space-y-3 shadow-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-500/30">
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-blue-400 bg-blue-950/60 px-2.5 py-0.5 rounded border border-blue-500/30">
                   CA JOURNEY
                 </span>
                 <span className="text-xs text-slate-300">Official Study Notes</span>
@@ -180,7 +182,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
               </p>
               <ul className="space-y-2 pt-2 border-t border-inherit">
                 <li className="flex items-start gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                   <span><strong>Chapter 1: Grammar Foundation</strong> – Detailed coverage of parts of speech, 12 verb tenses, modal verbs, conditionals, passive voice, reported speech, relative clauses, articles, gerunds/infinitives, comparatives, subjunctive, and inversion.</span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -205,7 +207,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             <div className="p-4 rounded-2xl bg-[#14284b] text-white flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-blue-400 uppercase">
                   CHAPTER 1: GRAMMAR FOUNDATION
                 </span>
                 <h3 className="text-lg font-bold text-white font-display">Core Theoretical Notes & Solved Examples</h3>
@@ -378,13 +380,13 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </thead>
                   <tbody className="divide-y divide-inherit">
                     <tr>
-                      <td className="p-3 font-bold text-emerald-500">Simple Present</td>
+                      <td className="p-3 font-bold text-blue-500">Simple Present</td>
                       <td className="p-3 font-mono text-[11px]">V (base) / V+s (he/she/it)</td>
                       <td className="p-3 italic text-slate-400">always, usually, every day, often, generally</td>
                       <td className="p-3">Habits, general truths, routines.<br/><span className="text-[11px] opacity-80 font-medium">"The company operates globally."</span></td>
                     </tr>
                     <tr className={tableAltRowBg}>
-                      <td className="p-3 font-bold text-emerald-500">Present Continuous</td>
+                      <td className="p-3 font-bold text-blue-500">Present Continuous</td>
                       <td className="p-3 font-mono text-[11px]">am/is/are + V-ing</td>
                       <td className="p-3 italic text-slate-400">now, currently, at present, right now</td>
                       <td className="p-3">Actions happening right now or temporary situations.<br/><span className="text-[11px] opacity-80 font-medium">"They are conducting an audit."</span></td>
@@ -493,7 +495,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                     <tr className={tableAltRowBg}><td className="p-3 font-bold text-blue-500">could</td><td className="p-3">Past ability, polite request, tentative possibility</td><td className="p-3 italic">"Could you please forward the financial statement?"</td></tr>
                     <tr><td className="p-3 font-bold text-rose-500">must</td><td className="p-3">Strong internal obligation, logical certainty / deduction</td><td className="p-3 italic">"You must wear protective gear." / "He must be at work; his car is outside."</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-bold text-rose-500">have to / need to</td><td className="p-3">External obligation (rules/laws), necessity</td><td className="p-3 italic">"We have to submit the tax returns by midnight."</td></tr>
-                    <tr><td className="p-3 font-bold text-emerald-500">should / ought to</td><td className="p-3">Advice, recommendation, expectation</td><td className="p-3 italic">"You should review the contract terms carefully."</td></tr>
+                    <tr><td className="p-3 font-bold text-blue-500">should / ought to</td><td className="p-3">Advice, recommendation, expectation</td><td className="p-3 italic">"You should review the contract terms carefully."</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-bold text-amber-500">may / might</td><td className="p-3">Formal permission (may), possibility (may=50%, might=30%)</td><td className="p-3 italic">"The proposal may be approved next week."</td></tr>
                     <tr><td className="p-3 font-bold text-slate-400">used to</td><td className="p-3">Past habit or state that is no longer true</td><td className="p-3 italic">"The firm used to operate from a smaller office."</td></tr>
                   </tbody>
@@ -501,7 +503,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
               </div>
 
               <div className="pt-3 space-y-3">
-                <h4 className="text-sm font-bold text-emerald-500">Modal Perfect Structure (Modal + have + V3)</h4>
+                <h4 className="text-sm font-bold text-blue-500">Modal Perfect Structure (Modal + have + V3)</h4>
                 <div className="overflow-x-auto rounded-xl border border-inherit">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
@@ -512,7 +514,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-inherit">
-                      <tr><td className="p-3 font-mono font-bold text-emerald-500">must have + V3</td><td className="p-3">Certain logical deduction about a past event</td><td className="p-3 italic">"She must have left early; her desk is clear."</td></tr>
+                      <tr><td className="p-3 font-mono font-bold text-blue-500">must have + V3</td><td className="p-3">Certain logical deduction about a past event</td><td className="p-3 italic">"She must have left early; her desk is clear."</td></tr>
                       <tr className={tableAltRowBg}><td className="p-3 font-mono font-bold text-rose-500">can't have + V3</td><td className="p-3">Logical impossibility about a past event</td><td className="p-3 italic">"He can't have failed; he scored 98%."</td></tr>
                       <tr><td className="p-3 font-mono font-bold text-amber-500">might / may have + V3</td><td className="p-3">Uncertain past possibility</td><td className="p-3 italic">"They might have missed the flight connection."</td></tr>
                       <tr className={tableAltRowBg}><td className="p-3 font-mono font-bold text-cyan-500">should have + V3</td><td className="p-3">Past regret or unfulfilled obligation / advice</td><td className="p-3 italic">"You should have informed the team earlier."</td></tr>
@@ -584,7 +586,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                 1.5 Passive Voice Formations
               </h3>
               <p className="text-xs sm:text-sm opacity-90 leading-relaxed">
-                The passive voice is used when the focus is on the action or receiver, rather than the agent. Formula: <code className="font-mono bg-black/10 px-1.5 py-0.5 rounded text-emerald-500 font-bold">be (in target tense) + past participle (V3)</code>.
+                The passive voice is used when the focus is on the action or receiver, rather than the agent. Formula: <code className="font-mono bg-black/10 px-1.5 py-0.5 rounded text-blue-500 font-bold">be (in target tense) + past participle (V3)</code>.
               </p>
 
               <div className="overflow-x-auto rounded-xl border border-inherit">
@@ -597,8 +599,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-inherit">
-                    <tr><td className="p-3 font-semibold">Simple Present</td><td className="p-3 italic">"They update the records daily."</td><td className="p-3 font-bold text-emerald-500">"The records are updated daily."</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-3 font-semibold">Present Continuous</td><td className="p-3 italic">"The firm is preparing the report."</td><td className="p-3 font-bold text-emerald-500">"The report is being prepared."</td></tr>
+                    <tr><td className="p-3 font-semibold">Simple Present</td><td className="p-3 italic">"They update the records daily."</td><td className="p-3 font-bold text-blue-500">"The records are updated daily."</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-3 font-semibold">Present Continuous</td><td className="p-3 italic">"The firm is preparing the report."</td><td className="p-3 font-bold text-blue-500">"The report is being prepared."</td></tr>
                     <tr><td className="p-3 font-semibold">Simple Past</td><td className="p-3 italic">"The auditor found an error."</td><td className="p-3 font-bold text-cyan-500">"An error was found by the auditor."</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-semibold">Present Perfect</td><td className="p-3 italic">"They have cancelled the meeting."</td><td className="p-3 font-bold text-amber-500">"The meeting has been cancelled."</td></tr>
                     <tr><td className="p-3 font-semibold">Future Simple</td><td className="p-3 italic">"They will announce the decision."</td><td className="p-3 font-bold text-blue-500">"The decision will be announced."</td></tr>
@@ -638,8 +640,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-inherit">
-                    <tr><td className="p-3">Present Simple ("I work")</td><td className="p-3 font-bold text-emerald-500">Past Simple ("She said she worked")</td><td className="p-3 font-mono text-[11px]">now → then / at that moment</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-3">Present Continuous ("I am working")</td><td className="p-3 font-bold text-emerald-500">Past Continuous ("He said he was working")</td><td className="p-3 font-mono text-[11px]">today → that day</td></tr>
+                    <tr><td className="p-3">Present Simple ("I work")</td><td className="p-3 font-bold text-blue-500">Past Simple ("She said she worked")</td><td className="p-3 font-mono text-[11px]">now → then / at that moment</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-3">Present Continuous ("I am working")</td><td className="p-3 font-bold text-blue-500">Past Continuous ("He said he was working")</td><td className="p-3 font-mono text-[11px]">today → that day</td></tr>
                     <tr><td className="p-3">Simple Past / Present Perfect</td><td className="p-3 font-bold text-cyan-500">Past Perfect ("They said they had finished")</td><td className="p-3 font-mono text-[11px]">tomorrow → the following day</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3">Will → Would</td><td className="p-3 font-bold text-amber-500">Can → Could</td><td className="p-3 font-mono text-[11px]">yesterday → the previous day</td></tr>
                     <tr><td className="p-3">May → Might</td><td className="p-3 font-bold text-rose-500">Must → Had to</td><td className="p-3 font-mono text-[11px]">here/this → there/that</td></tr>
@@ -659,7 +661,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             {/* Relative Clauses, Articles, Gerunds */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-inherit">
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-emerald-500 flex items-center gap-1.5">
+                <h4 className="text-sm font-bold text-blue-500 flex items-center gap-1.5">
                   <Bookmark className="w-4 h-4" /> 1.7 Relative Clauses
                 </h4>
                 <ul className="text-xs space-y-2 leading-relaxed">
@@ -718,7 +720,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             <div className="p-4 rounded-2xl bg-[#14284b] text-white flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-blue-400 uppercase">
                   C1 ADVANCED GRAMMAR
                 </span>
                 <h3 className="text-lg font-bold text-white font-display">1. Subjunctive & 2. Inversion Rules</h3>
@@ -728,7 +730,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Subjunctive */}
               <div className="p-5 rounded-2xl border border-inherit space-y-3">
-                <h4 className="text-sm font-bold text-emerald-500">1. Subjunctive (Very Common at C1)</h4>
+                <h4 className="text-sm font-bold text-blue-500">1. Subjunctive (Very Common at C1)</h4>
                 <p className="text-xs opacity-90 leading-relaxed">
                   Refers to a verb form or mood used to express doubt, possibility, necessity, importance, wishes, or hypothetical situations.
                 </p>
@@ -798,9 +800,9 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
       )}
 
       {/* =========================================================
-          CHAPTER 2: VOCABULARY MASTERY
+          CHAPTER 2: VOCABULARY MASTERY (Official Book)
           ========================================================= */}
-      {chapter.number === 2 && (
+      {chapter.id.startsWith('ecs-ch-') && chapter.number === 2 && (
         <div className="space-y-10">
           
           {/* Chapter 2 Overview & Roadmap Table (Page 8 in PDF) */}
@@ -809,7 +811,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             <div className="p-4 rounded-2xl bg-[#14284b] text-white flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-blue-400 uppercase">
                   CHAPTER 2: VOCABULARY MASTERY
                 </span>
                 <h3 className="text-lg font-bold text-white font-display">Core Theoretical Notes & Solved Examples</h3>
@@ -897,8 +899,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-inherit">
-                    <tr><td className="p-3 font-bold text-emerald-500">un- / dis- / in-</td><td className="p-3">Not, opposite of</td><td className="p-3 font-mono text-[11px]">unclear, disagree, incomplete, irresponsible, illegal</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-3 font-bold text-emerald-500">re- / pre-</td><td className="p-3">Again / Before</td><td className="p-3 font-mono text-[11px]">rebuild, review, preview, precaution, predict</td></tr>
+                    <tr><td className="p-3 font-bold text-blue-500">un- / dis- / in-</td><td className="p-3">Not, opposite of</td><td className="p-3 font-mono text-[11px]">unclear, disagree, incomplete, irresponsible, illegal</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-3 font-bold text-blue-500">re- / pre-</td><td className="p-3">Again / Before</td><td className="p-3 font-mono text-[11px]">rebuild, review, preview, precaution, predict</td></tr>
                     <tr><td className="p-3 font-bold text-amber-500">over- / under-</td><td className="p-3">Too much / Too little</td><td className="p-3 font-mono text-[11px]">overestimate, overcrowded, underestimate, underpaid</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-bold text-cyan-500">-tion / -ment (Noun)</td><td className="p-3">Action, state, or result</td><td className="p-3 font-mono text-[11px]">education, decision, development, achievement</td></tr>
                     <tr><td className="p-3 font-bold text-blue-500">-ful / -less (Adj)</td><td className="p-3">With / Without</td><td className="p-3 font-mono text-[11px]">careful, powerful, careless, hopeless, harmless</td></tr>
@@ -908,7 +910,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
               </div>
 
               <div className="pt-3 space-y-3">
-                <h4 className="text-sm font-bold text-emerald-500">Selected Word Family Matrix</h4>
+                <h4 className="text-sm font-bold text-blue-500">Selected Word Family Matrix</h4>
                 <div className="overflow-x-auto rounded-xl border border-inherit">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
@@ -944,7 +946,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. Work & Careers */}
                 <div className="p-4 rounded-xl border border-inherit space-y-2">
-                  <span className="font-bold text-emerald-500 text-xs uppercase tracking-wider block">1. Work & Careers</span>
+                  <span className="font-bold text-blue-500 text-xs uppercase tracking-wider block">1. Work & Careers</span>
                   <div className="space-y-1.5 text-xs">
                     <div><strong>Redundant:</strong> No longer needed; job role eliminated. <em className="opacity-80 block text-[11px]">"He was made redundant after the merger."</em></div>
                     <div><strong>Appraisal:</strong> Formal evaluation of employee performance. <em className="opacity-80 block text-[11px]">"Annual performance appraisals start next month."</em></div>
@@ -1000,7 +1002,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-inherit">
-                    <tr><td className="p-3 font-mono font-bold text-emerald-500">MAKE</td><td className="p-3">a decision, a mistake, progress, an effort, a profit, a complaint, an exception, a phone call</td></tr>
+                    <tr><td className="p-3 font-mono font-bold text-blue-500">MAKE</td><td className="p-3">a decision, a mistake, progress, an effort, a profit, a complaint, an exception, a phone call</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-mono font-bold text-blue-500">DO</td><td className="p-3">research, homework, business, a favour, damage, exercise, your best, harm</td></tr>
                     <tr><td className="p-3 font-mono font-bold text-amber-500">TAKE</td><td className="p-3">action, responsibility, part in, a risk, notes, advantage of, into account, place</td></tr>
                     <tr className={tableAltRowBg}><td className="p-3 font-mono font-bold text-purple-500">GET</td><td className="p-3">permission, promoted, fired, lost, in touch with, rid of, used to</td></tr>
@@ -1012,7 +1014,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             {/* Confused Word Pairs & Smart Memory Tricks */}
             <div className="p-5 rounded-2xl border border-inherit space-y-4">
-              <h4 className="text-sm font-bold text-emerald-500">Frequently Tested Word Pairs & Smart Tricks</h4>
+              <h4 className="text-sm font-bold text-blue-500">Frequently Tested Word Pairs & Smart Tricks</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-black/10 rounded-xl"><strong>1. Affect vs Effect:</strong> Affect (verb - to influence) | Effect (noun - result).</div>
                 <div className="p-3 bg-black/10 rounded-xl"><strong>2. Advice vs Advise:</strong> Advice (noun - suggestion) | Advise (verb - to suggest).</div>
@@ -1034,9 +1036,9 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
       )}
 
       {/* =========================================================
-          CHAPTER 3: READING SKILLS & STRATEGIES
+          CHAPTER 3: READING SKILLS & STRATEGIES (Official Book)
           ========================================================= */}
-      {chapter.number === 3 && (
+      {chapter.id.startsWith('ecs-ch-') && chapter.number === 3 && (
         <div className="space-y-10">
           
           {/* Chapter 3 Overview & Roadmap Table (Page 11 in PDF) */}
@@ -1045,7 +1047,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             <div className="p-4 rounded-2xl bg-[#14284b] text-white flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-blue-400 uppercase">
                   CHAPTER 3: READING SKILLS & STRATEGIES
                 </span>
                 <h3 className="text-lg font-bold text-white font-display">Core Theoretical Notes & Solved Examples</h3>
@@ -1118,7 +1120,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-[#0f766e] text-white">
                 <span className="text-xs font-mono font-bold uppercase">3.2 PART 2 – TEXT COHESION (2 ordering tasks, 6 sentences each)</span>
-                <p className="text-xs text-teal-100 mt-1">You receive 6 mixed-up sentences. The first sentence is given. You must put the other 5 sentences in the correct logical order.</p>
+                <p className="text-xs text-cyan-100 mt-1">You receive 6 mixed-up sentences. The first sentence is given. You must put the other 5 sentences in the correct logical order.</p>
               </div>
 
               {/* Cohesion Clues Box */}
@@ -1154,8 +1156,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </table>
                 </div>
 
-                <div className={`p-4 rounded-xl border-l-4 border-l-emerald-500 ${greenBoxBg} text-xs space-y-1`}>
-                  <span className="font-bold uppercase text-emerald-600 block">■ Answer & Explanation</span>
+                <div className={`p-4 rounded-xl border-l-4 border-l-blue-500 ${greenBoxBg} text-xs space-y-1`}>
+                  <span className="font-bold uppercase text-blue-600 block">■ Answer & Explanation</span>
                   <p className="font-bold">Correct order: 1 → D → B → A → E → C</p>
                   <p className="opacity-90">Logic: 1 (general claim) → D (what social media started as / how it grew) → B (global growth) → A (transition: not everyone agrees) → E (specific criticisms) → C (conclusion: despite issues, still important)</p>
                 </div>
@@ -1179,8 +1181,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </table>
                 </div>
 
-                <div className={`p-4 rounded-xl border-l-4 border-l-emerald-500 ${greenBoxBg} text-xs space-y-1`}>
-                  <span className="font-bold uppercase text-emerald-600 block">■ Answer & Explanation</span>
+                <div className={`p-4 rounded-xl border-l-4 border-l-blue-500 ${greenBoxBg} text-xs space-y-1`}>
+                  <span className="font-bold uppercase text-blue-600 block">■ Answer & Explanation</span>
                   <p className="font-bold">Correct order: 1 → E → B → D → A → C</p>
                   <p className="opacity-90">Logic: 1 (general intro) → E (benefits for the individual) → B (result for the individual) → D (further personal benefit: sense of purpose) → A (transition to wider benefits) → C (benefits for society)</p>
                 </div>
@@ -1196,7 +1198,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-[#0f766e] text-white">
                 <span className="text-xs font-mono font-bold uppercase">3.3 PART 3 – OPINION MATCHING (4 opinions, 7 statements)</span>
-                <p className="text-xs text-teal-100 mt-1">Read four short texts in which different people express their opinions on the same topic. Match each statement to the correct person.</p>
+                <p className="text-xs text-cyan-100 mt-1">Read four short texts in which different people express their opinions on the same topic. Match each statement to the correct person.</p>
               </div>
 
               {/* 4 Opinions Table */}
@@ -1211,8 +1213,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                       <td className="p-3 font-bold text-amber-500 w-24 text-center">MARCUS</td>
                       <td className="p-3 leading-relaxed">Fast food has become a scapegoat for all of society's health problems. The real issue is portion control and individual responsibility. If someone chooses to eat a burger every day, that is their choice. Governments should not interfere with personal dietary decisions. Education is useful, but ultimately, people are responsible for their own health.</td>
                     </tr>
-                    <tr className="bg-emerald-500/10">
-                      <td className="p-3 font-bold text-emerald-500 w-24 text-center">PRIYA</td>
+                    <tr className="bg-blue-500/10">
+                      <td className="p-3 font-bold text-blue-500 w-24 text-center">PRIYA</td>
                       <td className="p-3 leading-relaxed">What concerns me most about fast food is not the food itself but the industry behind it. The marketing of unhealthy products directly to children is deeply unethical. Children cannot make informed decisions about nutrition, yet they are bombarded with advertisements designed to create lifelong customers. This should be regulated far more strictly.</td>
                     </tr>
                     <tr className="bg-purple-500/10">
@@ -1229,12 +1231,12 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                 <div className="overflow-x-auto rounded-xl border border-inherit">
                   <table className="w-full text-xs text-left border-collapse">
                     <tbody className="divide-y divide-inherit">
-                      <tr><td className="p-2.5 font-bold w-8 text-center">1.</td><td className="p-2.5">The fast food sector is making genuine efforts to offer healthier products.</td><td className="p-2.5 text-right font-mono font-bold text-emerald-500">Leon (L)</td></tr>
+                      <tr><td className="p-2.5 font-bold w-8 text-center">1.</td><td className="p-2.5">The fast food sector is making genuine efforts to offer healthier products.</td><td className="p-2.5 text-right font-mono font-bold text-blue-500">Leon (L)</td></tr>
                       <tr className={tableAltRowBg}><td className="p-2.5 font-bold w-8 text-center">2.</td><td className="p-2.5">Repeated consumption of fast food poses a serious threat to people's health.</td><td className="p-2.5 text-right font-mono font-bold text-blue-500">Karen (K)</td></tr>
-                      <tr><td className="p-2.5 font-bold w-8 text-center">3.</td><td className="p-2.5">It is wrong that fast food companies target young consumers with advertising.</td><td className="p-2.5 text-right font-mono font-bold text-emerald-500">Priya (P)</td></tr>
+                      <tr><td className="p-2.5 font-bold w-8 text-center">3.</td><td className="p-2.5">It is wrong that fast food companies target young consumers with advertising.</td><td className="p-2.5 text-right font-mono font-bold text-blue-500">Priya (P)</td></tr>
                       <tr className={tableAltRowBg}><td className="p-2.5 font-bold w-8 text-center">4.</td><td className="p-2.5">People should take personal responsibility for what they eat rather than blaming the industry.</td><td className="p-2.5 text-right font-mono font-bold text-amber-500">Marcus (M)</td></tr>
                       <tr><td className="p-2.5 font-bold w-8 text-center">5.</td><td className="p-2.5">Better public awareness of nutritional risks is needed.</td><td className="p-2.5 text-right font-mono font-bold text-blue-500">Karen (K)</td></tr>
-                      <tr className={tableAltRowBg}><td className="p-2.5 font-bold w-8 text-center">6.</td><td className="p-2.5">The government should introduce tighter rules on how fast food is marketed to children.</td><td className="p-2.5 text-right font-mono font-bold text-emerald-500">Priya (P)</td></tr>
+                      <tr className={tableAltRowBg}><td className="p-2.5 font-bold w-8 text-center">6.</td><td className="p-2.5">The government should introduce tighter rules on how fast food is marketed to children.</td><td className="p-2.5 text-right font-mono font-bold text-blue-500">Priya (P)</td></tr>
                       <tr><td className="p-2.5 font-bold w-8 text-center">7.</td><td className="p-2.5">The fast food sector is unfairly blamed for broader health issues in society.</td><td className="p-2.5 text-right font-mono font-bold text-amber-500">Marcus (M)</td></tr>
                     </tbody>
                   </table>
@@ -1250,7 +1252,7 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-[#0f766e] text-white">
                 <span className="text-xs font-mono font-bold uppercase">3.4 PART 4 – LONG TEXT AND HEADINGS (~750 words, 8 headings, match 7)</span>
-                <p className="text-xs text-teal-100 mt-1">Read the long article divided into 7 paragraphs. Match 7 of the headings to the paragraphs. One heading is a distractor.</p>
+                <p className="text-xs text-cyan-100 mt-1">Read the long article divided into 7 paragraphs. Match 7 of the headings to the paragraphs. One heading is a distractor.</p>
               </div>
 
               {/* 6-Step Strategy Box */}
@@ -1262,17 +1264,17 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
               {/* Full Article 1: Artificial Intelligence in Education */}
               <div className="space-y-3 pt-2">
-                <h4 className="text-sm font-bold text-emerald-500">Practice Text 1: Artificial Intelligence in Education</h4>
+                <h4 className="text-sm font-bold text-blue-500">Practice Text 1: Artificial Intelligence in Education</h4>
                 <div className="overflow-x-auto rounded-xl border border-inherit">
                   <table className="w-full text-xs text-left border-collapse">
                     <tbody className="divide-y divide-inherit">
-                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 1</td><td className="p-3">Artificial intelligence is gradually making its presence felt in schools and universities across the world. From automated marking systems and intelligent tutoring programmes to virtual assistants and adaptive learning platforms, AI technologies are increasingly being integrated into the everyday experience of both students and educators. What was once the subject of science fiction is now a practical reality in many classrooms.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: iii. How AI is already being used in classrooms</span></td></tr>
-                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 2</td><td className="p-3">One of the most promising applications of AI in education is its ability to adapt to the individual needs of each learner. Unlike a single teacher managing thirty students, an AI system can simultaneously track the progress of every student, identify areas of weakness, and adjust the difficulty and content of exercises accordingly. This means that a student who struggles with fractions can receive additional support while a more advanced student is challenged with higher-level problems, all without disrupting the rest of the class.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: ii. Personalised learning for individual students</span></td></tr>
-                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 3</td><td className="p-3">Assessment is another area where AI is proving its value. Traditionally, teachers spend enormous amounts of time marking assignments, writing feedback, and recording results. AI tools can now perform these tasks in a fraction of the time, providing students with immediate, detailed feedback on their work. This not only reduces the administrative burden on teachers but also allows students to correct their mistakes quickly, which research suggests significantly improves retention and understanding.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: vii. Improving assessment and feedback</span></td></tr>
-                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 4</td><td className="p-3">Despite the excitement surrounding AI in education, some educators are cautious. They argue that teaching is fundamentally a human activity that depends on empathy, emotional intelligence, and the ability to read a room. A machine, however sophisticated, cannot replace the bond that forms between a teacher and a student, nor the motivational power of genuine human encouragement. If schools over-rely on AI, they risk producing students who are technically proficient but emotionally disconnected from learning.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: vi. The risk of reducing human connection in teaching</span></td></tr>
-                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 5</td><td className="p-3">There are also important questions to be asked about equity. Not all schools have equal access to technology, and not all students have reliable internet access at home. If wealthier schools can afford cutting-edge AI tools while underfunded schools cannot, the gap in educational outcomes between privileged and disadvantaged students may actually widen. Policymakers must ensure that the introduction of AI in education does not deepen existing inequalities.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: i. Concerns about fairness and access</span></td></tr>
-                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 6</td><td className="p-3">Many proponents of AI in education are keen to emphasise that the goal is not to replace teachers but to empower them. By taking over time-consuming administrative tasks, AI can free teachers to focus on what they do best: inspiring students, facilitating discussion, and providing mentorship. In this view, AI serves as a powerful assistant rather than a competitor, allowing educators to dedicate more time and energy to the interpersonal aspects of their work.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: viii. Support for teachers, not replacement</span></td></tr>
-                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 7</td><td className="p-3">Perhaps most importantly, AI literacy is fast becoming an essential skill for the modern workforce. Students who leave school without a basic understanding of how artificial intelligence works will be at a significant disadvantage in an increasingly automated job market. Schools therefore have a responsibility not only to use AI as a teaching tool but to teach about AI itself, ensuring that graduates are prepared to navigate and contribute to a world shaped by these technologies.<br/><span className="text-emerald-500 font-bold mt-1 block">→ Matched Heading: v. Preparing students for an AI-driven world</span></td></tr>
+                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 1</td><td className="p-3">Artificial intelligence is gradually making its presence felt in schools and universities across the world. From automated marking systems and intelligent tutoring programmes to virtual assistants and adaptive learning platforms, AI technologies are increasingly being integrated into the everyday experience of both students and educators. What was once the subject of science fiction is now a practical reality in many classrooms.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: iii. How AI is already being used in classrooms</span></td></tr>
+                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 2</td><td className="p-3">One of the most promising applications of AI in education is its ability to adapt to the individual needs of each learner. Unlike a single teacher managing thirty students, an AI system can simultaneously track the progress of every student, identify areas of weakness, and adjust the difficulty and content of exercises accordingly. This means that a student who struggles with fractions can receive additional support while a more advanced student is challenged with higher-level problems, all without disrupting the rest of the class.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: ii. Personalised learning for individual students</span></td></tr>
+                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 3</td><td className="p-3">Assessment is another area where AI is proving its value. Traditionally, teachers spend enormous amounts of time marking assignments, writing feedback, and recording results. AI tools can now perform these tasks in a fraction of the time, providing students with immediate, detailed feedback on their work. This not only reduces the administrative burden on teachers but also allows students to correct their mistakes quickly, which research suggests significantly improves retention and understanding.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: vii. Improving assessment and feedback</span></td></tr>
+                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 4</td><td className="p-3">Despite the excitement surrounding AI in education, some educators are cautious. They argue that teaching is fundamentally a human activity that depends on empathy, emotional intelligence, and the ability to read a room. A machine, however sophisticated, cannot replace the bond that forms between a teacher and a student, nor the motivational power of genuine human encouragement. If schools over-rely on AI, they risk producing students who are technically proficient but emotionally disconnected from learning.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: vi. The risk of reducing human connection in teaching</span></td></tr>
+                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 5</td><td className="p-3">There are also important questions to be asked about equity. Not all schools have equal access to technology, and not all students have reliable internet access at home. If wealthier schools can afford cutting-edge AI tools while underfunded schools cannot, the gap in educational outcomes between privileged and disadvantaged students may actually widen. Policymakers must ensure that the introduction of AI in education does not deepen existing inequalities.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: i. Concerns about fairness and access</span></td></tr>
+                      <tr className={tableAltRowBg}><td className="p-3 font-bold w-28 align-top">Paragraph 6</td><td className="p-3">Many proponents of AI in education are keen to emphasise that the goal is not to replace teachers but to empower them. By taking over time-consuming administrative tasks, AI can free teachers to focus on what they do best: inspiring students, facilitating discussion, and providing mentorship. In this view, AI serves as a powerful assistant rather than a competitor, allowing educators to dedicate more time and energy to the interpersonal aspects of their work.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: viii. Support for teachers, not replacement</span></td></tr>
+                      <tr><td className="p-3 font-bold w-28 align-top">Paragraph 7</td><td className="p-3">Perhaps most importantly, AI literacy is fast becoming an essential skill for the modern workforce. Students who leave school without a basic understanding of how artificial intelligence works will be at a significant disadvantage in an increasingly automated job market. Schools therefore have a responsibility not only to use AI as a teaching tool but to teach about AI itself, ensuring that graduates are prepared to navigate and contribute to a world shaped by these technologies.<br/><span className="text-blue-500 font-bold mt-1 block">→ Matched Heading: v. Preparing students for an AI-driven world</span></td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -1288,9 +1290,9 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
       )}
 
       {/* =========================================================
-          CHAPTER 4: WRITING SKILLS & MODELS
+          CHAPTER 4: WRITING SKILLS & MODELS (Official Book)
           ========================================================= */}
-      {chapter.number === 4 && (
+      {chapter.id.startsWith('ecs-ch-') && chapter.number === 4 && (
         <div className="space-y-10">
           
           {/* Chapter 4 Overview & Roadmap Table (Page 12 & 18 in PDF) */}
@@ -1366,12 +1368,12 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
               <div className="overflow-x-auto rounded-xl border border-inherit">
                 <table className="w-full text-xs text-left border-collapse">
                   <tbody className="divide-y divide-inherit">
-                    <tr className="bg-emerald-500/10"><td className="p-2.5 font-bold text-emerald-600 w-1/4">SALUTATION</td><td className="p-2.5">Hi [name], | Hey [name]! | Dear [name],</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-emerald-600">OPENING</td><td className="p-2.5">How are you? | I hope you're well! | It was great to hear from you! | Guess what! | You won't believe this, but...</td></tr>
-                    <tr><td className="p-2.5 font-bold text-emerald-600">BODY PHRASES</td><td className="p-2.5">I just wanted to let you know that... | I thought you'd like to hear... | I can't believe that... | What do you think about...? | Have you heard that...?</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-emerald-600">MAKING SUGGESTIONS</td><td className="p-2.5">Why don't we...? | How about...? | We should definitely... | Let's...! | Maybe we could...?</td></tr>
-                    <tr><td className="p-2.5 font-bold text-emerald-600">EXPRESSING FEELINGS</td><td className="p-2.5">I'm so excited about... | I was really surprised/shocked/disappointed that... | I can't wait to... | I'm not sure about...</td></tr>
-                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-emerald-600">CLOSING & SIGN-OFF</td><td className="p-2.5">Let me know what you think! | Write back soon! | Talk soon! | Best wishes, | Cheers, | See you soon,</td></tr>
+                    <tr className="bg-blue-500/10"><td className="p-2.5 font-bold text-blue-600 w-1/4">SALUTATION</td><td className="p-2.5">Hi [name], | Hey [name]! | Dear [name],</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-blue-600">OPENING</td><td className="p-2.5">How are you? | I hope you're well! | It was great to hear from you! | Guess what! | You won't believe this, but...</td></tr>
+                    <tr><td className="p-2.5 font-bold text-blue-600">BODY PHRASES</td><td className="p-2.5">I just wanted to let you know that... | I thought you'd like to hear... | I can't believe that... | What do you think about...? | Have you heard that...?</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-blue-600">MAKING SUGGESTIONS</td><td className="p-2.5">Why don't we...? | How about...? | We should definitely... | Let's...! | Maybe we could...?</td></tr>
+                    <tr><td className="p-2.5 font-bold text-blue-600">EXPRESSING FEELINGS</td><td className="p-2.5">I'm so excited about... | I was really surprised/shocked/disappointed that... | I can't wait to... | I'm not sure about...</td></tr>
+                    <tr className={tableAltRowBg}><td className="p-2.5 font-bold text-blue-600">CLOSING & SIGN-OFF</td><td className="p-2.5">Let me know what you think! | Write back soon! | Talk soon! | Best wishes, | Cheers, | See you soon,</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1384,13 +1386,13 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
 
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-[#14284b] text-white">
-                <span className="text-xs font-mono font-bold uppercase text-emerald-400">PART 3: THREE WRITTEN RESPONSES TO QUESTIONS (30-40 words each)</span>
+                <span className="text-xs font-mono font-bold uppercase text-blue-400">PART 3: THREE WRITTEN RESPONSES TO QUESTIONS (30-40 words each)</span>
                 <p className="text-xs text-slate-300 mt-1">Simulates an online club or group forum. Three members ask you questions one after another.</p>
               </div>
 
               {/* DAR Formula Box */}
-              <div className={`p-5 rounded-2xl border-l-4 border-l-emerald-500 ${greenBoxBg} space-y-2 text-xs`}>
-                <span className="font-bold uppercase tracking-wider text-emerald-600 block">■ The Perfect Answer Formula — DAR</span>
+              <div className={`p-5 rounded-2xl border-l-4 border-l-blue-500 ${greenBoxBg} space-y-2 text-xs`}>
+                <span className="font-bold uppercase tracking-wider text-blue-600 block">■ The Perfect Answer Formula — DAR</span>
                 <ul className="space-y-1">
                   <li><strong>• D — Direct response:</strong> Answer the question in the first sentence.</li>
                   <li><strong>• A — Add detail:</strong> Give a reason, an example, or a personal touch.</li>
@@ -1451,8 +1453,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </div>
 
                   {/* Formal */}
-                  <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-2">
-                    <span className="font-bold text-emerald-400 block uppercase">Formal Email to Council Manager (141 words)</span>
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs space-y-2">
+                    <span className="font-bold text-blue-400 block uppercase">Formal Email to Council Manager (141 words)</span>
                     <p className="leading-relaxed italic">
                       "Dear Council Manager,<br/><br/>
                       I am writing with reference to the recent announcement that the public park in our neighbourhood will be closed for a period of six months for renovation purposes. While I appreciate that updating the park's facilities is a worthwhile investment in our community, I am concerned about the significant impact this closure will have on local families, particularly those with young children.<br/><br/>
@@ -1485,8 +1487,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </div>
 
                   {/* Formal */}
-                  <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-2">
-                    <span className="font-bold text-emerald-400 block uppercase">Formal Email to HR Director (136 words)</span>
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs space-y-2">
+                    <span className="font-bold text-blue-400 block uppercase">Formal Email to HR Director (136 words)</span>
                     <p className="leading-relaxed italic">
                       "Dear HR Director,<br/><br/>
                       I am writing with reference to the recent announcement regarding the permanent closure of the company canteen and its replacement with a vending machine service. While I understand that cost pressures may have made this decision necessary, I am concerned about the effect this change will have on staff wellbeing and morale.<br/><br/>
@@ -1519,8 +1521,8 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
                   </div>
 
                   {/* Formal */}
-                  <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs space-y-2">
-                    <span className="font-bold text-emerald-400 block uppercase">Formal Email to Sky Airlines Customer Service (146 words)</span>
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs space-y-2">
+                    <span className="font-bold text-blue-400 block uppercase">Formal Email to Sky Airlines Customer Service (146 words)</span>
                     <p className="leading-relaxed italic">
                       "Dear Sir/Madam,<br/><br/>
                       I am writing with regard to flight SK-204 from Lahore to Istanbul, scheduled for next Friday (Booking Reference: SKY/9821). I have just been informed by email that this flight has been delayed by twenty-four hours.<br/><br/>
@@ -1540,6 +1542,19 @@ export const PDFDocumentView: React.FC<PDFRendererProps> = ({ chapter, theme }) 
         </div>
       )}
 
+      {/* Smart Notes Book: Custom professional PDF-like layout */}
+      {chapter.id.startsWith('smart-notes-') && (
+        <SmartNotesPDFView chapter={chapter} theme={theme} />
+      )}
+
+      {/* Fallback for any other custom chapters */}
+      {!chapter.id.startsWith('ecs-ch-') && !chapter.id.startsWith('smart-notes-') && (
+        <div className="prose max-w-none text-inherit">
+          <ReactMarkdown>{chapter.contentMarkdown}</ReactMarkdown>
+        </div>
+      )}
+
     </div>
   );
 };
+

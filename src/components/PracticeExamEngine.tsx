@@ -44,24 +44,42 @@ import {
 } from '../lib/examEngineService';
 import { generateAiWritingPart4 } from '../lib/aiTestGenerator';
 import { selectFreshPart4EmailTask, isPart4DefaultOrBanned } from '../data/expandedPart4EmailPool';
+import { select25GrammarQuestionsFromPdf, cleanArtifacts } from '../data/pdfGrammarPool';
+import { selectOfficialPdfVocabulary } from '../data/pdfVocabularyPool';
 import { recordQuestionsToStudentHistory } from '../lib/questionHistoryService';
+import { useTheme } from '../context/ThemeContext';
 
 export const PracticeExamEngine: React.FC = () => {
+  const { theme } = useTheme();
   // Test Sets state initialized with a dynamic syllabus-aligned set
   const [testSets, setTestSets] = useState<AptisTestSet[]>(() => {
     const initialDyn = generateDynamicTestSet({ customTitle: 'Aptis ICAP Practice Exam #1' });
-    // Sanitize any static sets to guarantee default banned questions never appear
+    // Sanitize any static sets to guarantee grammar and vocabulary are strictly from official PDF
     const sanitizedSets = ALL_APTIS_TEST_SETS.map(set => {
-      if (isPart4DefaultOrBanned(set.writing.part4)) {
-        return {
-          ...set,
+      let updated = { ...set };
+      const officialVocab = selectOfficialPdfVocabulary();
+      updated = {
+        ...updated,
+        core: {
+          ...updated.core,
+          grammarQuestions: select25GrammarQuestionsFromPdf(new Set()),
+          vocabWordMatching: officialVocab.vocabWordMatching,
+          vocabDefinitions: officialVocab.vocabDefinitions,
+          vocabCollocations: officialVocab.vocabCollocations,
+          vocabSentenceCompletion: officialVocab.vocabSentenceCompletion,
+          vocabContextMatching: officialVocab.vocabContextMatching
+        }
+      };
+      if (isPart4DefaultOrBanned(updated.writing.part4)) {
+        updated = {
+          ...updated,
           writing: {
-            ...set.writing,
+            ...updated.writing,
             part4: selectFreshPart4EmailTask(new Set())
           }
         };
       }
-      return set;
+      return updated;
     });
     return [initialDyn.testSet, ...sanitizedSets];
   });
@@ -249,7 +267,28 @@ export const PracticeExamEngine: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
-  // Regenerate Part 4 (Emails) on the fly with a fresh, authentic ICAP ECS scenario
+  // Navigation between test parts (Core -> Reading -> Writing)
+  const handleNextPart = () => {
+    if (activeTab === 'core') {
+      setActiveTab('reading');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (activeTab === 'reading') {
+      setActiveTab('writing');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPart = () => {
+    if (activeTab === 'writing') {
+      setActiveTab('reading');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (activeTab === 'reading') {
+      setActiveTab('core');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Regenerate Part 4 (Emails) on the fly with a fresh, random topic strictly from the official PDF
   const handleRegeneratePart4 = async () => {
     setIsRegeneratingPart4(true);
     try {
@@ -258,7 +297,7 @@ export const PracticeExamEngine: React.FC = () => {
 
       let nextPart4 = aiTask;
       if (!nextPart4 || isPart4DefaultOrBanned(nextPart4)) {
-        // Fallback to fresh procedural ICAP scenario
+        // Fallback to fresh non-repeating scenario from official PDF topics
         const seen = new Set<string>();
         try {
           const raw = localStorage.getItem('icap_seen_part4_scenarios');
@@ -875,7 +914,7 @@ Respond ONLY with a JSON object matching this schema:
   // Generate Dynamic Aptis Test Set via AI models & verified procedural synthesis
   const handleGenerateDynamicSet = async () => {
     setIsGeneratingSet(true);
-    setGenerationNotice('Generating fresh ICAP ECS test set with AI & verified questions...');
+    setGenerationNotice('Generating fresh ICAP ECS test set with verified questions...');
 
     try {
       const dynamicResult = await generateAiEnrichedTestSet({
@@ -930,8 +969,8 @@ Respond ONLY with a JSON object matching this schema:
       
       {/* Dynamic Generation Notification Banner */}
       {generationNotice && (
-        <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-xs font-semibold shadow-lg animate-fade-in">
-          <Sparkles className="w-4 h-4 shrink-0 text-emerald-400" />
+        <div className="bg-blue-500/20 border border-blue-500/40 text-blue-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-xs font-semibold shadow-lg animate-fade-in">
+          <Sparkles className="w-4 h-4 shrink-0 text-blue-400" />
           <span>{generationNotice}</span>
         </div>
       )}
@@ -946,7 +985,7 @@ Respond ONLY with a JSON object matching this schema:
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   ICAP ECS • CA Journey
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
@@ -956,12 +995,12 @@ Respond ONLY with a JSON object matching this schema:
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 PRACTICE TEST
               </h1>
-              <h2 className="text-lg sm:text-xl font-bold text-emerald-400 mt-0.5">
+              <h2 className="text-lg sm:text-xl font-bold text-blue-400 mt-0.5">
                 English Communication Skills Course
               </h2>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold tracking-wide">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-bold tracking-wide">
+                  <Clock className="w-3.5 h-3.5 text-blue-400" />
                   <span>Full Exam: 1 Hour 50 Minutes</span>
                 </span>
                 <span className="text-xs text-slate-400 hidden sm:inline">Core (25m) + Reading (35m) + Writing (50m)</span>
@@ -976,10 +1015,10 @@ Respond ONLY with a JSON object matching this schema:
                   id="select-test-set"
                   value={selectedTestCategory}
                   onChange={(e) => handleSelectTestCategory(e.target.value)}
-                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer flex-1 sm:flex-initial"
+                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer flex-1 sm:flex-initial"
                 >
                   <option value="" disabled>Select Test...</option>
-                  <option value="full" className="font-bold text-emerald-400 bg-slate-900 py-1">⭐ Full Exam (1 Hour 50 Minutes) — All 3 Modules</option>
+                  <option value="full" className="font-bold text-blue-400 bg-slate-900 py-1">⭐ Full Exam (1 Hour 50 Minutes) — All 3 Modules</option>
                   <option value="core">1. Aptis General Core Test (25 min)</option>
                   <option value="reading">2. Aptis General Reading Test (35 min)</option>
                   <option value="writing">3. Aptis General Writing Test (50 min)</option>
@@ -990,14 +1029,14 @@ Respond ONLY with a JSON object matching this schema:
                 <button
                   onClick={handleGenerateDynamicSet}
                   disabled={isGeneratingSet}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-emerald-300 transition-all duration-75 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-blue-300 transition-all duration-75 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
                   {isGeneratingSet ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
                   ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                   )}
-                  <span>{isGeneratingSet ? 'Generating...' : '✨ Generate AI Set'}</span>
+                  <span>{isGeneratingSet ? 'Generating...' : '✨ Generate New Set'}</span>
                 </button>
 
                 <button
@@ -1022,13 +1061,13 @@ Respond ONLY with a JSON object matching this schema:
 
           {/* Dynamic Test Generation & Syllabus Alignment Badge */}
           {latestGenStats && (
-            <div className="p-3 bg-emerald-950/25 border border-emerald-500/25 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-300">
+            <div className="p-3 bg-blue-950/25 border border-blue-500/25 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-blue-300">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                 <span className="font-bold text-white">Dynamic Test Active:</span>
                 <span>{latestGenStats.topicsCovered.length} Syllabus Topics</span>
                 <span className="text-slate-500">•</span>
-                <span className="text-emerald-400 font-bold">Randomized Combination</span>
+                <span className="text-blue-400 font-bold">Randomized Combination</span>
               </div>
               <div className="text-[11px] text-slate-400">
                 Tests Generated: <strong className="text-white">{attemptHistory.length} (Unlimited)</strong>
@@ -1056,24 +1095,24 @@ Respond ONLY with a JSON object matching this schema:
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-200 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-emerald-400" />
+              <BookOpen className="w-4 h-4 text-blue-400" />
               <span>Test Components & Practice Guides</span>
             </h3>
             <span className="text-xs text-slate-500">Select any component above or below to begin practice</span>
           </div>
 
-          {/* 3 Component Cards Exactly As In PDF */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          {/* 4 Component Cards: Core, Reading, Writing, and Full ECS Test */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
             
             {/* COMPONENT 1: CORE TEST */}
-            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-emerald-500/40 transition">
+            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-blue-500/40 transition">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-sm">
+                  <span className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm">
                     1
                   </span>
                   <span className="text-xs font-mono font-bold text-slate-400 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                    <Clock className="w-3.5 h-3.5 text-blue-400" />
                     25 minutes
                   </span>
                 </div>
@@ -1093,7 +1132,7 @@ Respond ONLY with a JSON object matching this schema:
                   onClick={() => handleSelectTestCategory('core')}
                   onMouseEnter={() => warmUpNextTestSet('core')}
                   onTouchStart={() => warmUpNextTestSet('core')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all duration-75 flex items-center justify-center gap-2 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
+                  className="w-full py-2.5 px-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs transition-all duration-75 flex items-center justify-center gap-2 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
                   <Play className="w-3.5 h-3.5 fill-slate-950" />
                   <span>Click for Practice Test</span>
@@ -1102,14 +1141,14 @@ Respond ONLY with a JSON object matching this schema:
                   onClick={() => handleOpenAnswerKey('core')}
                   className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs transition-all duration-75 flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                  <BookOpen className="w-3.5 h-3.5 text-blue-400" />
                   <span>Click for Answer Key</span>
                 </button>
               </div>
             </div>
 
             {/* COMPONENT 2: READING TEST */}
-            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-emerald-500/40 transition">
+            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-blue-500/40 transition">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm">
@@ -1152,7 +1191,7 @@ Respond ONLY with a JSON object matching this schema:
             </div>
 
             {/* COMPONENT 3: WRITING TEST */}
-            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-emerald-500/40 transition">
+            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-amber-500/40 transition">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-sm">
@@ -1194,6 +1233,49 @@ Respond ONLY with a JSON object matching this schema:
               </div>
             </div>
 
+            {/* COMPONENT 4: ICAP ECS FULL TEST */}
+            <div className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-purple-500/40 transition">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-sm">
+                    4
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-purple-400" />
+                    1h 50m
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white leading-tight">
+                  4. ICAP ECS Full Test
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Complete test covering <strong>all three parts</strong>: <strong>Core (Grammar & Vocabulary)</strong>, <strong>Reading</strong>, and <strong>Writing</strong>. The total time allowed is <strong>1 hour 50 minutes</strong>.
+                </p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Full official exam simulation with comprehensive timed navigation across all three modules, full scoring breakdown, and CEFR grading.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-slate-700/60">
+                <button
+                  onClick={() => handleSelectTestCategory('full')}
+                  onMouseEnter={() => warmUpNextTestSet('full')}
+                  onTouchStart={() => warmUpNextTestSet('full')}
+                  className="w-full py-2.5 px-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs transition-all duration-75 flex items-center justify-center gap-2 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
+                >
+                  <Play className="w-3.5 h-3.5 fill-slate-950" />
+                  <span>Click for Practice Test</span>
+                </button>
+                <button
+                  onClick={() => handleOpenAnswerKey('core')}
+                  className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs transition-all duration-75 flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Click for Answer Key</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
@@ -1214,11 +1296,11 @@ Respond ONLY with a JSON object matching this schema:
                 className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all duration-75 text-xs font-semibold cursor-pointer touch-manipulation active:scale-[0.98] shrink-0"
                 title="Return to Overview"
               >
-                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
                 <span>Back<span className="hidden sm:inline"> to Overview</span></span>
               </button>
 
-              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-extrabold uppercase font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0">
+              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-extrabold uppercase font-mono bg-blue-500/20 text-blue-400 border border-blue-500/40 shrink-0">
                 {testMode === 'full' ? 'Full Test' : `${testMode.toUpperCase()}`}
               </span>
               <h2 className="text-xs sm:text-base font-bold text-white truncate max-w-[120px] xs:max-w-[180px] sm:max-w-xs md:max-w-md">
@@ -1240,10 +1322,10 @@ Respond ONLY with a JSON object matching this schema:
                   id="sticky-select-test"
                   value={selectedTestCategory}
                   onChange={(e) => handleSelectTestCategory(e.target.value)}
-                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-1 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none cursor-pointer"
+                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-1 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
                 >
                   <option value="" disabled>Select Test...</option>
-                  <option value="full" className="font-bold text-emerald-400 bg-slate-900 py-1">⭐ Full Exam (1 Hour 50 Minutes)</option>
+                  <option value="full" className="font-bold text-blue-400 bg-slate-900 py-1">⭐ Full Exam (1 Hour 50 Minutes)</option>
                   <option value="core">1. Aptis General Core Test (25m)</option>
                   <option value="reading">2. Aptis General Reading Test (35m)</option>
                   <option value="writing">3. Aptis General Writing Test (50m)</option>
@@ -1253,15 +1335,15 @@ Respond ONLY with a JSON object matching this schema:
               <div className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border font-mono font-bold text-xs sm:text-sm transition ${
                 timeLeft < 300
                   ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse'
-                  : 'bg-slate-800 text-emerald-300 border-slate-700'
+                  : 'bg-slate-800 text-blue-300 border-slate-700'
               }`}>
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
                 <span>{formatTimer(timeLeft)}</span>
               </div>
 
               <button
                 onClick={handleAutoSubmit}
-                className="px-3 sm:px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all duration-75 shadow flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
+                className="px-3 sm:px-4 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs transition-all duration-75 shadow flex items-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span><span className="hidden sm:inline">Finish & </span>Submit</span>
@@ -1281,41 +1363,67 @@ Respond ONLY with a JSON object matching this schema:
 
           {/* Sub-Section Navigation Tabs (Only in Full Mode or Component Selection) */}
           {testMode === 'full' && (
-            <div className="grid grid-cols-3 bg-slate-900 p-1 sm:p-1.5 rounded-2xl border border-slate-800 gap-1 sm:gap-1.5">
+            <div className={`grid grid-cols-3 p-1 sm:p-1.5 rounded-2xl border gap-1 sm:gap-1.5 ${
+              theme === 'light' ? 'bg-[#e2edf8] border-[#cbd8ec]' : 'bg-slate-900 border-slate-800'
+            }`}>
               <button
                 onClick={() => setActiveTab('core')}
-                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
+                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
                   activeTab === 'core'
-                    ? 'bg-emerald-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? theme === 'light'
+                      ? 'bg-blue-600 text-white font-extrabold shadow-md ring-2 ring-blue-500/50'
+                      : 'bg-blue-500 text-slate-950 font-bold shadow-md'
+                    : theme === 'light'
+                    ? 'bg-white text-[#0a1636] font-bold border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 font-semibold'
                 }`}
               >
-                <span>1. Core</span>
-                <span className="hidden sm:inline text-[10px] font-mono opacity-80">(50 Qs)</span>
+                <span className={activeTab === 'core' && theme === 'light' ? 'text-white font-extrabold' : ''}>1. Core</span>
+                <span className={`hidden sm:inline text-[10px] font-mono ${
+                  activeTab === 'core'
+                    ? theme === 'light' ? 'text-blue-100 font-bold' : 'opacity-80'
+                    : theme === 'light' ? 'text-slate-600 font-bold' : 'opacity-80'
+                }`}>(50 Qs)</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('reading')}
-                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
+                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
                   activeTab === 'reading'
-                    ? 'bg-blue-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? theme === 'light'
+                      ? 'bg-blue-600 text-white font-extrabold shadow-md ring-2 ring-blue-500/50'
+                      : 'bg-blue-500 text-slate-950 font-bold shadow-md'
+                    : theme === 'light'
+                    ? 'bg-white text-[#0a1636] font-bold border border-[#cbd8ec] hover:bg-blue-50 hover:text-blue-700 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 font-semibold'
                 }`}
               >
-                <span>2. Reading</span>
-                <span className="hidden sm:inline text-[10px] font-mono opacity-80">(4 Sec)</span>
+                <span className={activeTab === 'reading' && theme === 'light' ? 'text-white font-extrabold' : ''}>2. Reading</span>
+                <span className={`hidden sm:inline text-[10px] font-mono ${
+                  activeTab === 'reading'
+                    ? theme === 'light' ? 'text-blue-100 font-bold' : 'opacity-80'
+                    : theme === 'light' ? 'text-slate-600 font-bold' : 'opacity-80'
+                }`}>(4 Sec)</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('writing')}
-                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
+                className={`py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs transition-all duration-75 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer touch-manipulation active:scale-[0.98] ${
                   activeTab === 'writing'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? theme === 'light'
+                      ? 'bg-amber-600 text-white font-extrabold shadow-md ring-2 ring-amber-500/50'
+                      : 'bg-amber-500 text-slate-950 font-bold shadow-md'
+                    : theme === 'light'
+                    ? 'bg-white text-[#0a1636] font-bold border border-[#cbd8ec] hover:bg-amber-50 hover:text-amber-800 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 font-semibold'
                 }`}
               >
-                <span>3. Writing</span>
-                <span className="hidden sm:inline text-[10px] font-mono opacity-80">(4 Parts)</span>
+                <span className={activeTab === 'writing' && theme === 'light' ? 'text-white font-extrabold' : ''}>3. Writing</span>
+                <span className={`hidden sm:inline text-[10px] font-mono ${
+                  activeTab === 'writing'
+                    ? theme === 'light' ? 'text-amber-100 font-bold' : 'opacity-80'
+                    : theme === 'light' ? 'text-slate-600 font-bold' : 'opacity-80'
+                }`}>(4 Parts)</span>
               </button>
             </div>
           )}
@@ -1330,7 +1438,7 @@ Respond ONLY with a JSON object matching this schema:
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-800">
                   <div>
-                    <h3 className="text-lg font-bold text-emerald-400">Part 1: Grammar (25 Questions)</h3>
+                    <h3 className="text-lg font-bold text-blue-400">Part 1: Grammar (25 Questions)</h3>
                     <p className="text-xs text-slate-400">
                       Choose the word or phrase that best completes the sentence statement.
                     </p>
@@ -1347,16 +1455,17 @@ Respond ONLY with a JSON object matching this schema:
                   ).map((q, idx) => (
                     <div key={q.id} className="p-5 rounded-2xl bg-slate-850 border border-slate-750 space-y-3">
                       <div className="flex items-start justify-between gap-2">
-                        <span className="text-xs font-mono font-bold text-emerald-400">Question {idx + 1} of 25</span>
+                        <span className="text-xs font-mono font-bold text-blue-400">Question {idx + 1} of 25</span>
                         <span className="text-[11px] font-semibold text-slate-400">{q.category}</span>
                       </div>
                       
                       <p className="text-sm font-semibold text-slate-100 leading-relaxed">
-                        {q.question}
+                        {cleanArtifacts(q.question)}
                       </p>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                         {q.options.map((opt, optIdx) => {
+                          const cleanOpt = cleanArtifacts(opt);
                           const isSelected = grammarAnswers[q.id] === optIdx;
                           return (
                             <button
@@ -1364,7 +1473,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setGrammarAnswers((prev) => ({ ...prev, [q.id]: optIdx }))}
                               className={`p-3 rounded-xl text-xs font-semibold text-left transition flex items-center justify-between border ${
                                 isSelected
-                                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold ring-1 ring-emerald-500'
+                                  ? 'bg-blue-500/20 border-blue-500 text-blue-300 font-bold ring-1 ring-blue-500'
                                   : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-750 hover:text-white'
                               }`}
                             >
@@ -1372,9 +1481,9 @@ Respond ONLY with a JSON object matching this schema:
                                 <span className="w-5 h-5 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-[10px] font-mono font-bold">
                                   {String.fromCharCode(65 + optIdx)}
                                 </span>
-                                <span>{opt}</span>
+                                <span>{cleanOpt}</span>
                               </span>
-                              {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                              {isSelected && <Check className="w-4 h-4 text-blue-400" />}
                             </button>
                           );
                         })}
@@ -1388,7 +1497,7 @@ Respond ONLY with a JSON object matching this schema:
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-800">
                   <div>
-                    <h3 className="text-lg font-bold text-teal-400">Part 2: Vocabulary (25 Items across 5 Tasks)</h3>
+                    <h3 className="text-lg font-bold text-cyan-400">Part 2: Vocabulary (25 Items across 5 Tasks)</h3>
                     <p className="text-xs text-slate-400">
                       Authentic Aptis tasks: Word matching, definitions, collocations, sentence completion, and synonyms.
                     </p>
@@ -1406,7 +1515,7 @@ Respond ONLY with a JSON object matching this schema:
                     {currentTestSet.core.vocabWordMatching.map((item, idx) => (
                       <div key={item.id} className="p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-emerald-400">Q{26 + idx}. Target Word:</span>
+                          <span className="text-xs font-bold text-blue-400">Q{26 + idx}. Target Word:</span>
                           <span className="text-sm font-mono font-bold text-white uppercase">{item.targetWord}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2 pt-1">
@@ -1416,7 +1525,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setVocabMatchingAnswers((prev) => ({ ...prev, [item.id]: opt }))}
                               className={`p-2.5 rounded-xl text-xs font-semibold text-center border transition ${
                                 vocabMatchingAnswers[item.id] === opt
-                                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                                  ? 'bg-blue-500/20 border-blue-500 text-blue-300 font-bold'
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
@@ -1449,7 +1558,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setVocabDefAnswers((prev) => ({ ...prev, [item.id]: opt }))}
                               className={`p-2 rounded-xl text-xs font-semibold text-center border transition ${
                                 vocabDefAnswers[item.id] === opt
-                                  ? 'bg-teal-500/20 border-teal-500 text-teal-300 font-bold'
+                                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
@@ -1482,7 +1591,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setVocabCollocAnswers((prev) => ({ ...prev, [item.id]: optIdx }))}
                               className={`p-2 rounded-xl text-xs font-semibold text-center border transition ${
                                 vocabCollocAnswers[item.id] === optIdx
-                                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                                  ? 'bg-blue-500/20 border-blue-500 text-blue-300 font-bold'
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
@@ -1515,7 +1624,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setVocabSentenceAnswers((prev) => ({ ...prev, [item.id]: optIdx }))}
                               className={`p-2 rounded-xl text-xs font-semibold text-center border transition ${
                                 vocabSentenceAnswers[item.id] === optIdx
-                                  ? 'bg-teal-500/20 border-teal-500 text-teal-300 font-bold'
+                                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
@@ -1539,7 +1648,7 @@ Respond ONLY with a JSON object matching this schema:
                     {currentTestSet.core.vocabContextMatching.map((item, idx) => (
                       <div key={item.id} className="p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-teal-400">Q{46 + idx}. Context Word:</span>
+                          <span className="text-xs font-bold text-cyan-400">Q{46 + idx}. Context Word:</span>
                           <span className="text-sm font-mono font-bold text-white uppercase">{item.targetWord}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2 pt-1">
@@ -1549,7 +1658,7 @@ Respond ONLY with a JSON object matching this schema:
                               onClick={() => setVocabContextAnswers((prev) => ({ ...prev, [item.id]: opt }))}
                               className={`p-2 rounded-xl text-xs font-semibold text-center border transition ${
                                 vocabContextAnswers[item.id] === opt
-                                  ? 'bg-teal-500/20 border-teal-500 text-teal-300 font-bold'
+                                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
@@ -1804,7 +1913,7 @@ Respond ONLY with a JSON object matching this schema:
                     <span>Target: 20–30 words</span>
                     <span className={`font-mono font-bold ${
                       getWordCount(writingPart2Answer) >= 20 && getWordCount(writingPart2Answer) <= 30
-                        ? 'text-emerald-400'
+                        ? 'text-blue-400'
                         : 'text-amber-400'
                     }`}>
                       Current: {getWordCount(writingPart2Answer)} words
@@ -1869,7 +1978,7 @@ Respond ONLY with a JSON object matching this schema:
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 mt-1">
                       <span>Entity: <strong className="text-slate-200">{currentTestSet.writing.part4.clubName}</strong></span>
                       {currentTestSet.writing.part4.recipientTitle && (
-                        <span>• Authority: <strong className="text-emerald-300">{currentTestSet.writing.part4.recipientName ? `${currentTestSet.writing.part4.recipientName} (${currentTestSet.writing.part4.recipientTitle})` : currentTestSet.writing.part4.recipientTitle}</strong></span>
+                        <span>• Authority: <strong className="text-blue-300">{currentTestSet.writing.part4.recipientName ? `${currentTestSet.writing.part4.recipientName} (${currentTestSet.writing.part4.recipientTitle})` : currentTestSet.writing.part4.recipientTitle}</strong></span>
                       )}
                       {currentTestSet.writing.part4.friendName && (
                         <span>• Colleague: <strong className="text-amber-300">{currentTestSet.writing.part4.friendName}</strong></span>
@@ -1881,7 +1990,7 @@ Respond ONLY with a JSON object matching this schema:
                     onClick={handleRegeneratePart4}
                     disabled={isRegeneratingPart4}
                     className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition shadow shrink-0 cursor-pointer disabled:opacity-50"
-                    title="Generate a fresh, authentic ICAP ECS email writing task with novel scenario, recipient, and context"
+                    title="Generate a fresh email writing task with a new random topic selected from the official PDF"
                   >
                     {isRegeneratingPart4 ? (
                       <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
@@ -1931,7 +2040,7 @@ Respond ONLY with a JSON object matching this schema:
                 {/* 4B: Formal */}
                 <div className="p-5 rounded-2xl bg-slate-850 border border-slate-750 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-300 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-blue-300 uppercase tracking-wide">
                       Task 4B: Formal Email to {currentTestSet.writing.part4.recipientName || currentTestSet.writing.part4.recipientTitle || 'Authority'} (120–150 words)
                     </span>
                     <span className="text-xs text-slate-400 font-mono">Word Target: 120–150</span>
@@ -1943,11 +2052,11 @@ Respond ONLY with a JSON object matching this schema:
                     placeholder={`Dear ${currentTestSet.writing.part4.recipientName || currentTestSet.writing.part4.recipientTitle || 'Sir/Madam'},&#10;&#10;I am writing to formally communicate our concern regarding...`}
                     value={writingPart4BAnswer}
                     onChange={(e) => setWritingPart4BAnswer(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>Strict formal register (no contractions, professional address & sign-off)</span>
-                    <span className="font-mono font-bold text-emerald-400">{getWordCount(writingPart4BAnswer)} words</span>
+                    <span className="font-mono font-bold text-blue-400">{getWordCount(writingPart4BAnswer)} words</span>
                   </div>
                 </div>
 
@@ -1956,23 +2065,80 @@ Respond ONLY with a JSON object matching this schema:
             </div>
           )}
 
-          {/* Bottom Submit & Navigation Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
-            <button
-              onClick={handleBackToOverview}
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-semibold text-xs transition flex items-center gap-2 cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-emerald-400" />
-              <span>Back to Main Page</span>
-            </button>
+          {/* Bottom Submit & Navigation Buttons (Adjusted to match Back to Main Page button style) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-slate-800">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <button
+                onClick={handleBackToOverview}
+                className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+              >
+                <ArrowLeft className="w-4 h-4 text-slate-300" />
+                <span>Back to Main Page</span>
+              </button>
 
-            <button
-              onClick={handleAutoSubmit}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm uppercase tracking-wide transition shadow-xl shadow-emerald-500/20 flex items-center gap-2 cursor-pointer"
-            >
-              <FileCheck className="w-5 h-5" />
-              <span>Complete & Submit All Sections</span>
-            </button>
+              {/* In Full mode, show Previous Part if on Reading or Writing */}
+              {testMode === 'full' && activeTab === 'reading' && (
+                <button
+                  onClick={handlePrevPart}
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+                >
+                  <ArrowLeft className="w-4 h-4 text-slate-300" />
+                  <span>Previous Part (Core)</span>
+                </button>
+              )}
+
+              {testMode === 'full' && activeTab === 'writing' && (
+                <button
+                  onClick={handlePrevPart}
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+                >
+                  <ArrowLeft className="w-4 h-4 text-slate-300" />
+                  <span>Previous Part (Reading)</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* NEXT PART BUTTON (Styled identical to Back to Main Page button) */}
+              {((testMode === 'full' && activeTab === 'core') || testMode === 'core') && (
+                <button
+                  onClick={handleNextPart}
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+                  title="Proceed to the Reading Test"
+                >
+                  <span>Next Part (Reading Test)</span>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                </button>
+              )}
+
+              {((testMode === 'full' && activeTab === 'reading') || testMode === 'reading') && (
+                <button
+                  onClick={handleNextPart}
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+                  title="Proceed to the Writing Test"
+                >
+                  <span>Next Part (Writing Test)</span>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                </button>
+              )}
+
+              {/* Complete & Submit Button (Styled identical to Back to Main Page button) */}
+              <button
+                onClick={handleAutoSubmit}
+                className="px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer touch-manipulation active:scale-[0.98]"
+              >
+                <FileCheck className="w-4 h-4 text-slate-300" />
+                <span>
+                  {testMode === 'full' && activeTab !== 'writing'
+                    ? 'Finish & Submit All'
+                    : testMode === 'core'
+                    ? 'Submit Core Test'
+                    : testMode === 'reading'
+                    ? 'Submit Reading Test'
+                    : 'Complete & Submit All Sections'}
+                </span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -1990,7 +2156,7 @@ Respond ONLY with a JSON object matching this schema:
               onClick={handleBackToOverview}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition shadow cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4 text-emerald-400" />
+              <ArrowLeft className="w-4 h-4 text-blue-400" />
               <span>Back to Main Page</span>
             </button>
           </div>
@@ -1998,7 +2164,7 @@ Respond ONLY with a JSON object matching this schema:
           {/* Score Header Card */}
           <div className={`p-8 rounded-3xl border shadow-2xl space-y-6 ${
             examResult.isPassed
-              ? 'bg-gradient-to-br from-slate-900 via-emerald-950/40 to-slate-900 border-emerald-500/40'
+              ? 'bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 border-blue-500/40'
               : 'bg-gradient-to-br from-slate-900 via-rose-950/40 to-slate-900 border-rose-500/40'
           }`}>
             
@@ -2006,7 +2172,7 @@ Respond ONLY with a JSON object matching this schema:
               <div>
                 <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider ${
                   examResult.isPassed
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                     : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                 }`}>
                   {examResult.isPassed ? 'PASSED • CEFR CERTIFIED' : 'BELOW PASSING THRESHOLD'}
@@ -2023,7 +2189,7 @@ Respond ONLY with a JSON object matching this schema:
               <div className="flex items-center gap-4">
                 <div className="text-center p-3 sm:p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">CEFR Band</span>
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
+                  <span className="text-2xl sm:text-3xl font-black text-blue-400 font-mono">
                     {examResult.cefrLevel}
                   </span>
                 </div>
@@ -2041,26 +2207,26 @@ Respond ONLY with a JSON object matching this schema:
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">1. Grammar (Part 1)</span>
-                  <span className="text-xl font-bold font-mono text-emerald-400 block">{examResult.grammarScore} / 25</span>
+                  <span className="text-xl font-bold font-mono text-blue-400 block">{examResult.grammarScore} / 25</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">2. Vocabulary (Tasks 1–5)</span>
-                  <span className="text-xl font-bold font-mono text-teal-400 block">{examResult.vocabScore} / 25</span>
+                  <span className="text-xl font-bold font-mono text-cyan-400 block">{examResult.vocabScore} / 25</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-800/60 border border-emerald-500/30 text-center space-y-1 bg-emerald-500/5">
-                  <span className="text-xs text-emerald-300 font-semibold">Total Core Score</span>
-                  <span className="text-xl font-bold font-mono text-emerald-300 block">{examResult.grammarScore + examResult.vocabScore} / 50</span>
+                <div className="p-4 rounded-2xl bg-slate-800/60 border border-blue-500/30 text-center space-y-1 bg-blue-500/5">
+                  <span className="text-xs text-blue-300 font-semibold">Total Core Score</span>
+                  <span className="text-xl font-bold font-mono text-blue-300 block">{examResult.grammarScore + examResult.vocabScore} / 50</span>
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">1. Grammar</span>
-                  <span className="text-xl font-bold font-mono text-emerald-400 block">{examResult.grammarScore} / 25</span>
+                  <span className="text-xl font-bold font-mono text-blue-400 block">{examResult.grammarScore} / 25</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">2. Vocabulary</span>
-                  <span className="text-xl font-bold font-mono text-teal-400 block">{examResult.vocabScore} / 25</span>
+                  <span className="text-xl font-bold font-mono text-cyan-400 block">{examResult.vocabScore} / 25</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">3. Reading</span>
@@ -2080,7 +2246,7 @@ Respond ONLY with a JSON object matching this schema:
                   onClick={() => setIsAnswerKeyOpen(true)}
                   className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
-                  <BookOpen className="w-4 h-4 text-emerald-400" />
+                  <BookOpen className="w-4 h-4 text-blue-400" />
                   <span>Answer Key & Notes</span>
                 </button>
                 <button
@@ -2095,14 +2261,14 @@ Respond ONLY with a JSON object matching this schema:
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleGenerateDynamicSet}
-                  className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-emerald-300 transition flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
+                  className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-blue-300 transition flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <Sparkles className="w-4 h-4 text-blue-400" />
                   <span>Generate Next Set</span>
                 </button>
                 <button
                   onClick={handleRetakeExam}
-                  className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
+                  className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Retake / New Test</span>

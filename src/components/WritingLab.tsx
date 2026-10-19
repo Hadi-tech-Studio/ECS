@@ -19,6 +19,12 @@ import {
 } from 'lucide-react';
 import { WritingScenario, WritingEvaluation } from '../types';
 import { MOCK_WRITING_SCENARIOS, MOCK_WRITING_EVALUATION } from '../data/mockData';
+import { 
+  getRandomPdfWritingScenario, 
+  getAllPdfWritingScenarios,
+  PDF_FORMAL_EMAIL_TOPICS,
+  PDF_INFORMAL_EMAIL_TOPICS
+} from '../data/aptisPdfEmailTopics';
 import { callGeminiAPI } from '../lib/api-handler';
 import { analyzeWritingWithMistakes, WritingFeedbackResult } from '../lib/writingFeedback';
 import { WritingFeedbackDisplay } from './WritingFeedbackDisplay';
@@ -28,7 +34,11 @@ interface WritingLabProps {
 }
 
 export const WritingLab: React.FC<WritingLabProps> = ({ onBackToMain }) => {
-  const [currentScenario, setCurrentScenario] = useState<WritingScenario>(MOCK_WRITING_SCENARIOS[0]);
+  const [seenScenarioIds, setSeenScenarioIds] = useState<Set<string>>(() => new Set());
+  const [currentScenario, setCurrentScenario] = useState<WritingScenario>(() => {
+    const sc = getRandomPdfWritingScenario();
+    return sc;
+  });
   const [studentText, setStudentText] = useState<string>('');
   const [isGeneratingScenario, setIsGeneratingScenario] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -45,31 +55,41 @@ export const WritingLab: React.FC<WritingLabProps> = ({ onBackToMain }) => {
     return studentText.length;
   }, [studentText]);
 
-  // Target word count: 120 - 150 words
-  const isWordCountValid = wordCount >= 120 && wordCount <= 150;
-  const isTooShort = wordCount > 0 && wordCount < 120;
-  const isTooLong = wordCount > 150;
+  // Target word count based on current scenario
+  const targetMinWords = currentScenario.requiredWordCount?.min || 120;
+  const targetMaxWords = currentScenario.requiredWordCount?.max || 150;
+  const isWordCountValid = wordCount >= targetMinWords && wordCount <= targetMaxWords;
+  const isTooShort = wordCount > 0 && wordCount < targetMinWords;
+  const isTooLong = wordCount > targetMaxWords;
 
-  // Step 3 Requirement 1: Scenario Prompt Generator via Gemini
+  // Step 3 Requirement 1: Scenario Prompt Generator strictly based on PDF topics
   const handleGenerateRandomScenario = async () => {
     setIsGeneratingScenario(true);
 
-    const systemPrompt = `You are a Lead Examiner for ICAP (Institute of Chartered Accountants of Pakistan) Business Communication exams.
-Generate a realistic, high-impact business communication or audit email scenario for zero-to-advanced CA students.
-Topics can include:
-- Unrecorded liability inquiry to client CFO
-- Inventory count delay or physical verification safety issue
-- Management letter point regarding lack of dual authorization in petty cash
-- Statutory bank confirmation reminder under ISA 505
-- Revenue recognition deferral dispute under IFRS 15
+    // Pick a non-repeating scenario from the PDF topics
+    const nextSeen = new Set(seenScenarioIds);
+    nextSeen.add(currentScenario.id);
+    const proceduralFallback = getRandomPdfWritingScenario(nextSeen);
+
+    const systemPrompt = `You are a Lead Examiner for the Aptis General Writing Test and ECS Writing Section.
+Generate an authentic, high-impact email writing scenario strictly based on the official 50 topics from the PDF:
+Formal Email Topics (1-30):
+1. Request for Sponsorship for a College Event, 2. Invitation to a Company for a Seminar, 3. Request for an Internship Opportunity, 4. Application for a Job, 5. Request for Industrial Visit, 6. Invitation to a Guest Speaker, 7. Complaint About Poor Service, 8. Request for a Business Meeting, 9. Proposal for a Corporate Social Responsibility (CSR) Event, 10. Request for Financial Assistance, 11. Invitation to a Company for a Career Fair, 12. Request for a Training Session, 13. Inquiry About Professional Courses, 14. Complaint About Defective Products, 15. Request for Extension of a Deadline, 16. Follow-up on a Job Application, 17. Request for Business Collaboration, 18. Invitation to a Corporate Conference, 19. Request for a Letter of Recommendation, 20. Apology for a Delayed Submission, 21. Request for Permission to Organize an Event, 22. Inquiry About a Company's Services, 23. Proposal for a New Business Idea, 24. Request for Employee Training, 25. Invitation to a Business Partner, 26. Notification of a Change in Meeting Schedule, 27. Request for Quotation, 28. Response to a Customer Complaint, 29. Request for Leave, 30. Thank-You Email After a Business Meeting.
+Informal Email Topics (31-50):
+31. Inviting a Friend to a Birthday Party, 32. Congratulating a Friend on Success, 33. Thanking a Friend for Help, 34. Apologizing to a Friend, 35. Inviting a Friend to Spend Holidays, 36. Advising a Friend About Career Choices, 37. Sharing Your Exam Results, 38. Describing Your First Day at College, 39. Sharing Your Hostel Experience, 40. Inviting a Friend to a Family Function, 41. Congratulating a Friend on a New Job, 42. Advising a Friend on Exam Preparation, 43. Sharing Your Experience of a College Event, 44. Thanking a Friend for a Gift, 45. Inviting a Friend to a Study Session, 46. Sharing Your Experience of an Educational Trip, 47. Advising a Friend on Time Management, 48. Comforting a Friend After Failure, 49. Sharing Your Future Career Plans, 50. Telling a Friend About Your New College or Academy.
+
+CRITICAL RULES:
+1. ONLY select one topic from the 50 PDF topics listed above.
+2. DO NOT include accounting, auditing, or related topics (no balance sheets, audit firms, ISA, IFRS, or petty cash).
+3. If formal topic (1-30), word count must be 120-150 words. If informal topic (31-50), word count must be 40-60 words.
 
 Return pure JSON matching this exact structure:
 {
-  "id": "sc-dynamic",
-  "title": "Short title of scenario",
-  "role": "Your role (e.g., Audit Senior / Tax Consultant)",
+  "id": "pdf-sc-dynamic",
+  "title": "Title including official topic number (e.g. Request for Sponsorship for a College Event (Topic #1))",
+  "role": "Your role",
   "recipient": "Recipient name and title",
-  "scenario": "Detailed 3-4 sentence scenario description with context...",
+  "scenario": "Detailed 3-4 sentence scenario description strictly aligned with the PDF topic...",
   "requiredWordCount": { "min": 120, "max": 150 },
   "keyPoints": [
     "Key requirement 1",
@@ -77,24 +97,34 @@ Return pure JSON matching this exact structure:
     "Key requirement 3",
     "Key requirement 4"
   ],
-  "sampleModelAnswer": "A pristine, 135-word ICAP model answer email demonstrating formal passive tone, correct vocabulary, and proper email framing."
+  "sampleModelAnswer": "A pristine model answer email adhering strictly to appropriate register."
 }`;
 
-    const userPrompt = `Generate a fresh random ICAP scenario now. Timestamp: ${Date.now()}`;
-
-    // Pick a random fallback from mock scenarios
-    const randomFallback = MOCK_WRITING_SCENARIOS[Math.floor(Math.random() * MOCK_WRITING_SCENARIOS.length)];
+    const userPrompt = `Generate a fresh, non-repeating scenario selected from the PDF topics now. Timestamp: ${Date.now()}`;
 
     try {
-      const generated = await callGeminiAPI<WritingScenario>(systemPrompt, userPrompt, randomFallback);
-      if (generated && generated.title && generated.scenario) {
+      const generated = await callGeminiAPI<WritingScenario>(systemPrompt, userPrompt, proceduralFallback);
+      if (
+        generated && 
+        generated.title && 
+        generated.scenario &&
+        !generated.scenario.toLowerCase().includes('audit') &&
+        !generated.scenario.toLowerCase().includes('accounting')
+      ) {
         setCurrentScenario(generated);
-        setEvaluation(null); // Clear previous analysis
+        setSeenScenarioIds(prev => new Set(prev).add(generated.id));
+        setEvaluation(null);
+        setFeedbackResult(null);
+      } else {
+        setCurrentScenario(proceduralFallback);
+        setSeenScenarioIds(prev => new Set(prev).add(proceduralFallback.id));
+        setEvaluation(null);
         setFeedbackResult(null);
       }
     } catch (e) {
       console.warn('Scenario generation fallback used:', e);
-      setCurrentScenario(randomFallback);
+      setCurrentScenario(proceduralFallback);
+      setSeenScenarioIds(prev => new Set(prev).add(proceduralFallback.id));
       setEvaluation(null);
       setFeedbackResult(null);
     } finally {
@@ -190,7 +220,7 @@ Return pure JSON matching this exact structure:
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold transition-all duration-75 shadow cursor-pointer touch-manipulation active:scale-[0.98]"
             title="Return to Main Practice Exam Page"
           >
-            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <ArrowLeft className="w-4 h-4 text-blue-400" />
             <span>← Back to Main Page</span>
           </button>
         </div>
@@ -200,7 +230,7 @@ Return pure JSON matching this exact structure:
       <div className="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
               AI Writing & Email Lab
             </span>
             <span className="text-xs text-slate-400">Target: 120–150 Words Formal Business Register</span>
@@ -209,7 +239,7 @@ Return pure JSON matching this exact structure:
             ICAP CA Business Writing & Diagnostic Evaluator
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-            Practice authentic audit emails, memos, and client reports. Receive sentence-by-sentence heatmap correction powered by Gemini 2.5 Flash.
+            Practice authentic formal and informal email writing strictly based on official exam topics. Receive sentence-by-sentence heatmap correction and diagnostic feedback.
           </p>
         </div>
 
@@ -217,7 +247,7 @@ Return pure JSON matching this exact structure:
         <button
           onClick={handleGenerateRandomScenario}
           disabled={isGeneratingScenario}
-          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all duration-75 cursor-pointer touch-manipulation active:scale-[0.98] disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold bg-blue-500 hover:bg-blue-400 text-slate-950 shadow-lg shadow-blue-500/20 transition-all duration-75 cursor-pointer touch-manipulation active:scale-[0.98] disabled:opacity-50"
         >
           {isGeneratingScenario ? (
             <>
@@ -227,7 +257,7 @@ Return pure JSON matching this exact structure:
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              <span>Generate Random ICAP Scenario</span>
+              <span>Generate Random Email Scenario</span>
             </>
           )}
         </button>
@@ -237,7 +267,7 @@ Return pure JSON matching this exact structure:
       <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+            <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
               <FileText className="w-4 h-4" />
             </span>
             <div>
@@ -251,7 +281,7 @@ Return pure JSON matching this exact structure:
           <div className="flex items-center gap-2">
             <button
               onClick={handleUseSampleDraft}
-              className="text-xs text-slate-500 hover:text-emerald-600 font-medium underline"
+              className="text-xs text-slate-500 hover:text-blue-600 font-medium underline"
             >
               Insert Demo Error Draft
             </button>
@@ -260,7 +290,7 @@ Return pure JSON matching this exact structure:
                 onClick={handleCopyModelAnswer}
                 className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
               >
-                {copiedSample ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedSample ? <Check className="w-3.5 h-3.5 text-blue-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedSample ? 'Copied Model!' : 'Model Answer'}</span>
               </button>
             )}
@@ -277,7 +307,7 @@ Return pure JSON matching this exact structure:
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-1.5">
               {currentScenario.keyPoints.map((kp, idx) => (
                 <div key={idx} className="flex items-center gap-1.5 text-slate-600">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
                   <span>{kp}</span>
                 </div>
               ))}
@@ -290,7 +320,7 @@ Return pure JSON matching this exact structure:
       <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <label className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
-            <PenTool className="w-4 h-4 text-emerald-600" />
+            <PenTool className="w-4 h-4 text-blue-600" />
             <span>Student Writing Workspace:</span>
           </label>
 
@@ -301,20 +331,20 @@ Return pure JSON matching this exact structure:
             </div>
 
             {isWordCountValid && (
-              <span className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Word Count Ideal (120–150)
+              <span className="flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-lg">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Word Count Ideal ({targetMinWords}–{targetMaxWords})
               </span>
             )}
 
             {isTooShort && (
               <span className="flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-lg animate-pulse">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Too Short ({120 - wordCount} words remaining)
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Too Short ({targetMinWords - wordCount} words remaining)
               </span>
             )}
 
             {isTooLong && (
               <span className="flex items-center gap-1 text-xs font-bold text-rose-800 bg-rose-100 px-3 py-1 rounded-lg">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-600" /> Over Limit ({wordCount - 150} words excess)
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-600" /> Over Limit ({wordCount - targetMaxWords} words excess)
               </span>
             )}
           </div>
@@ -323,14 +353,14 @@ Return pure JSON matching this exact structure:
         <textarea
           value={studentText}
           onChange={(e) => setStudentText(e.target.value)}
-          placeholder="Dear Mr. Tariq,&#10;&#10;I am writing to formally apprise you of an unforeseen delay in concluding the inventory verification at Apex Chemicals Ltd...&#10;&#10;Yours sincerely,&#10;Audit Senior"
+          placeholder={`Write your email draft here...\n\nTarget word count: ${targetMinWords}–${targetMaxWords} words.`}
           rows={9}
-          className="w-full p-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs sm:text-sm font-sans leading-relaxed text-slate-800 transition"
+          className="w-full p-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm font-sans leading-relaxed text-slate-800 transition"
         />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
           <p className="text-xs text-slate-500">
-            Tip: Use formal salutations ("Dear Mr. Tariq"), non-accusatory passive verbs, and avoid casual contractions.
+            Tip: Follow the designated tone (formal or informal), address the recipient appropriately, and adhere strictly to the target word limit.
           </p>
 
           <button
@@ -340,12 +370,12 @@ Return pure JSON matching this exact structure:
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
                 <span>Analyzing Sentences & Tone...</span>
               </>
             ) : (
               <>
-                <Gauge className="w-4 h-4 text-emerald-400" />
+                <Gauge className="w-4 h-4 text-blue-400" />
                 <span>Analyze Writing (AI Diagnostic)</span>
               </>
             )}
@@ -360,13 +390,13 @@ Return pure JSON matching this exact structure:
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 pb-6">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wide">
+                <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 uppercase tracking-wide">
                   Diagnostic Report
                 </span>
                 <span className="text-xs text-slate-500 font-medium">Evaluation standard: ICAP PRC-01</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900">
-                Overall Writing Score: <span className="text-emerald-600">{evaluation.score} / 100</span>
+                Overall Writing Score: <span className="text-blue-600">{evaluation.score} / 100</span>
               </h2>
             </div>
 
@@ -375,14 +405,14 @@ Return pure JSON matching this exact structure:
               {/* Band Rating */}
               <div className="px-4 py-3 rounded-2xl bg-slate-900 text-white text-center min-w-[130px]">
                 <div className="text-[10px] uppercase font-bold text-slate-400">Band Rating</div>
-                <div className="text-sm font-bold text-emerald-400">{evaluation.bandRating}</div>
+                <div className="text-sm font-bold text-blue-400">{evaluation.bandRating}</div>
               </div>
 
               {/* Tone & Register Detector */}
               <div className="px-4 py-3 rounded-2xl bg-slate-100 text-slate-800 text-center min-w-[130px] border border-slate-200">
                 <div className="text-[10px] uppercase font-bold text-slate-500">Tone & Register</div>
                 <div className={`text-sm font-bold ${
-                  evaluation.toneRegister === 'Formal' ? 'text-emerald-600' : 'text-amber-600'
+                  evaluation.toneRegister === 'Formal' ? 'text-blue-600' : 'text-amber-600'
                 }`}>
                   {evaluation.toneRegister}
                 </div>
@@ -413,8 +443,8 @@ Return pure JSON matching this exact structure:
               {evaluation.summaryFeedback}
             </div>
             {evaluation.urduSummary && (
-              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-xs sm:text-sm text-slate-800 leading-relaxed font-urdu">
-                <strong className="block text-emerald-900 font-bold mb-1 font-sans not-italic">
+              <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs sm:text-sm text-slate-800 leading-relaxed font-urdu">
+                <strong className="block text-blue-900 font-bold mb-1 font-sans not-italic">
                   اردو میں رہنمائی (Urdu Summary):
                 </strong>
                 {evaluation.urduSummary}
@@ -463,7 +493,7 @@ Return pure JSON matching this exact structure:
                       </td>
 
                       {/* Col 2 */}
-                      <td className="p-3.5 text-emerald-950 bg-emerald-50/40 border-r border-slate-200 font-semibold leading-relaxed">
+                      <td className="p-3.5 text-blue-950 bg-blue-50/40 border-r border-slate-200 font-semibold leading-relaxed">
                         "{item.correctedSentence}"
                       </td>
 
@@ -478,7 +508,7 @@ Return pure JSON matching this exact structure:
                       <td className="p-3.5 text-slate-700 leading-relaxed space-y-1">
                         <div>{item.explanation}</div>
                         {item.urduExplanation && (
-                          <div className="text-emerald-800 font-urdu text-[11px] pt-1 border-t border-slate-100">
+                          <div className="text-blue-800 font-urdu text-[11px] pt-1 border-t border-slate-100">
                             {item.urduExplanation}
                           </div>
                         )}

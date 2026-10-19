@@ -5,19 +5,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navbar, ActiveTab } from './components/Navbar';
+import { HomePage } from './components/HomePage';
 import { PracticeExamEngine } from './components/PracticeExamEngine';
 import { WritingLab } from './components/WritingLab';
 import { BooksHub } from './components/BooksHub';
+import { AudioHub } from './components/AudioHub';
 import { Dashboard } from './components/Dashboard';
 import { ApiKeyModal } from './components/ApiKeyModal';
-import { registerKeyModalHandler, getGeminiApiKey, checkServerGeminiStatus } from './lib/api-handler';
-import { ExternalLink, Sparkles, BookOpen, ShieldCheck, GraduationCap, Palette } from 'lucide-react';
+import { Footer } from './components/Footer';
+import { registerKeyModalHandler, checkServerGeminiStatus } from './lib/api-handler';
 import { useTheme } from './context/ThemeContext';
-import { ThemeSwitcher } from './components/ThemeSwitcher';
 
 export default function App() {
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('exam');
+  
+  // Default to 'home' landing page as the first screen
+  const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [hasApiKey, setHasApiKey] = useState<boolean>(true);
 
@@ -38,7 +41,6 @@ export default function App() {
     registerKeyModalHandler(() => {
       return new Promise((resolve) => {
         setIsApiKeyModalOpen(true);
-        // Polling until modal resolves or cancelled
         const interval = setInterval(() => {
           const stored = localStorage.getItem('GEMINI_API_KEY');
           if (stored && stored.trim()) {
@@ -47,7 +49,6 @@ export default function App() {
           }
         }, 500);
 
-        // Fallback timeout
         setTimeout(() => {
           clearInterval(interval);
           resolve(null);
@@ -61,12 +62,12 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-200 overflow-x-hidden w-full ${
+    <div className={`min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 overflow-x-hidden w-full ${
       theme === 'sepia'
         ? 'bg-[#fbf0d9] text-[#342410]'
         : theme === 'light'
-        ? 'bg-slate-50 text-slate-900'
-        : 'bg-slate-950 text-slate-100'
+        ? 'bg-[#f0f4fa] text-[#0a1636]'
+        : 'bg-[#060b18] text-slate-100'
     }`}>
       
       {/* Navigation Header */}
@@ -77,68 +78,87 @@ export default function App() {
         hasApiKey={hasApiKey}
       />
 
-      {/* Main Container */}
+      {/* Main Container - Renders only the selected section, never simultaneously on the homepage */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-16">
-        <div className={activeTab === 'exam' ? 'block' : 'hidden'} role="tabpanel" aria-hidden={activeTab !== 'exam'}>
-          <PracticeExamEngine />
-        </div>
-        <div className={activeTab === 'writing' ? 'block' : 'hidden'} role="tabpanel" aria-hidden={activeTab !== 'writing'}>
-          <WritingLab onBackToMain={() => setActiveTab('exam')} />
-        </div>
-        <div className={activeTab === 'books' ? 'block' : 'hidden'} role="tabpanel" aria-hidden={activeTab !== 'books'}>
-          <BooksHub onBackToMain={() => setActiveTab('exam')} onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)} />
-        </div>
-        <div className={activeTab === 'dashboard' ? 'block' : 'hidden'} role="tabpanel" aria-hidden={activeTab !== 'dashboard'}>
-          <Dashboard
-            onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-            onBackToMain={() => setActiveTab('exam')}
-            onStartExam={() => setActiveTab('exam')}
-            isActive={activeTab === 'dashboard'}
-          />
-        </div>
+        
+        {/* HOMEPAGE: Landing Screen */}
+        {activeTab === 'home' && (
+          <div role="tabpanel" aria-label="Home">
+            <HomePage 
+              onSelectSection={(section) => setActiveTab(section)}
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+            />
+          </div>
+        )}
+
+        {/* EXAM: Practice Exam Engine (Aptis 1h 50m / Core / Reading / Writing) */}
+        {activeTab === 'exam' && (
+          <div role="tabpanel" aria-label="Practice Exam">
+            <PracticeExamEngine />
+          </div>
+        )}
+
+        {/* WRITING: AI Writing Lab */}
+        {activeTab === 'writing' && (
+          <div role="tabpanel" aria-label="Writing Lab">
+            <WritingLab onBackToMain={() => setActiveTab('home')} />
+          </div>
+        )}
+
+        {/* BOOKS: Books & Revision Notes Library */}
+        {activeTab === 'books' && (
+          <div role="tabpanel" aria-label="Books and Notes">
+            <BooksHub 
+              onBackToMain={() => setActiveTab('home')} 
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)} 
+            />
+          </div>
+        )}
+
+        {/* AUDIO: Audio & Visual Listening Hub */}
+        {activeTab === 'audio' && (
+          <div role="tabpanel" aria-label="Audio Hub">
+            <AudioHub 
+              onBackToMain={() => setActiveTab('home')} 
+              onOpenExam={() => setActiveTab('exam')} 
+            />
+          </div>
+        )}
+
+        {/* FLASHCARDS: 3D Vocabulary & Collocations */}
+        {activeTab === 'flashcards' && (
+          <div role="tabpanel" aria-label="Flashcards">
+            <Dashboard
+              viewMode="flashcards"
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+              onBackToMain={() => setActiveTab('home')}
+              onStartExam={() => setActiveTab('exam')}
+              isActive={activeTab === 'flashcards'}
+            />
+          </div>
+        )}
+
+        {/* STATS: Diagnostic Analytics & Student Score Records */}
+        {activeTab === 'stats' && (
+          <div role="tabpanel" aria-label="Stats">
+            <Dashboard
+              viewMode="stats"
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+              onBackToMain={() => setActiveTab('home')}
+              onStartExam={() => setActiveTab('exam')}
+              isActive={activeTab === 'stats'}
+            />
+          </div>
+        )}
       </main>
 
-      {/* Footer & Reference Links */}
-      <footer className={`border-t py-8 text-xs transition-colors duration-200 ${
-        theme === 'sepia'
-          ? 'bg-[#f4e4c1] border-[#dec596] text-[#795d3a]'
-          : theme === 'light'
-          ? 'bg-white border-slate-200 text-slate-600'
-          : 'bg-slate-900 border-slate-800 text-slate-400'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="w-4 h-4 text-emerald-500" />
-            <span className={`font-semibold ${
-              theme === 'sepia' ? 'text-[#2d1f11]' : theme === 'light' ? 'text-slate-900' : 'text-white'
-            }`}>
-              ICAP ECS - English Communication Skills
-            </span>
-            <span className={`${
-              theme === 'sepia' ? 'text-[#92754c]' : theme === 'light' ? 'text-slate-500' : 'text-slate-500'
-            }`}>
-              • Powered by Google Gemini 2.5 Flash
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 opacity-60" />
-              <span className="font-medium mr-1">Theme:</span>
-              <ThemeSwitcher size="sm" showLabels={true} />
-            </div>
-            <span>•</span>
-            <button
-              onClick={() => setIsApiKeyModalOpen(true)}
-              className="hover:text-emerald-500 transition underline font-medium cursor-pointer"
-            >
-              API Key Config
-            </button>
-            <span>•</span>
-            <span className="text-emerald-500 font-semibold">CA Journey Ready</span>
-          </div>
-        </div>
-      </footer>
+      {/* Senior Developer Footer */}
+      <Footer 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+        hasApiKey={hasApiKey}
+      />
 
       {/* API Key Modal */}
       <ApiKeyModal

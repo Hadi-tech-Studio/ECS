@@ -49,18 +49,18 @@ export async function generateAiGrammarQuestions(
   count: number = 10,
   topics: string[] = ['Verbs', 'Parts of Speech', 'Tenses', 'Articles', 'Collocations', 'Inversions', 'Subjunctive', 'Synonyms', 'Antonyms', 'Modal Conditionals', 'Active / Passive', 'Relative Clauses']
 ): Promise<GrammarQuestion[]> {
-  const prompt = `You are a senior exam designer for the ICAP English Communication Skills (ECS) Aptis General Core Test.
-Generate ${count} distinct, high-quality, professional English grammar multiple-choice questions strictly aligned with the ICAP ECS syllabus.
+  const prompt = `You are a senior exam designer for the Aptis General Core Test.
+Generate ${count} distinct, high-quality English grammar multiple-choice questions covering a wide variety of general English topics (everyday life, education, health, technology, environment, travel, hobbies, social issues, work, relationships, and general knowledge), along with occasional accounting and business topics.
 The questions must cover the following 12 core areas:
 - Verbs (gerunds, infinitives, causatives, phrasal verbs)
 - Parts of Speech (adjectives, adverbs, nouns, prepositions, conjunctions)
-- Tenses (perfect continuous, past perfect, future progressive)
+- Tenses (present, past, continuous, perfect continuous, past perfect, future progressive)
 - Articles & Determiners (definite, indefinite, zero article, quantifiers)
-- Collocations & Business Idioms
+- Collocations & Common Idioms
 - Inversions (negative adverbials, conditionals, correlatives)
 - Subjunctive & Mandative Mood (demands, recommendations, necessity)
-- Synonyms in formal corporate/accounting register
-- Antonyms in formal corporate/accounting register
+- Synonyms across general English contexts
+- Antonyms across general English contexts
 - Modal Conditionals & Mixed Conditionals (unreal past, deduction, obligation)
 - Active / Passive Voice (formal reporting, impersonal structures)
 - Relative Clauses (defining vs non-defining, prepositional relative clauses)
@@ -195,15 +195,16 @@ Return ONLY a valid JSON object matching this schema:
  * Attempts to generate a brand-new Writing Module (Theme, Part 1, Part 2, Part 3, Part 4)
  */
 export async function generateAiWritingModule(): Promise<AptisWritingModule | null> {
-  const prompt = `Create a completely new, authentic Aptis General Writing Test module aligned with the ICAP English Communication Skills (ECS) syllabus.
-Choose an engaging professional or community club context (e.g., Young Corporate Governance Forum, Sustainable Business Circle, Forensic Data Association, Chartered Students Welfare Society, Global Trade Society).
+  const prompt = `Create a completely new, authentic Aptis General Writing Test module.
+Choose an engaging student, collegiate, or community club context (e.g., Young Leaders & Public Speaking Guild, University Technology & Design Society, Campus Environmental Action Circle, Cultural Heritage Association, Collegiate Literary Club).
+CRITICAL RULE: DO NOT include accounting, auditing, or related topics (no balance sheets, audit firms, ISA, IFRS, or ledgers).
 
 Structure:
 1. Part 1: 5 short onboarding questions (1-5 words each).
-2. Part 2: Form Name and prompt requiring a 20-30 words declaration of personal motivation/ethics.
+2. Part 2: Form Name and prompt requiring a 20-30 words declaration of personal motivation/interests.
 3. Part 3: 3 distinct member chat queries with sender names and questions (requiring 30-40 words each).
-4. Part 4: Executive notice announcing an unexpected change or cancellation (e.g. conference venue change, workshop refund converted into vouchers, trip cancelled).
-   - Task A: Informal email to a member friend (40-50 words).
+4. Part 4: Executive notice announcing an unexpected change or request based on general academic/campus events.
+   - Task A: Informal email to a member friend (40-60 words).
    - Task B: Formal email to the President/Authority (120-150 words).
 
 Return ONLY a valid JSON object matching the AptisWritingModule schema:
@@ -230,8 +231,8 @@ Return ONLY a valid JSON object matching the AptisWritingModule schema:
     "clubName": "Club Discussion Room",
     "context": "You are chatting with members. Respond to all 3 messages. (Write 30-40 words each)",
     "memberChats": [
-      { "id": "chat1", "memberName": "Ayesha (Senior Analyst)", "avatarInitials": "AA", "message": "Message 1?", "minWords": 30, "maxWords": 40, "sampleAnswer": "Sample response." },
-      { "id": "chat2", "memberName": "Bilal (Audit Trainee)", "avatarInitials": "BT", "message": "Message 2?", "minWords": 30, "maxWords": 40, "sampleAnswer": "Sample response." },
+      { "id": "chat1", "memberName": "Ayesha (Senior Student)", "avatarInitials": "AS", "message": "Message 1?", "minWords": 30, "maxWords": 40, "sampleAnswer": "Sample response." },
+      { "id": "chat2", "memberName": "Bilal (Project Lead)", "avatarInitials": "BL", "message": "Message 2?", "minWords": 30, "maxWords": 40, "sampleAnswer": "Sample response." },
       { "id": "chat3", "memberName": "Farhan (Coordinator)", "avatarInitials": "FC", "message": "Message 3?", "minWords": 30, "maxWords": 40, "sampleAnswer": "Sample response." }
     ]
   },
@@ -239,9 +240,9 @@ Return ONLY a valid JSON object matching the AptisWritingModule schema:
     "clubName": "Club Executive Announcement",
     "contextNotice": "Official notice text regarding the unexpected event cancellation...",
     "taskA": {
-      "prompt": "Write an email to your club friend. Express your thoughts and suggest an alternative. (Write 40-50 words)",
+      "prompt": "Write an email to your club friend. Express your thoughts and suggest an alternative. (Write 40-60 words)",
       "minWords": 40,
-      "maxWords": 50,
+      "maxWords": 60,
       "sampleAnswer": "Hi... sample informal email."
     },
     "taskB": {
@@ -256,7 +257,7 @@ Return ONLY a valid JSON object matching the AptisWritingModule schema:
   try {
     const result = await callGeminiAPI<AptisWritingModule>({
       prompt,
-      systemInstruction: 'You are an expert Cambridge/Aptis exam designer. Output strict JSON only.',
+      systemInstruction: 'You are an expert Cambridge/Aptis exam designer. Output strict JSON only without conversational text.',
       responseMimeType: 'application/json',
       model: 'gemini-3.1-flash-lite'
     });
@@ -327,59 +328,108 @@ Return ONLY a valid JSON object matching the AptisWritingModule schema:
 
 /**
  * Dynamically generates a brand-new, authentic Part 4 Email Writing Task (Task 4A informal + Task 4B formal)
- * aligned with the ICAP English Communication Skills (ECS) syllabus using Gemini AI.
+/**
+ * Dynamically generates a brand-new, authentic Part 4 Email Writing Task (Task 4A informal + Task 4B formal)
+ * strictly using the attached PDF topics (Formal Emails 1-30, Informal Emails 31-50) using Gemini AI.
  * 
- * Guarantees variety across scenarios, communication purposes, recipients, and contexts.
  * Strictest anti-repetition rules: NEVER produces the default library/Zoom/15% fee task,
- * and verifies that the output has not been previously seen by the student.
+ * NEVER includes accounting or auditing topics, and verifies that the output is fresh.
  */
 export async function generateAiWritingPart4(
   contextTheme?: string,
   excludedKeywords?: string[]
 ): Promise<WritingPart4 | null> {
-  const scenarioAngles = [
-    'Mandatory enterprise accounting software (ERP/SAP) migration scheduled with zero trainee classroom training',
-    'Sudden curtailment of pre-exam study leaves two weeks prior to ICAP CAF examinations due to client audit deadlines',
-    'Abrupt relocation of regional audit offices 40km away along a remote motorway with zero public transport or shuttle',
-    'Whistleblowing discovery: uncompetitive multi-million procurement contracts awarded to client director’s family, with management intimidation',
-    'Revocation of financial database research subscriptions (Bloomberg, Capital IQ) forcing reliance on unverified internet searches',
-    'Cancellation of coveted international audit training secondments (London/Dubai) with zero compensatory opportunities',
-    'Mandatory biometric surveillance and continuous keystroke logging software installed on trainee audit laptops',
-    'Sudden 65% reduction in outstation provincial factory travel per diems and cancellation of intercity transit reimbursements',
-    'Audit client plant manager refusing physical inventory observation access under claim of trade secrets',
-    'Revocation of overtime compensation and transport allowances during peak busy-season statutory reporting',
-    'Unilateral changes to ICAP Continuous Professional Development (CPD) certification criteria disqualifying trainee credits',
-    'Urgent environmental sustainability (ESG) compliance audit finding hazardous chemical storage violations at client facility'
+  const formalPdfTopicsList = [
+    '1. Request for Sponsorship for a College Event',
+    '2. Invitation to a Company for a Seminar',
+    '3. Request for an Internship Opportunity',
+    '4. Application for a Job',
+    '5. Request for Industrial Visit',
+    '6. Invitation to a Guest Speaker',
+    '7. Complaint About Poor Service',
+    '8. Request for a Business Meeting',
+    '9. Proposal for a Corporate Social Responsibility (CSR) Event',
+    '10. Request for Financial Assistance',
+    '11. Invitation to a Company for a Career Fair',
+    '12. Request for a Training Session',
+    '13. Inquiry About Professional Courses',
+    '14. Complaint About Defective Products',
+    '15. Request for Extension of a Deadline',
+    '16. Follow-up on a Job Application',
+    '17. Request for Business Collaboration',
+    '18. Invitation to a Corporate Conference',
+    '19. Request for a Letter of Recommendation',
+    '20. Apology for a Delayed Submission',
+    '21. Request for Permission to Organize an Event',
+    '22. Inquiry About a Company\'s Services',
+    '23. Proposal for a New Business Idea',
+    '24. Request for Employee Training',
+    '25. Invitation to a Business Partner',
+    '26. Notification of a Change in Meeting Schedule',
+    '27. Request for Quotation',
+    '28. Response to a Customer Complaint',
+    '29. Request for Leave',
+    '30. Thank-You Email After a Business Meeting'
   ];
 
-  const randomAngle = scenarioAngles[Math.floor(Math.random() * scenarioAngles.length)];
+  const informalPdfTopicsList = [
+    '31. Inviting a Friend to a Birthday Party',
+    '32. Congratulating a Friend on Success',
+    '33. Thanking a Friend for Help',
+    '34. Apologizing to a Friend',
+    '35. Inviting a Friend to Spend Holidays',
+    '36. Advising a Friend About Career Choices',
+    '37. Sharing Your Exam Results',
+    '38. Describing Your First Day at College',
+    '39. Sharing Your Hostel Experience',
+    '40. Inviting a Friend to a Family Function',
+    '41. Congratulating a Friend on a New Job',
+    '42. Advising a Friend on Exam Preparation',
+    '43. Sharing Your Experience of a College Event',
+    '44. Thanking a Friend for a Gift',
+    '45. Inviting a Friend to a Study Session',
+    '46. Sharing Your Experience of an Educational Trip',
+    '47. Advising a Friend on Time Management',
+    '48. Comforting a Friend After Failure',
+    '49. Sharing Your Future Career Plans',
+    '50. Telling a Friend About Your New College or Academy'
+  ];
 
-  const prompt = `You are a chief examiner designing an authentic writing assessment for the Institute of Chartered Accountants of Pakistan (ICAP) English Communication Skills (ECS) and Cambridge Aptis Writing examination (Part 4: Email Writing).
+  const randomFormal = formalPdfTopicsList[Math.floor(Math.random() * formalPdfTopicsList.length)];
+  const randomInformal = informalPdfTopicsList[Math.floor(Math.random() * informalPdfTopicsList.length)];
 
-Create a COMPLETELY NEW, authentic Part 4 email task.
-CRITICAL MANDATE: NEVER generate anything about a community library, Zoom meetings, or a 15% membership fee increase. This is the banned default question and must NEVER appear.
+  const prompt = `You are a chief examiner designing an authentic writing assessment for the Aptis General Writing Test (Part 4: Email Writing).
 
-Theme Context: ${contextTheme || 'Chartered Accountancy & Professional Corporate Practice'}
-Focus Scenario Angle: ${randomAngle}
+CRITICAL REQUIREMENT:
+The attached official syllabus PDF is the ONLY source for Formal and Informal email topics:
+- Formal Topics (1 to 30)
+- Informal Topics (31 to 50)
+DO NOT include accounting, auditing, or related topics (no balance sheets, audit firms, ISA, IFRS, or ledgers).
+NEVER generate anything about a community library, Zoom meetings, or a 15% fee increase.
+
+Selected Formal Topic: "${randomFormal}"
+Selected Informal Topic: "${randomInformal}"
+
+Theme Context: ${contextTheme || 'College, Career, and Professional Development'}
 
 Requirements:
-1. "scenarioTopic": A concise, realistic workplace/accounting/governance dilemma.
-2. "communicationPurpose": A specific objective (e.g. petitioning against arbitrary directive, requesting policy exemption, proposing compromise schedule, reporting ethics issue, seeking statutory clarification).
-3. "recipientTitle": A realistic senior authority title (e.g. Senior Engagement Partner, Director of Student Training, Head of Quality Assurance & Risk Management, Audit Committee Chairperson, Chief Financial Officer, Human Resources Director, Ethics Ombudsman).
-4. "recipientName": A realistic professional name with honorifics (e.g., Mr. Tariq Mahmud, FCA; Ms. Saira Malik; Dr. Zafar Iqbal; Barrister Asad Alam).
-5. "friendName": A colleague/peer trainee name (e.g., Ahmed, Bilal, Sana, Maria, Daniyal, Hira, Saad, Fatima).
-6. "clubName": The organizational entity or practice group name (e.g., Assurance Practice Committee, ICAP Trainee Council, Regional Audit & Governance Forum).
-7. "contextNotice": A realistic internal memorandum, circular, or directive with reference number and date detailing the sudden policy change, disruption, or crisis (60-100 words).
+1. "scenarioTopic": State the formal topic name and number (e.g., "${randomFormal}")
+2. "communicationPurpose": Specific objective matching the formal topic
+3. "recipientTitle": Realistic professional authority title for the formal topic (e.g., Director of Operations, Course Coordinator, Head of Corporate Relations)
+4. "recipientName": Realistic professional name with title (e.g., Mr. Salman Qureshi, Dr. Sarah Mansoor, Ms. Nadia Farooq)
+5. "friendName": A friend name for Task A (e.g., Hamza, Sara, Bilal, Zainab, Daniyal, Nida, Saad, Amina)
+6. "clubName": The college or organizational entity name (e.g., Student Leadership Council, Campus Career Center)
+7. "contextNotice": Realistic memorandum or notification text (60-90 words) establishing the situation for the topics.
 8. "taskA":
-   - prompt: Prompt to write an informal email to your friend (using the friendName chosen above). Express shock/concern, discuss impact on daily work/studies, and suggest a joint action or meeting to coordinate. (Write 40–60 words)
+   - prompt: Prompt to write an informal email to your friend (${randomInformal}). (Write 40–60 words)
    - minWords: 40
    - maxWords: 60
-   - sampleAnswer: A high-scoring informal email model answer (40-60 words) using natural contractions and conversational tone.
+   - sampleAnswer: A high-scoring informal email model answer (40-60 words).
 9. "taskB":
-   - prompt: Prompt to write a formal email to the designated authority (using recipientTitle and recipientName). Express polite but firm concern/dissent, analyze the risks/impropriety under professional standards, and propose a constructive, workable compromise or solution. (Write 120–150 words)
+   - prompt: Prompt to write a formal email to the recipient (${randomFormal}). (Write 120–150 words)
    - minWords: 120
    - maxWords: 150
-   - sampleAnswer: A high-scoring formal email model answer (120-150 words) adhering strictly to professional etiquette, no informal contractions, sophisticated discourse markers, and clear sign-off.
+   - sampleAnswer: A high-scoring formal email model answer (120-150 words).
 
 Return ONLY a valid JSON object matching this schema:
 {
@@ -407,7 +457,7 @@ Return ONLY a valid JSON object matching this schema:
   try {
     const result = await callGeminiAPI<WritingPart4>({
       prompt,
-      systemInstruction: 'You are an expert Cambridge/Aptis/ICAP exam writer. Always output strictly valid JSON without conversational text.',
+      systemInstruction: 'You are an expert Cambridge/Aptis exam writer. Always output strictly valid JSON without conversational text.',
       responseMimeType: 'application/json',
       model: 'gemini-3.1-flash-lite'
     });
@@ -426,12 +476,12 @@ Return ONLY a valid JSON object matching this schema:
       if (!sim.isSimilar) {
         return {
           id: `ai-w-p4-${Date.now()}`,
-          clubName: result.clubName || 'Professional Practice Council',
-          scenarioTopic: result.scenarioTopic || 'Professional Practice Directive',
-          communicationPurpose: result.communicationPurpose || 'Formal Review and Policy Representation',
-          recipientTitle: result.recipientTitle || 'Senior Practice Partner',
-          recipientName: result.recipientName || 'Mr. Tariq Mahmud, FCA',
-          friendName: result.friendName || 'Ahmed',
+          clubName: result.clubName || 'Student & Professional Association',
+          scenarioTopic: result.scenarioTopic || randomFormal,
+          communicationPurpose: result.communicationPurpose || 'Official Written Representation',
+          recipientTitle: result.recipientTitle || 'Department Director',
+          recipientName: result.recipientName || 'Mr. Salman Qureshi',
+          friendName: result.friendName || 'Hamza',
           contextNotice: result.contextNotice,
           taskA: {
             prompt: result.taskA.prompt,
@@ -452,6 +502,7 @@ Return ONLY a valid JSON object matching this schema:
     console.warn('[aiTestGenerator] AI Part 4 generation fallback to procedural pool:', err);
   }
 
-  return null;
+  // Fallback strictly selects from PDF pool
+  return selectFreshPart4EmailTask(new Set());
 }
 

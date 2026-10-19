@@ -13,6 +13,7 @@ import { APTIS_TEST_SET_1, APTIS_TEST_SET_2 } from './aptisMockData';
 import { INITIAL_EXAM_QUESTIONS } from './mockData';
 import { ADDITIONAL_CURATED_GRAMMAR_POOL } from './expandedGrammarPool';
 import { ICAP_ECS_CURATED_GRAMMAR_POOL, ICAP_CORE_CATEGORIES, IcapCoreCategory } from './icapCoreGrammarPool';
+import { GENERAL_ENGLISH_CORE_POOL } from './generalEnglishCorePool';
 import { 
   EXPANDED_READING_SECTION_1, 
   EXPANDED_READING_SECTION_2, 
@@ -434,6 +435,7 @@ export function mapToIcapCategory(cat: string = '', questionText: string = ''): 
 
 // Combine all grammar questions into the master pool
 export const MASTER_GRAMMAR_POOL: GrammarQuestion[] = [
+  ...GENERAL_ENGLISH_CORE_POOL,
   ...ICAP_ECS_CURATED_GRAMMAR_POOL,
   ...SET_1_GRAMMAR_TAGGED,
   ...SET_2_GRAMMAR_TAGGED,
@@ -464,125 +466,10 @@ export const UNIQUE_GRAMMAR_POOL: GrammarQuestion[] = (() => {
   return unique;
 })();
 
-// Additional pools for Vocabulary Tasks 1-5
-export const EXPANDED_VOCAB_MATCHING_POOL: VocabWordMatchItem[] = [
-  ...APTIS_TEST_SET_1.core.vocabWordMatching,
-  ...APTIS_TEST_SET_2.core.vocabWordMatching,
-  {
-    id: 'vm-pool-01',
-    targetWord: 'reconcile',
-    correctMatch: 'harmonize',
-    options: ['harmonize', 'disregard', 'postpone', 'liquidate'],
-    explanation: '"Reconcile" means to check for harmony or agreement between accounts.',
-    urduExplanation: '"Reconcile" کا مطلب ہے کھاتوں کے درمیان تال میل اور مطابقت پیدا کرنا۔'
-  },
-  {
-    id: 'vm-pool-02',
-    targetWord: 'scrutinize',
-    correctMatch: 'examine closely',
-    options: ['examine closely', 'ignore', 'approve quickly', 'disclose'],
-    explanation: '"Scrutinize" means to examine working papers with close critical detail.',
-    urduExplanation: '"Scrutinize" کا مطلب ہے گہری نظر سے اور باریک بینی سے جانچ پڑتال کرنا۔'
-  },
-  {
-    id: 'vm-pool-03',
-    targetWord: 'statutory',
-    correctMatch: 'mandatory by law',
-    options: ['mandatory by law', 'voluntary', 'temporary', 'customary'],
-    explanation: '"Statutory" means required, enacted, or permitted by statute or law.',
-    urduExplanation: '"Statutory" کا مطلب ہے قانون کے تحت لازمی قرار دیا گیا۔'
-  },
-  {
-    id: 'vm-pool-04',
-    targetWord: 'prudent',
-    correctMatch: 'cautious and sensible',
-    options: ['cautious and sensible', 'reckless', 'hasty', 'generous'],
-    explanation: '"Prudent" denotes acting with care and sound financial foresight.',
-    urduExplanation: '"Prudent" کا مطلب ہے دانشمندانہ، محتاط اور دور اندیش۔'
-  },
-  {
-    id: 'vm-pool-05',
-    targetWord: 'contingent',
-    correctMatch: 'conditional on events',
-    options: ['conditional on events', 'definite', 'permanent', 'irrevocable'],
-    explanation: '"Contingent" describes liabilities dependent on uncertain future outcomes.',
-    urduExplanation: '"Contingent" کا مطلب ہے کسی مستقبل کے واقعے سے مشروط ہونا۔'
-  }
-];
-
-export const EXPANDED_VOCAB_DEFINITIONS_POOL: VocabDefinitionItem[] = [
-  ...APTIS_TEST_SET_1.core.vocabDefinitions,
-  ...APTIS_TEST_SET_2.core.vocabDefinitions,
-  {
-    id: 'vd-pool-01',
-    definition: 'An allocation of the depreciable amount of an asset over its estimated useful economic life.',
-    correctWord: 'Depreciation',
-    options: ['Depreciation', 'Amortization', 'Impairment', 'Depletion'],
-    explanation: 'Depreciation is the systematic write-off of tangible fixed assets.',
-    urduExplanation: 'ٹھوس اثاثوں (Tangible Assets) کی مالیت میں وقت کے ساتھ منظم کمی کو Depreciation کہتے ہیں۔'
-  },
-  {
-    id: 'vd-pool-02',
-    definition: 'The ease with which an asset can be converted into ready cash without impacting price.',
-    correctWord: 'Liquidity',
-    options: ['Liquidity', 'Solvency', 'Profitability', 'Leverage'],
-    explanation: 'Liquidity measures the readiness of assets to settle near-term obligations.',
-    urduExplanation: 'اثاثے کو جلدی کیش میں تبدیل کرنے کی صلاحیت کو Liquidity کہتے ہیں۔'
-  },
-  {
-    id: 'vd-pool-03',
-    definition: 'A legal or ethical relationship of trust and care between an agent and principal.',
-    correctWord: 'Fiduciary',
-    options: ['Fiduciary', 'Beneficiary', 'Arbitrator', 'Guarantor'],
-    explanation: 'A fiduciary has legal and moral duties to act solely in client interest.',
-    urduExplanation: 'امانت داری اور دیانتداری کے قانونی رشتے کو Fiduciary کہتے ہیں۔'
-  },
-  {
-    id: 'vd-pool-04',
-    definition: 'Information whose omission or misstatement could influence economic decisions of users.',
-    correctWord: 'Materiality',
-    options: ['Materiality', 'Prudence', 'Going concern', 'Accrual'],
-    explanation: 'Materiality is the threshold at which financial errors alter stakeholder judgment.',
-    urduExplanation: 'ایسی اہم مالی معلومات جس کے چھپانے سے قاری کا فیصلہ بدل جائے اسے Materiality کہتے ہیں۔'
-  }
-];
-
-export const EXPANDED_VOCAB_COLLOCATIONS_POOL: VocabCollocationItem[] = [
-  ...APTIS_TEST_SET_1.core.vocabCollocations,
-  ...APTIS_TEST_SET_2.core.vocabCollocations,
-  {
-    id: 'vc-pool-01',
-    sentence: 'Auditors are required under the code of ethics to _______ due care and diligence.',
-    options: ['exercise', 'make', 'perform', 'produce'],
-    correctIndex: 0,
-    explanation: '"Exercise due care" is the standard professional governance collocation.',
-    urduExplanation: '"Exercise due care" کا مطلب ہے مکمل احتیاط اور ذمہ داری سے کام انجام دینا۔'
-  },
-  {
-    id: 'vc-pool-02',
-    sentence: 'The CFO called an urgent meeting to _______ the financial implications of the dispute.',
-    options: ['weigh', 'heavier', 'scale', 'balance'],
-    correctIndex: 0,
-    explanation: '"Weigh implications" means to evaluate the consequences carefully.',
-    urduExplanation: '"Weigh implications" کا مطلب ہے مالی اثرات اور نتائج کا بغور جائزہ لینا ہے۔'
-  },
-  {
-    id: 'vc-pool-03',
-    sentence: 'Failure to file annual statutory returns will _______ significant legal penalties.',
-    options: ['incur', 'attract', 'obtain', 'induce'],
-    correctIndex: 0,
-    explanation: '"Incur penalties" means to become subject to financial fines through wrongdoing.',
-    urduExplanation: '"Incur penalties" کا مطلب ہے قانونی سزاؤں یا جرمانوں کا مستوجب بننا۔'
-  },
-  {
-    id: 'vc-pool-04',
-    sentence: 'The committee was finally able to _______ a consensus regarding the revised budget.',
-    options: ['reach', 'arrive', 'strike', 'make'],
-    correctIndex: 0,
-    explanation: '"Reach a consensus" is the customary collocation for collective agreement.',
-    urduExplanation: 'اتفاقِ رائے تک پہنچنے کے لیے انگریزی میں "reach a consensus" استعمال ہوتا ہے۔'
-  }
-];
+// Export comprehensive vocabulary pools across all 5 tasks (General English + occasional business)
+export const EXPANDED_VOCAB_MATCHING_POOL: VocabWordMatchItem[] = FULL_VOCAB_MATCHING_POOL;
+export const EXPANDED_VOCAB_DEFINITIONS_POOL: VocabDefinitionItem[] = FULL_VOCAB_DEFINITIONS_POOL;
+export const EXPANDED_VOCAB_COLLOCATIONS_POOL: VocabCollocationItem[] = FULL_VOCAB_COLLOCATIONS_POOL;
 
 // Reading passages pools
 export const EXPANDED_READING_SECTIONS: {

@@ -131,7 +131,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
         </button>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-inner">
+          <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shadow-inner">
             <Key className="w-6 h-6" />
           </div>
           <div>
@@ -144,10 +144,10 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
           The ICAP English Hub utilizes <span className="font-semibold text-slate-900">Google Gemini Flash</span> to generate exam questions, audit writing scenarios, and sentence diagnostics.
         </p>
 
-        <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3.5 mb-4 text-xs text-emerald-950 flex items-start gap-2.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="bg-blue-50 border border-blue-200/80 rounded-xl p-3.5 mb-4 text-xs text-blue-950 flex items-start gap-2.5">
+          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
           <div>
-            <strong className="font-semibold text-emerald-900">Connected Server-Side:</strong> Gemini is authenticated via Google AI Studio server environment credentials. You can use dynamic practice immediately without providing a custom key.
+            <strong className="font-semibold text-blue-900">Connected Server-Side:</strong> Gemini is authenticated via Google AI Studio server environment credentials. You can use dynamic practice immediately without providing a custom key.
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
               type="button"
               onClick={handleTestKey}
               disabled={isValidating}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 hover:underline disabled:opacity-50"
+              className="text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1 hover:underline disabled:opacity-50"
             >
               {isValidating ? (
                 <>
@@ -183,18 +183,18 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
                 setValidationResult(null);
               }}
               placeholder="AIzaSy... (leave blank to use default project key)"
-              className="w-full px-3.5 py-3 text-sm font-mono rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 focus:bg-white transition"
+              className="w-full px-3.5 py-3 text-sm font-mono rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition"
             />
           </div>
 
           {validationResult && (
             <div className={`p-3 rounded-xl text-xs flex items-start gap-2 border ${
               validationResult.valid
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                ? 'bg-blue-50 border-blue-200 text-blue-900'
                 : 'bg-rose-50 border-rose-200 text-rose-900'
             }`}>
               {validationResult.valid ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
               ) : (
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               )}
@@ -209,16 +209,16 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold hover:underline"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold hover:underline"
             >
               Get Free Key from Google AI Studio <ExternalLink className="w-3.5 h-3.5" />
             </a>
             {currentKey ? (
-              <span className="text-emerald-600 font-medium flex items-center gap-1">
+              <span className="text-blue-600 font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Custom Key Configured
               </span>
             ) : (
-              <span className="text-emerald-600 font-medium flex items-center gap-1">
+              <span className="text-blue-600 font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Project Key Active
               </span>
             )}
@@ -226,8 +226,8 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
         </div>
 
         {savedSuccess && (
-          <div className="mb-4 p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          <div className="mb-4 p-2.5 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-blue-600" />
             <span>API Key successfully validated and saved!</span>
           </div>
         )}
@@ -250,7 +250,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
           <button
             onClick={handleSave}
             disabled={isValidating}
-            className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5"
+            className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-1.5"
           >
             {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             <span>Save &amp; Continue</span>

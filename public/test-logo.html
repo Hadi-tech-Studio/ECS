@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Complete Logo Preview</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; padding: 30px; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .card { border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  .card-light { background: #ffffff; color: #0f172a; }
+  .card-dark { background: #070e1c; color: #f8fafc; border: 1px solid #1e293b; }
+  h2 { margin-top: 0; }
+  .logo-box { width: 68px; height: 68px; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .logo-box-lg { width: 140px; height: 140px; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .badge-dark { background: #081226; border: 1.5px solid rgba(245, 158, 11, 0.6); box-shadow: 0 4px 15px rgba(0,0,0,0.25); }
+  .badge-clean { background: transparent; }
+  img { width: 100%; height: 100%; object-fit: contain; }
+  .row { display: flex; align-items: center; gap: 16px; margin: 16px 0; }
+  .title { font-size: 22px; font-weight: 800; }
+  .sub { font-size: 13px; font-weight: 700; color: #2563eb; text-transform: uppercase; }
+  .fav-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .fav-icon { width: 32px; height: 32px; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <h1 style="text-align:center;">CA Journey Complete Logo & Favicon</h1>
+  
+  <div class="grid">
+    <!-- Light Mode -->
+    <div class="card card-light">
+      <h2>Light Mode Header</h2>
+      <p>Complete Logo (Emblem + CA Journey text) in Royal Dark Badge:</p>
+      <div class="row" style="background:#f1f5f9; padding: 12px; border-radius: 12px;">
+        <div class="logo-box badge-dark">
+          <img src="/logo-full-clean.png" alt="Logo" />
+        </div>
+        <div>
+          <div class="title">ICAP ECS</div>
+          <div class="sub">CA JOURNEY</div>
+        </div>
+      </div>
+
+      <p>Large Hero / Display Size:</p>
+      <div style="display:flex; justify-content:center; padding: 20px; background:#f8fafc; border-radius: 12px;">
+        <div class="logo-box-lg badge-dark">
+          <img src="/logo-full-clean.png" alt="Logo" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode -->
+    <div class="card card-dark">
+      <h2>Dark Mode Header</h2>
+      <p>Complete Logo (Emblem + CA Journey text) in Royal Dark Badge:</p>
+      <div class="row" style="background:#0b1528; padding: 12px; border-radius: 12px; border: 1px solid #1e3052;">
+        <div class="logo-box badge-dark">
+          <img src="/logo-full-clean.png" alt="Logo" />
+        </div>
+        <div>
+          <div class="title" style="color:white;">ICAP ECS</div>
+          <div class="sub" style="color:#60a5fa;">CA JOURNEY</div>
+        </div>
+      </div>
+
+      <p>Large Hero / Display Size:</p>
+      <div style="display:flex; justify-content:center; padding: 20px; background:#040914; border-radius: 12px;">
+        <div class="logo-box-lg badge-dark">
+          <img src="/logo-full-clean.png" alt="Logo" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 600px; margin: 30px auto; background:#1e293b; padding: 20px; border-radius: 12px; text-align:center;">
+    <h3>Browser Tab Favicon Preview</h3>
+    <div style="display:inline-flex; align-items:center; gap: 10px; background:#334155; padding: 8px 16px; border-radius: 8px;">
+      <img src="/favicon-32.png" style="width: 20px; height: 20px;" />
+      <span style="font-size: 13px; font-weight: 500;">ICAP ECS - CA Journey</span>
+    </div>
+  </div>
+</body>
+</html>
