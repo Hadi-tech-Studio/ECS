@@ -5,13 +5,14 @@ import {
   ReadingSection4 
 } from '../types';
 import { APTIS_TEST_SET_1, APTIS_TEST_SET_2 } from './aptisMockData';
+import { PDF_READING_SECTION_1_POOL } from './pdfReadingSection1Pool';
 import { PDF_READING_SECTION_4_POOL } from './pdfReadingSection4Pool';
 
 // ============================================================================
 // READING SECTION 1: Sentence Comprehension / Sentence Completion (5 Gaps)
-// Sourced 100% from the official APTIS Sentence Completion Practice PDF (50 Questions)
+// Sourced 100% strictly from the official APTIS Sentence Completion Practice PDF (50 Questions)
 // ============================================================================
-export const EXPANDED_READING_SECTION_1: ReadingSection1[] = [];
+export const EXPANDED_READING_SECTION_1: ReadingSection1[] = PDF_READING_SECTION_1_POOL;
 
 // ============================================================================
 // READING SECTION 2: Text Cohesion / Scrambled Narrative (6 Sentences)
