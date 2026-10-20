@@ -63,6 +63,11 @@ import {
   clearSeenPdfVocabIds 
 } from '../data/pdfVocabularyPool';
 import { 
+  selectOfficialPdfReadingSection1, 
+  clearSeenPdfReadingSection1Ids, 
+  PDF_READING_SECTION_1_POOL 
+} from '../data/pdfReadingSection1Pool';
+import { 
   select25GrammarQuestionsFromPdf, 
   getSeenPdfGrammarIds, 
   getSeenPdfBaseKeys,
@@ -254,6 +259,7 @@ export function clearExamHistoryAndTracking(): void {
     localStorage.removeItem(`icap_seen_vocab_${prefix}_ids`);
   });
   clearSeenPdfVocabIds();
+  clearSeenPdfReadingSection1Ids();
   clearStudentQuestionHistory();
   window.dispatchEvent(new CustomEvent('icap_exam_reset'));
   window.dispatchEvent(new Event('storage'));
@@ -731,13 +737,8 @@ function generateDynamicTestSetInternal(options?: {
     ...selectedVocabContext.map(v => ({ id: v.id, text: v.targetWord, type: 'vocab' as const }))
   ]);
 
-  // 3. Select Reading Sections (Fresh non-repeating passages from expanded pools or AI)
-  let readingSec1: ReadingSection1 = optionsObj?.aiReadingSection1 || selectFreshReadingSection(
-    EXPANDED_READING_SECTIONS.section1, 
-    'icap_seen_reading_s1_ids', 
-    APTIS_TEST_SET_1.reading.section1,
-    'reading-s1'
-  );
+  // 3. Select Reading Sections (Strictly from official PDF pool for Section 1 Sentence Comprehension)
+  let readingSec1: ReadingSection1 = selectOfficialPdfReadingSection1();
   let readingSec2: ReadingSection2 = selectFreshReadingSection(
     EXPANDED_READING_SECTIONS.section2, 
     'icap_seen_reading_s2_ids', 
@@ -759,7 +760,7 @@ function generateDynamicTestSetInternal(options?: {
 
   // Validate all reading sections
   const valR1 = validateReadingSection1(readingSec1);
-  if (!valR1.valid) readingSec1 = APTIS_TEST_SET_1.reading.section1;
+  if (!valR1.valid) readingSec1 = PDF_READING_SECTION_1_POOL[0];
 
   const valR2 = validateReadingSection2(readingSec2);
   if (!valR2.valid) readingSec2 = APTIS_TEST_SET_1.reading.section2;
@@ -1010,12 +1011,7 @@ export async function generateAiEnrichedTestSet(options?: {
   try {
     const promises: Promise<any>[] = [];
 
-    // Grammar questions are strictly sourced from the official PDF pool (100% adherence to syllabus and PDF items)
-    if (mode === 'full' || mode === 'reading') {
-      promises.push(
-        generateAiReadingSection1().then(res => { if (res) aiReading1 = res; }).catch(() => {})
-      );
-    }
+    // Grammar & Sentence Comprehension questions are strictly sourced from the official PDF pools (100% adherence to syllabus and PDF items)
     if (mode === 'full' || mode === 'writing') {
       promises.push(
         generateAiWritingPart4().then(res => { if (res) aiPart4 = res; }).catch(() => {})
