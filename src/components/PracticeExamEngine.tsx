@@ -46,6 +46,7 @@ import { generateAiWritingPart4 } from '../lib/aiTestGenerator';
 import { selectFreshPart4EmailTask, isPart4DefaultOrBanned } from '../data/expandedPart4EmailPool';
 import { select25GrammarQuestionsFromPdf, cleanArtifacts } from '../data/pdfGrammarPool';
 import { selectOfficialPdfVocabulary } from '../data/pdfVocabularyPool';
+import { selectOfficialPdfReadingSection1 } from '../data/pdfReadingSection1Pool';
 import { recordQuestionsToStudentHistory } from '../lib/questionHistoryService';
 import { useTheme } from '../context/ThemeContext';
 
@@ -68,6 +69,10 @@ export const PracticeExamEngine: React.FC = () => {
           vocabCollocations: officialVocab.vocabCollocations,
           vocabSentenceCompletion: officialVocab.vocabSentenceCompletion,
           vocabContextMatching: officialVocab.vocabContextMatching
+        },
+        reading: {
+          ...updated.reading,
+          section1: selectOfficialPdfReadingSection1()
         }
       };
       if (isPart4DefaultOrBanned(updated.writing.part4)) {
