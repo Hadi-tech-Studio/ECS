@@ -411,33 +411,22 @@ function toVocabSentenceItem(q: RawPdfVocabQuestion): VocabCollocationItem {
   };
 }
 
-// List of extreme C1-C2 / advanced GRE vocabulary words to ensure they are strictly treated as 'Difficult'
-const ADVANCED_GRE_WORDS = new Set([
-  'aberration', 'abjure', 'abject', 'abhor', 'abdicate', 'abate', 'abet', 'abscond', 'acquiesce', 'acerbic',
-  'anarchy', 'animosity', 'apathy', 'appease', 'arduous', 'ascetic', 'assiduous', 'avarice', 'banal', 'belittle',
-  'bequeath', 'blatant', 'boorish', 'cajole', 'callous', 'castigate', 'churlish', 'craven', 'cynical', 'defamation',
-  'deleterious', 'demagogue', 'derision', 'despot', 'diatribe', 'didactic', 'diffident', 'disparage', 'ebullient',
-  'eclectic', 'effrontery', 'egregious', 'elegy', 'ephemeral', 'erudite', 'esoteric', 'eulogy', 'evanescent',
-  'exacerbate', 'exculpate', 'exigent', 'exonerate', 'fastidious', 'fatuous', 'fawning', 'garrulous', 'hackneyed',
-  'hapless', 'harangue', 'hedonist', 'hegemony', 'iconoclast', 'ignominious', 'immutable', 'impecunious',
-  'impervious', 'impetuous', 'implacable', 'impudent', 'inchoate', 'indefatigable', 'indolent', 'ineffable',
-  'ineluctable', 'ingenuous', 'inimical', 'insidious', 'insipid', 'insolent', 'intransigent', 'invective',
-  'inveterate', 'irascible', 'laconic', 'largesse', 'lethargic', 'loquacious', 'magnanimous', 'malevolent',
-  'maverick', 'mendacious', 'mercurial', 'modicum', 'morose', 'multifarious', 'munificent', 'myriad', 'nadir',
-  'nascent', 'nefarious', 'neophyte', 'noisome', 'obdurate', 'obfuscate', 'obsequious', 'obstinate', 'obstreperous',
-  'onerous', 'opprobrium', 'ostentatious', 'panacea', 'pariah', 'parsimonious', 'paucity', 'pedantic', 'pejorative',
-  'penurious', 'perfidious', 'perfunctory', 'pernicious', 'petulant', 'phlegmatic', 'pithy', 'placate', 'platitude',
-  'plethora', 'polemic', 'precarious', 'precipitate', 'preclude', 'predilection', 'prodigal', 'profligate',
-  'prolific', 'prosaic', 'proscribe', 'puerile', 'pugnacious', 'pulchritude', 'punctilious', 'pungent',
-  'pusillanimous', 'quell', 'querulous', 'quixotic', 'quotidian', 'rancour', 'rapacious', 'recalcitrant', 'recant',
-  'recondite', 'redoubtable', 'relegate', 'reprobate', 'repudiate', 'rescind', 'reticent', 'revere', 'rhetoric',
-  'sagacious', 'salient', 'salubrious', 'sanctimonious', 'sanguine', 'scintillating', 'scrupulous', 'sedulous',
-  'servile', 'soporific', 'specious', 'spurious', 'staunch', 'stolid', 'stratagem', 'strident', 'substantiate',
-  'supercilious', 'superfluous', 'surreptitious', 'sycophant', 'tacit', 'taciturn', 'tantamount', 'temerity',
-  'tenacious', 'tenuous', 'timorous', 'tirade', 'torpid', 'tractable', 'transient', 'trepidation', 'truculent',
-  'ubiquitous', 'umbrage', 'unctuous', 'upbraid', 'usurp', 'vacillate', 'venerate', 'veracity', 'verbose',
-  'vexation', 'vicarious', 'vilify', 'vindicate', 'virulent', 'vituperate', 'vociferous', 'voluble', 'voracious',
-  'wane', 'wanton', 'winsome', 'wizened', 'xenophobia', 'zealous', 'zenith'
+// ---------------------------------------------------------------------------
+// DIFFICULTY CALIBRATION
+// Only these words are treated as 'Difficult'. Everything else is Easy/Moderate
+// based on the PDF's own numbering (num ≤ 100 → Easy, 101–200 → Moderate).
+// This keeps ≤ 1 Hard question per 5-question task (Easy-to-Moderate overall).
+// ---------------------------------------------------------------------------
+const HARD_VOCAB_WORDS = new Set([
+  // Truly advanced / C1-C2 words that are appropriate as Hard
+  'ebullient', 'ephemeral', 'erudite', 'esoteric', 'exacerbate', 'exonerate',
+  'fastidious', 'irascible', 'laconic', 'lethargic', 'magnanimous', 'malevolent',
+  'nefarious', 'obdurate', 'ostentatious', 'parsimonious', 'perfidious', 'perfunctory',
+  'precarious', 'precipitate', 'predilection', 'pugnacious', 'rancour', 'recalcitrant',
+  'sagacious', 'spurious', 'surreptitious', 'tacit', 'tenacious', 'ubiquitous',
+  'vindicate', 'voracious', 'zealous', 'assiduous', 'avarice', 'enigmatic',
+  'equanimity', 'gregarious', 'haughty', 'ingenuous', 'insipid', 'malleable',
+  'ostensible', 'paradox', 'quintessential', 'reticent', 'rhetoric', 'transient',
 ]);
 
 function getNormalizedTargetWord(q: RawPdfVocabQuestion): string {
@@ -448,119 +437,198 @@ function getNormalizedTargetWord(q: RawPdfVocabQuestion): string {
 }
 
 /**
- * Returns the calibrated lexical difficulty of a question so that each test
- * has at most 1 hard question, and the rest are accessible medium/easy questions.
+ * Calibrates difficulty: max ~1 Hard per 5-question task.
+ * Easy  → num ≤ 100 and NOT in HARD_VOCAB_WORDS
+ * Moderate → num 101-200 and NOT in HARD_VOCAB_WORDS
+ * Difficult → in HARD_VOCAB_WORDS OR num > 200
  */
 function getCalibratedDifficulty(q: RawPdfVocabQuestion): 'Easy' | 'Moderate' | 'Difficult' {
   const target = getNormalizedTargetWord(q);
-  if (ADVANCED_GRE_WORDS.has(target)) {
-    return 'Difficult';
-  }
+  if (HARD_VOCAB_WORDS.has(target)) return 'Difficult';
   if (q.num <= 100) return 'Easy';
   if (q.num <= 200) return 'Moderate';
   return 'Difficult';
 }
 
+import { generateAutoVocabQuestions } from './pdfVocabAutoGenerator';
+
+// ---------------------------------------------------------------------------
+// SEEN-TRACKING — one key per question category so tasks never share a pool
+// ---------------------------------------------------------------------------
+const SEEN_KEYS = {
+  match1:  'icap_seen_match1',   // Task 1: Word Matching  (first 125 of matchQuestions)
+  def:     'icap_seen_def',      // Task 2: Word Definitions
+  colloc:  'icap_seen_colloc',   // Task 3: Collocations
+  usage:   'icap_seen_usage',    // Task 4: Word Usage
+  match5:  'icap_seen_match5',   // Task 5: Context Matching (last 125 of matchQuestions)
+  synth:   'icap_seen_synth',    // Supplementary generated questions
+} as const;
+
+function loadSeenSet(key: string): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch { return new Set(); }
+}
+
+function saveSeenSet(key: string, seen: Set<string>): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(key, JSON.stringify(Array.from(seen))); } catch { /* quota */ }
+}
+
+/** Clears ALL vocabulary seen-sets so the full pool restarts. */
+export function clearAllVocabSeenSets(): void {
+  memorySeenVocabIds = new Set<string>();
+  if (typeof window === 'undefined') return;
+  Object.values(SEEN_KEYS).forEach(k => {
+    try { localStorage.removeItem(k); } catch { /* ignore */ }
+  });
+  try { localStorage.removeItem(SEEN_PDF_VOCAB_STORAGE_KEY); } catch { /* ignore */ }
+}
+
 /**
- * Helper to select exactly N questions of a specific difficulty from a question list,
- * avoiding already seen questions until the pool is exhausted, then resetting that bucket.
+ * Picks unseen questions strictly from the official PDF pool first.
+ * If the PDF pool for that difficulty is exhausted, automatically generates
+ * new MCQs matching the same PDF format, content, and difficulty.
+ * Guaranteed: strictly NO repeating questions across tests or attempts.
  */
-function pickBucket(
-  pool: RawPdfVocabQuestion[],
+function pickPdfOrAutoGenerate(
+  pdfPool: RawPdfVocabQuestion[],
+  category: 'Word Matching' | 'Word Definition' | 'Word Combination' | 'Word Usage',
   difficulty: 'Easy' | 'Moderate' | 'Difficult',
   count: number,
   seenSet: Set<string>,
-  excludeIdsInCurrentAttempt: Set<string>
+  reservedInAttempt: Set<string>,
+  namespace = 'pdf'
 ): RawPdfVocabQuestion[] {
-  const diffPool = pool.filter(q => getCalibratedDifficulty(q) === difficulty);
-  let available = diffPool.filter(q => !seenSet.has(q.id) && !excludeIdsInCurrentAttempt.has(q.id));
+  // 1. Pick strictly unseen questions from the official PDF pool first
+  const diffPool = pdfPool.filter(q => getCalibratedDifficulty(q) === difficulty);
+  const availablePdf = diffPool.filter(q => !seenSet.has(q.id) && !reservedInAttempt.has(q.id));
+  const chosenFromPdf = shuffle(availablePdf).slice(0, count);
 
-  // If not enough unseen items remain in this difficulty bucket, reset this bucket in seenSet
-  if (available.length < count) {
-    diffPool.forEach(q => seenSet.delete(q.id));
-    available = diffPool.filter(q => !excludeIdsInCurrentAttempt.has(q.id));
-  }
-
-  const shuffled = shuffle(available);
-  const selected = shuffled.slice(0, count);
-
-  // Fallback if somehow still short
-  if (selected.length < count) {
-    const remainingNeeded = count - selected.length;
-    const others = diffPool.filter(q => !selected.some(s => s.id === q.id));
-    selected.push(...shuffle(others).slice(0, remainingNeeded));
-  }
-
-  // Mark selected items as seen and reserve for current attempt
-  selected.forEach(q => {
+  chosenFromPdf.forEach(q => {
     seenSet.add(q.id);
-    excludeIdsInCurrentAttempt.add(q.id);
+    reservedInAttempt.add(q.id);
   });
 
-  return selected;
+  // 2. If all PDF questions for this category & difficulty are exhausted,
+  // automatically generate brand-new, unique MCQs matching the PDF's format and difficulty.
+  const needed = count - chosenFromPdf.length;
+  if (needed <= 0) {
+    return chosenFromPdf;
+  }
+
+  const generated = generateAutoVocabQuestions(
+    category,
+    difficulty,
+    needed,
+    seenSet,
+    reservedInAttempt,
+    namespace
+  );
+
+  return [...chosenFromPdf, ...generated];
 }
 
+// ---------------------------------------------------------------------------
+// EXPORTED INTERFACE & MAIN SELECTOR
+// ---------------------------------------------------------------------------
 export interface SelectedOfficialVocabulary {
-  vocabWordMatching: VocabWordMatchItem[];      // Task 1: Word Matching (5 MCQs: 2 Easy, 2 Moderate, 1 Difficult)
-  vocabDefinitions: VocabDefinitionItem[];       // Task 2: Word Definitions (5 MCQs: 2 Easy, 2 Moderate, 1 Difficult)
-  vocabCollocations: VocabCollocationItem[];     // Task 3: Combinations / Collocations (5 MCQs: 2 Easy, 2 Moderate, 1 Difficult)
-  vocabSentenceCompletion: VocabCollocationItem[]; // Task 4: Word Usage (5 MCQs: 2 Easy, 2 Moderate, 1 Difficult)
-  vocabContextMatching: VocabWordMatchItem[];   // Task 5: Context Matching (5 MCQs: 2 Easy, 2 Moderate, 1 Difficult)
+  vocabWordMatching: VocabWordMatchItem[];        // Task 1: Word Matching
+  vocabDefinitions: VocabDefinitionItem[];         // Task 2: Word Definitions
+  vocabCollocations: VocabCollocationItem[];       // Task 3: Collocations
+  vocabSentenceCompletion: VocabCollocationItem[]; // Task 4: Word Usage / Sentence Completion
+  vocabContextMatching: VocabWordMatchItem[];      // Task 5: Context Matching (synonym-style)
 }
 
 /**
- * Selects 25 official vocabulary questions strictly from the 1,000 PDF questions:
- * - 5 MCQs per category/task: exactly 2 Easy, 2 Moderate, 1 Difficult (Hard).
- * - Randomizes questions on every test attempt.
- * - Tracks seen questions in localStorage to avoid repetition until all PDF questions are used.
+ * Selects 25 vocabulary questions (5 per task) with strict no-repeat tracking:
+ *
+ * Difficulty per task:
+ * - 2 Easy
+ * - 2 Moderate
+ * - 1 Hard (Difficult)
+ * Total across all 25 questions: 10 Easy, 10 Moderate, 5 Difficult.
+ * This keeps Vocabulary MCQs easy-to-moderate (80%), with only a few hard questions (20%),
+ * perfectly calibrated for the ICAP ECS exam.
+ *
+ * Execution flow:
+ * 1. Strictly uses all 1,000 official questions from the uploaded PDF first.
+ * 2. Tasks 1 and 5 draw from separate, non-overlapping halves of matchQuestions so they
+ *    never display the same word twice in the same test session.
+ * 3. Once the PDF questions are exhausted for any category & difficulty, new unique MCQs
+ *    are automatically generated matching the exact PDF content, format, and difficulty.
+ * 4. All question IDs and signatures are tracked per-category in localStorage, strictly
+ *    preventing any question from repeating anywhere across tests or attempts.
  */
 export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
-  const seenSet = getSeenPdfVocabIds();
-  const currentAttemptReservedIds = new Set<string>();
+  // Per-category seen sets (separate so tasks 1 & 5 never collide)
+  const seen1    = loadSeenSet(SEEN_KEYS.match1);
+  const seen2    = loadSeenSet(SEEN_KEYS.def);
+  const seen3    = loadSeenSet(SEEN_KEYS.colloc);
+  const seen4    = loadSeenSet(SEEN_KEYS.usage);
+  const seen5    = loadSeenSet(SEEN_KEYS.match5);
 
-  // Task 1: Word Matching (5 items: 2 Easy, 2 Moderate, 1 Difficult)
+  // Task 1 & 5 use DIFFERENT non-overlapping halves of matchQuestions
+  const allMatch = PDF_VOCABULARY_1000.matchQuestions;
+  const midpoint = Math.ceil(allMatch.length / 2);
+  const matchPool1 = allMatch.slice(0, midpoint);          // first 125 → Task 1
+  const matchPool5 = allMatch.slice(midpoint);             // last 125  → Task 5
+
+  const reservedThisAttempt = new Set<string>();
+
+  // --- TASK 1: Word Matching (2 Easy, 2 Moderate, 1 Difficult) ---
   const task1Raw = [
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Easy', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Moderate', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Difficult', 1, seenSet, currentAttemptReservedIds)
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Easy', 2, seen1, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Moderate', 2, seen1, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Difficult', 1, seen1, reservedThisAttempt, 't1')
   ];
 
-  // Task 2: Word Definitions (5 items: 2 Easy, 2 Moderate, 1 Difficult)
+  // --- TASK 2: Word Definitions (2 Easy, 2 Moderate, 1 Difficult) ---
   const task2Raw = [
-    ...pickBucket(PDF_VOCABULARY_1000.defQuestions, 'Easy', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.defQuestions, 'Moderate', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.defQuestions, 'Difficult', 1, seenSet, currentAttemptReservedIds)
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Easy', 2, seen2, reservedThisAttempt, 't2'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Moderate', 2, seen2, reservedThisAttempt, 't2'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Difficult', 1, seen2, reservedThisAttempt, 't2')
   ];
 
-  // Task 3: Word Combination / Collocations (5 items: 2 Easy, 2 Moderate, 1 Difficult)
+  // --- TASK 3: Collocations (2 Easy, 2 Moderate, 1 Difficult) ---
   const task3Raw = [
-    ...pickBucket(PDF_VOCABULARY_1000.collocQuestions, 'Easy', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.collocQuestions, 'Moderate', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.collocQuestions, 'Difficult', 1, seenSet, currentAttemptReservedIds)
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Easy', 2, seen3, reservedThisAttempt, 't3'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Moderate', 2, seen3, reservedThisAttempt, 't3'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Difficult', 1, seen3, reservedThisAttempt, 't3')
   ];
 
-  // Task 4: Word Usage / Sentence Completion (5 items: 2 Easy, 2 Moderate, 1 Difficult)
+  // --- TASK 4: Word Usage / Sentence Completion (2 Easy, 2 Moderate, 1 Difficult) ---
   const task4Raw = [
-    ...pickBucket(PDF_VOCABULARY_1000.usageQuestions, 'Easy', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.usageQuestions, 'Moderate', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.usageQuestions, 'Difficult', 1, seenSet, currentAttemptReservedIds)
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Easy', 2, seen4, reservedThisAttempt, 't4'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Moderate', 2, seen4, reservedThisAttempt, 't4'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Difficult', 1, seen4, reservedThisAttempt, 't4')
   ];
 
-  // Task 5: Context Matching / Synonyms (5 items: 2 Easy, 2 Moderate, 1 Difficult from distinct matchQuestions)
+  // --- TASK 5: Context Matching (2 Easy, 2 Moderate, 1 Difficult) — uses DIFFERENT half of matchQuestions ---
   const task5Raw = [
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Easy', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Moderate', 2, seenSet, currentAttemptReservedIds),
-    ...pickBucket(PDF_VOCABULARY_1000.matchQuestions, 'Difficult', 1, seenSet, currentAttemptReservedIds)
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Easy', 2, seen5, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Moderate', 2, seen5, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Difficult', 1, seen5, reservedThisAttempt, 't5')
   ];
 
-  // Persist updated seen IDs
-  saveSeenPdfVocabIds(seenSet);
+  // Persist all per-category seen sets
+  saveSeenSet(SEEN_KEYS.match1, seen1);
+  saveSeenSet(SEEN_KEYS.def,    seen2);
+  saveSeenSet(SEEN_KEYS.colloc, seen3);
+  saveSeenSet(SEEN_KEYS.usage,  seen4);
+  saveSeenSet(SEEN_KEYS.match5, seen5);
+  // Also update the legacy seen set for backwards compatibility
+  saveSeenPdfVocabIds(new Set([...seen1, ...seen2, ...seen3, ...seen4, ...seen5]));
 
   return {
-    vocabWordMatching: shuffle(task1Raw).map(toVocabWordMatchItem),
-    vocabDefinitions: shuffle(task2Raw).map(toVocabDefinitionItem),
-    vocabCollocations: shuffle(task3Raw).map(toVocabCollocationItem),
+    vocabWordMatching:       shuffle(task1Raw).map(toVocabWordMatchItem),
+    vocabDefinitions:        shuffle(task2Raw).map(toVocabDefinitionItem),
+    vocabCollocations:       shuffle(task3Raw).map(toVocabCollocationItem),
     vocabSentenceCompletion: shuffle(task4Raw).map(toVocabSentenceItem),
-    vocabContextMatching: shuffle(task5Raw).map(toVocabWordMatchItem)
+    vocabContextMatching:    shuffle(task5Raw).map(toVocabWordMatchItem),
   };
 }
