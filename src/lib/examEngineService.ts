@@ -67,6 +67,11 @@ import {
   clearSeenPdfReadingSection1Ids, 
   PDF_READING_SECTION_1_POOL 
 } from '../data/pdfReadingSection1Pool';
+import { generateSyntheticReadingSection1 } from '../data/readingSection1AutoGenerator';
+import { generateSyntheticReadingSection2 } from '../data/readingSection2AutoGenerator';
+import { generateSyntheticReadingSection3 } from '../data/readingSection3AutoGenerator';
+import { generateSyntheticReadingSection4 } from '../data/readingSection4AutoGenerator';
+import { generateSyntheticWritingModule } from '../data/writingAutoGenerator';
 import { 
   select25GrammarQuestionsFromPdf, 
   getSeenPdfGrammarIds, 
@@ -202,13 +207,13 @@ function getSeenKeys(storageKey: string): Set<string> {
 /**
  * Generic helper to mark seen IDs for any pool (non-blocking)
  */
-function markSeenKeys(storageKey: string, ids: string[], maxLimit = 200): void {
+function markSeenKeys(storageKey: string, ids: string[], maxLimit = 50000): void {
   if (ids.length === 0) return;
   const current = getSeenKeys(storageKey);
   ids.forEach(id => current.add(id));
   let arr = Array.from(current);
   if (arr.length > maxLimit) {
-    arr = arr.slice(arr.length - Math.floor(maxLimit * 0.5));
+    arr = arr.slice(arr.length - Math.floor(maxLimit * 0.8));
   }
   memorySeenCache.set(storageKey, new Set(arr));
 
@@ -236,7 +241,7 @@ export function getSeenQuestionIds(): Set<string> {
  * Mark question IDs as seen in localStorage
  */
 export function markQuestionsSeen(ids: string[]): void {
-  markSeenKeys(SEEN_QUESTIONS_KEY, ids, Math.max(400, UNIQUE_GRAMMAR_POOL.length));
+  markSeenKeys(SEEN_QUESTIONS_KEY, ids, 50000);
 }
 
 /**
@@ -504,7 +509,9 @@ export function shuffleVocabCollocOptions(item: VocabCollocationItem): VocabColl
 
 
 /**
- * Selects an unseen reading section from a pool, validating and ensuring no repeats
+ * Selects an unseen reading section from a pool, validating and ensuring no repeats.
+ * When the pool is exhausted, automatically generates brand-new reading passages
+ * matching ICAP ECS format and difficulty so questions NEVER repeat.
  */
 function selectFreshReadingSection<T extends { id: string; title: string }>(
   pool: T[], 
@@ -512,11 +519,10 @@ function selectFreshReadingSection<T extends { id: string; title: string }>(
   fallback: T,
   sectionType: 'reading-s1' | 'reading-s2' | 'reading-s3' | 'reading-s4'
 ): T {
-  if (!pool || pool.length === 0) return fallback;
   const seen = getSeenKeys(storageKey);
   
   // Filter candidates that have not been seen by ID and are not similar to student history
-  const validCandidates = pool.filter(item => {
+  const validCandidates = (pool || []).filter(item => {
     if (seen.has(item.id)) return false;
     const sim = isQuestionSubstantiallySimilar(item.title, sectionType, undefined, 0.60);
     return !sim.isSimilar;
@@ -526,17 +532,19 @@ function selectFreshReadingSection<T extends { id: string; title: string }>(
   if (validCandidates.length > 0) {
     chosen = validCandidates[Math.floor(Math.random() * validCandidates.length)];
   } else {
-    // If all seen or similar, pick from pool and reset storage key
-    const nonRepeated = pool.filter(item => !seen.has(item.id));
-    chosen = nonRepeated.length > 0 
-      ? nonRepeated[Math.floor(Math.random() * nonRepeated.length)]
-      : pool[Math.floor(Math.random() * pool.length)];
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(storageKey);
+    // Pool exhausted: automatically generate brand-new, unique reading section matching format & syllabus
+    if (sectionType === 'reading-s2') {
+      chosen = generateSyntheticReadingSection2(seen) as unknown as T;
+    } else if (sectionType === 'reading-s3') {
+      chosen = generateSyntheticReadingSection3(seen) as unknown as T;
+    } else if (sectionType === 'reading-s4') {
+      chosen = generateSyntheticReadingSection4(seen) as unknown as T;
+    } else {
+      chosen = generateSyntheticReadingSection1(seen) as unknown as T;
     }
   }
 
-  markSeenKeys(storageKey, [chosen.id], pool.length + 5);
+  markSeenKeys(storageKey, [chosen.id], 50000);
   return chosen;
 }
 
@@ -751,25 +759,20 @@ function generateDynamicTestSetInternal(options?: {
     APTIS_TEST_SET_1.reading.section3,
     'reading-s3'
   );
-  let readingSec4: ReadingSection4 = selectFreshReadingSection(
-    EXPANDED_READING_SECTIONS.section4, 
-    'icap_seen_reading_s4_ids', 
-    APTIS_TEST_SET_1.reading.section4,
-    'reading-s4'
-  );
+  let readingSec4: ReadingSection4 = selectFreshPdfReadingSection4(getSeenKeys('icap_seen_reading_s4_ids'));
 
-  // Validate all reading sections
+  // Validate all reading sections without repeating fallback defaults
   const valR1 = validateReadingSection1(readingSec1);
-  if (!valR1.valid) readingSec1 = PDF_READING_SECTION_1_POOL[0];
+  if (!valR1.valid) readingSec1 = generateSyntheticReadingSection1(new Set());
 
   const valR2 = validateReadingSection2(readingSec2);
-  if (!valR2.valid) readingSec2 = APTIS_TEST_SET_1.reading.section2;
+  if (!valR2.valid) readingSec2 = generateSyntheticReadingSection2(new Set());
 
   const valR3 = validateReadingSection3(readingSec3);
-  if (!valR3.valid) readingSec3 = APTIS_TEST_SET_1.reading.section3;
+  if (!valR3.valid) readingSec3 = generateSyntheticReadingSection3(new Set());
 
   const valR4 = validateReadingSection4(readingSec4);
-  if (!valR4.valid) readingSec4 = APTIS_TEST_SET_1.reading.section4;
+  if (!valR4.valid) readingSec4 = generateSyntheticReadingSection4(new Set());
 
   const selectedReading = {
     section1: readingSec1,
@@ -801,20 +804,20 @@ function generateDynamicTestSetInternal(options?: {
       return !sim.isSimilar;
     });
 
-    selectedWriting = unseenWriting.length > 0 
-      ? { ...unseenWriting[Math.floor(Math.random() * unseenWriting.length)] }
-      : { ...EXPANDED_WRITING_MODULES[Math.floor(Math.random() * EXPANDED_WRITING_MODULES.length)] };
-    
-    if (unseenWriting.length === 0 && typeof window !== 'undefined') {
-      localStorage.removeItem(writingSeenKey);
+    if (unseenWriting.length > 0) {
+      selectedWriting = { ...unseenWriting[Math.floor(Math.random() * unseenWriting.length)] };
+    } else {
+      // Writing modules exhausted: generate brand-new unique club onboarding scenario
+      selectedWriting = generateSyntheticWritingModule(writingSeen);
     }
-    markSeenKeys(writingSeenKey, [selectedWriting.themeName], EXPANDED_WRITING_MODULES.length + 2);
+    
+    markSeenKeys(writingSeenKey, [selectedWriting.themeName], 50000);
   }
 
   // Validate writing module
   const valW = validateWritingModule(selectedWriting);
   if (!valW.valid) {
-    selectedWriting = { ...EXPANDED_WRITING_MODULES[0] };
+    selectedWriting = generateSyntheticWritingModule(new Set());
   }
 
   // CRITICAL: Ensure Part 4 is ALWAYS a truly new, non-repeating email writing task strictly using official PDF topics (1-30 Formal, 31-50 Informal)
@@ -838,7 +841,7 @@ function generateDynamicTestSetInternal(options?: {
       selectedWriting.part4.scenarioTopic || '', 
       selectedWriting.part4.clubName
     ].filter(Boolean), 
-    30
+    50000
   );
 
   // Record writing scenario and Part 4 to student history for strict similarity checking
