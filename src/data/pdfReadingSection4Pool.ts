@@ -1,4 +1,5 @@
 import { ReadingSection4 } from '../types';
+import { generateSyntheticReadingSection4 } from './readingSection4AutoGenerator';
 
 /**
  * Official ICAP ECS Long Text Comprehension Question Pool
@@ -2944,19 +2945,13 @@ export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSec
   // Find candidate questions not yet seen
   const candidates = safePool.filter(item => !currentSeen.has(item.id));
 
-  let chosen: PdfLongTextQuestion;
+  let chosen: ReadingSection4;
   if (candidates.length > 0) {
     chosen = candidates[Math.floor(Math.random() * candidates.length)];
   } else {
-    // If all questions have been seen, reset the tracker to restart cycle smoothly
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('icap_seen_pdf_reading_s4_ids');
-      } catch {
-        // ignore
-      }
-    }
-    chosen = safePool[Math.floor(Math.random() * safePool.length)];
+    // All 48 PDF questions have been seen!
+    // Automatically generate brand-new, unique Reading Section 4 exercise so questions never repeat.
+    chosen = generateSyntheticReadingSection4(currentSeen);
   }
 
   // Record chosen ID to localStorage
