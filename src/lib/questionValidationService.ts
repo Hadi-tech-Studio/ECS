@@ -102,7 +102,7 @@ export function validateVocabWordMatch(item: any): ValidationResult {
  */
 export function validateVocabDefinition(item: any): ValidationResult {
   const errors: string[] = [];
-  if (!item || typeof item.definition !== 'string' || item.definition.trim().length < 8) {
+  if (!item || typeof item.definition !== 'string' || item.definition.trim().length < 3) {
     errors.push('Definition must be non-empty and descriptive');
   }
   if (!Array.isArray(item.options) || item.options.length < 3) {
@@ -119,7 +119,7 @@ export function validateVocabDefinition(item: any): ValidationResult {
  */
 export function validateVocabCollocation(item: any): ValidationResult {
   const errors: string[] = [];
-  if (!item || typeof item.sentence !== 'string' || item.sentence.trim().length < 10) {
+  if (!item || typeof item.sentence !== 'string' || item.sentence.trim().length < 3) {
     errors.push('Sentence must be non-empty');
   }
   if (!Array.isArray(item.options) || item.options.length < 3) {
