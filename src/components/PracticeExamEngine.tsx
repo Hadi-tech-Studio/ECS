@@ -504,13 +504,13 @@ export const PracticeExamEngine: React.FC = () => {
       trackVocabItem('Contextual Usage', correct, answered);
     });
 
-    // 3. Reading Scores: (out of 50)
+    // 3. Reading Scores: (out of 25)
     let readingPoints = 0;
     let readingCorrect = 0;
     let readingIncorrect = 0;
     let readingUnanswered = 0;
 
-    // Section 1: 5 gaps -> 2.5 pts each = 12.5 pts
+    // Section 1: 5 gaps -> 1.25 pts each = 6.25 pts
     if (!topicTracker['Reading Gap-Fill & Cohesion']) {
       topicTracker['Reading Gap-Fill & Cohesion'] = { correct: 0, total: 0, module: 'Reading' };
     }
@@ -520,7 +520,7 @@ export const PracticeExamEngine: React.FC = () => {
       if (ans === undefined || ans === null) {
         readingUnanswered += 1;
       } else if (ans === p.correctIndex) {
-        readingPoints += 2.5;
+        readingPoints += 1.25;
         readingCorrect += 1;
         topicTracker['Reading Gap-Fill & Cohesion'].correct += 1;
       } else {
@@ -528,7 +528,7 @@ export const PracticeExamEngine: React.FC = () => {
       }
     });
 
-    // Section 2: 6 sentences reordering -> 12.5 pts max
+    // Section 2: 6 sentences reordering -> 6.25 pts max
     const correctSeq = currentTestSet.reading.section2.correctOrder;
     let sec2Matches = 0;
     if (!topicTracker['Text Coherence & Sequencing']) {
@@ -544,9 +544,9 @@ export const PracticeExamEngine: React.FC = () => {
         readingIncorrect += 1;
       }
     });
-    readingPoints += (sec2Matches / 6) * 12.5;
+    readingPoints += (sec2Matches / 6) * 6.25;
 
-    // Section 3: 7 questions -> 12.5 pts
+    // Section 3: 7 questions -> 6.25 pts
     if (!topicTracker['Multi-Text Information Matching']) {
       topicTracker['Multi-Text Information Matching'] = { correct: 0, total: 0, module: 'Reading' };
     }
@@ -556,7 +556,7 @@ export const PracticeExamEngine: React.FC = () => {
       if (!ans) {
         readingUnanswered += 1;
       } else if (ans.trim().toUpperCase() === (q.correctPersonId || '').trim().toUpperCase()) {
-        readingPoints += (12.5 / 7);
+        readingPoints += (6.25 / 7);
         readingCorrect += 1;
         topicTracker['Multi-Text Information Matching'].correct += 1;
       } else {
@@ -564,7 +564,7 @@ export const PracticeExamEngine: React.FC = () => {
       }
     });
 
-    // Section 4: 5 paragraphs -> 12.5 pts (2.5 pts each)
+    // Section 4: 5 paragraphs -> 6.25 pts (1.25 pts each)
     if (!topicTracker['Paragraph Gist & Headings']) {
       topicTracker['Paragraph Gist & Headings'] = { correct: 0, total: 0, module: 'Reading' };
     }
@@ -574,7 +574,7 @@ export const PracticeExamEngine: React.FC = () => {
       if (ans === undefined || ans === null) {
         readingUnanswered += 1;
       } else if (ans === p.correctHeadingIndex) {
-        readingPoints += 2.5;
+        readingPoints += 1.25;
         readingCorrect += 1;
         topicTracker['Paragraph Gist & Headings'].correct += 1;
       } else {
@@ -582,21 +582,65 @@ export const PracticeExamEngine: React.FC = () => {
       }
     });
 
-    const readingScore = Math.round(readingPoints);
+    const readingScore = Math.min(25, Math.round(readingPoints));
 
-    // 4. Writing estimated score based on completion + AI evaluation
-    let estimatedWritingScore = 32; // Default baseline out of 50
-    const hasP1 = Object.values(writingPart1Answers).filter((v) => typeof v === 'string' && v.trim().length > 0).length >= 3;
-    const hasP2 = (writingPart2Answer || '').trim().split(/\s+/).length >= 15;
-    const hasP3 = Object.values(writingPart3Answers).filter((v) => typeof v === 'string' && v.trim().split(/\s+/).length >= 20).length >= 2;
-    const hasP4A = (writingPart4AAnswer || '').trim().split(/\s+/).length >= 30;
-    const hasP4B = (writingPart4BAnswer || '').trim().split(/\s+/).length >= 80;
+    // 4. Writing estimated score based on task completion & standard criteria (out of 25)
+    // Part 1 (5 items) = 5 marks (1.0 each)
+    // Part 2 (form filling) = 5 marks
+    // Part 3 (3 chats) = 5 marks (1.67 each)
+    // Part 4 (4A = 4 marks, 4B = 6 marks) = 10 marks
+    // Total Writing = 25 marks
+
+    let writingPart1Marks = 0;
+    const p1Filled = Object.values(writingPart1Answers).filter(v => typeof v === 'string' && v.trim().length > 0);
+    p1Filled.forEach(val => {
+      const words = val.trim().split(/\s+/).filter(Boolean).length;
+      if (words >= 1 && words <= 10) {
+        writingPart1Marks += 1.0;
+      } else if (words > 0) {
+        writingPart1Marks += 0.5;
+      }
+    });
+    writingPart1Marks = Math.min(5, writingPart1Marks);
+
+    const p2Words = (writingPart2Answer || '').trim().split(/\s+/).filter(Boolean).length;
+    let writingPart2Marks = 0;
+    if (p2Words >= 15 && p2Words <= 40) writingPart2Marks = 5;
+    else if (p2Words >= 10) writingPart2Marks = 4;
+    else if (p2Words >= 5) writingPart2Marks = 2.5;
+
+    let writingPart3Marks = 0;
+    const p3Entries = Object.values(writingPart3Answers).filter(v => typeof v === 'string' && v.trim().length > 0);
+    p3Entries.forEach(ans => {
+      const words = ans.trim().split(/\s+/).filter(Boolean).length;
+      if (words >= 20 && words <= 50) writingPart3Marks += (5 / 3);
+      else if (words >= 10) writingPart3Marks += 1.0;
+      else if (words > 0) writingPart3Marks += 0.5;
+    });
+    writingPart3Marks = Math.min(5, Math.round(writingPart3Marks * 10) / 10);
+
+    const p4AWords = (writingPart4AAnswer || '').trim().split(/\s+/).filter(Boolean).length;
+    let writingPart4AMarks = 0;
+    if (p4AWords >= 30 && p4AWords <= 80) writingPart4AMarks = 4;
+    else if (p4AWords >= 20) writingPart4AMarks = 3;
+    else if (p4AWords >= 10) writingPart4AMarks = 1.5;
+
+    const p4BWords = (writingPart4BAnswer || '').trim().split(/\s+/).filter(Boolean).length;
+    let writingPart4BMarks = 0;
+    if (p4BWords >= 90 && p4BWords <= 180) writingPart4BMarks = 6;
+    else if (p4BWords >= 60) writingPart4BMarks = 4.5;
+    else if (p4BWords >= 30) writingPart4BMarks = 2.5;
+    else if (p4BWords >= 10) writingPart4BMarks = 1.0;
+
+    const hasP1 = p1Filled.length >= 3;
+    const hasP2 = p2Words >= 15;
+    const hasP3 = p3Entries.length >= 2;
+    const hasP4A = p4AWords >= 30;
+    const hasP4B = p4BWords >= 80;
 
     const writingTasksCompleted = (hasP1 ? 1 : 0) + (hasP2 ? 1 : 0) + (hasP3 ? 1 : 0) + (hasP4A ? 1 : 0) + (hasP4B ? 1 : 0);
-    const writingCompletionCount = (hasP1 ? 10 : 0) + (hasP2 ? 8 : 0) + (hasP3 ? 12 : 0) + (hasP4A ? 8 : 0) + (hasP4B ? 12 : 0);
-    if (writingCompletionCount > 0) {
-      estimatedWritingScore = Math.min(50, Math.max(15, writingCompletionCount));
-    }
+    const calculatedInitialWritingScore = Math.min(25, Math.round(writingPart1Marks + writingPart2Marks + writingPart3Marks + writingPart4AMarks + writingPart4BMarks));
+    const estimatedWritingScore = calculatedInitialWritingScore;
 
     if (testMode === 'full' || testMode === 'writing') {
       topicTracker['Professional Writing & Tone'] = {
@@ -607,13 +651,13 @@ export const PracticeExamEngine: React.FC = () => {
     }
 
     let totalScore = 0;
-    let maxPossibleScore = 150;
+    let maxPossibleScore = 100;
     let totalQuestions = 0;
     let correctAnswers = 0;
     let incorrectAnswers = 0;
     let unansweredQuestions = 0;
 
-    const coreQuestionsCount = currentTestSet.core.grammarQuestions.length + 25;
+    const coreQuestionsCount = currentTestSet.core.grammarQuestions.length + 25; // 50 items
     const readingQuestionsCount = 5 + 6 + 7 + 5; // 23 items
     const writingQuestionsCount = 5; // 5 parts
 
@@ -626,21 +670,22 @@ export const PracticeExamEngine: React.FC = () => {
       unansweredQuestions = grammarUnanswered + vocabUnanswered;
     } else if (testMode === 'reading') {
       totalScore = readingScore;
-      maxPossibleScore = 50;
+      maxPossibleScore = 25;
       totalQuestions = readingQuestionsCount;
       correctAnswers = readingCorrect;
       incorrectAnswers = readingIncorrect;
       unansweredQuestions = readingUnanswered;
     } else if (testMode === 'writing') {
       totalScore = estimatedWritingScore;
-      maxPossibleScore = 50;
+      maxPossibleScore = 25;
       totalQuestions = writingQuestionsCount;
       correctAnswers = writingTasksCompleted;
       incorrectAnswers = 5 - writingTasksCompleted;
       unansweredQuestions = writingTasksCompleted < 5 ? 5 - writingTasksCompleted : 0;
     } else {
+      // Full test: Grammar (25) + Vocab (25) + Reading (25) + Writing (25) = 100
       totalScore = grammarScore + vocabScore + readingScore + estimatedWritingScore;
-      maxPossibleScore = 150;
+      maxPossibleScore = 100;
       totalQuestions = coreQuestionsCount + readingQuestionsCount + writingQuestionsCount;
       correctAnswers = grammarCorrect + vocabCorrect + readingCorrect + writingTasksCompleted;
       incorrectAnswers = grammarIncorrect + vocabIncorrect + readingIncorrect + (5 - writingTasksCompleted);
@@ -710,8 +755,8 @@ export const PracticeExamEngine: React.FC = () => {
       sectionBreakdown: {
         grammar: { correct: grammarCorrect, total: currentTestSet.core.grammarQuestions.length, marks: grammarScore, maxMarks: 25 },
         vocab: { correct: vocabCorrect, total: 25, marks: vocabScore, maxMarks: 25 },
-        reading: { correct: readingCorrect, total: readingQuestionsCount, marks: readingScore, maxMarks: 50 },
-        writing: { marks: estimatedWritingScore, maxMarks: 50, tasksCompleted: writingTasksCompleted, totalTasks: 5 }
+        reading: { correct: readingCorrect, total: readingQuestionsCount, marks: readingScore, maxMarks: 25 },
+        writing: { marks: estimatedWritingScore, maxMarks: 25, tasksCompleted: writingTasksCompleted, totalTasks: 5 }
       }
     };
 
@@ -762,14 +807,18 @@ export const PracticeExamEngine: React.FC = () => {
 
       const prompt = `You are a Senior ICAP English Communication Skills (ECS) & Aptis General Writing Examiner.
 Evaluate this student's writing submission with the thoroughness and rigor of a professional Writing Lab.
-Compare each student answer with the provided suggested benchmark answers and identify every single mistake, including:
+Compare each student answer with the provided suggested benchmark answers and identify every genuine mistake:
 1. Grammar (subject-verb agreement, tenses, verb forms, articles, prepositions)
-2. Spelling
+2. Spelling (genuine spelling mistakes)
 3. Word choice & vocabulary collocations
-4. Sentence structure (run-on sentences, fragments, comma splices)
-5. Punctuation (capitalization, commas, full stops, apostrophes)
-6. Clarity and conciseness
-7. Tone & Register (informal for friend in Task 4A, formal professional for club president/management in Task 4B)
+4. Sentence structure (run-on sentences, awkward syntax)
+5. Punctuation (capitalization, commas, apostrophes)
+6. Tone & Register (informal for friend in Task 4A, formal professional for club president/management in Task 4B)
+
+CRITICAL INSTRUCTIONS FOR MARKING:
+- In Part 1, Part 2, and Part 3: Do NOT penalize or flag missing terminal full stops (.) on brief entries or conversational chat responses. Accept valid short answers.
+- Whitelist Pakistani cities (Karachi, Lahore, Islamabad, etc.) and accounting terms (ICAP, CA, audit, ledger, debit, credit).
+- Score is STRICTLY out of 25 (Part 1 = 5, Part 2 = 5, Part 3 = 5, Part 4 = 10 marks).
 
 --- EXAM TASKS & SUBMISSIONS ---
 Theme: "${currentTestSet.writing.themeName}"
@@ -793,16 +842,16 @@ Prompt: "${currentTestSet.writing.part4.taskB.prompt}"
 Suggested Benchmark Answer: "${currentTestSet.writing.part4.taskB.sampleAnswer}"
 Student's Answer: "${writingPart4BAnswer || '(No response)'}"
 
-Read the entire response carefully so no mistakes are missed. For each identified mistake, provide:
-- "originalSentence": exact excerpt or sentence from student's answer containing the error
+For each identified mistake, provide:
+- "originalSentence": exact excerpt or sentence containing the error
 - "correctedSentence": the corrected version of the sentence
 - "errorType": one of "Grammar", "Spelling", "Word Choice", "Sentence Structure", "Punctuation", "Clarity", "Tone & Register"
-- "explanation": clear explanation of what is wrong and why the correction is needed
+- "explanation": clear explanation of what is wrong and why
 - "urduExplanation": brief Urdu explanation for Pakistani CA students
 
 Respond ONLY with a JSON object matching this schema:
 {
-  "score": number (0 to 50),
+  "score": number (0 to 25),
   "bandRating": "A2" | "B1" | "B2" | "C1",
   "toneRegister": "Formal" | "Informal" | "Mixed",
   "summaryFeedback": "Detailed, specific feedback comparing student performance with suggested model answers, noting precision, grammatical accuracy, word count adherence, and tone appropriateness.",
@@ -826,19 +875,22 @@ Respond ONLY with a JSON object matching this schema:
         writingPart4BAnswer, 
         currentTestSet.writing.part4.taskB.prompt, 
         'formal',
-        currentTestSet.writing.part4.taskB.sampleAnswer
+        currentTestSet.writing.part4.taskB.sampleAnswer,
+        'part4B'
       );
       const clientAnalysis4A = analyzeTextClientSide(
         writingPart4AAnswer, 
         currentTestSet.writing.part4.taskA.prompt, 
         'informal',
-        currentTestSet.writing.part4.taskA.sampleAnswer
+        currentTestSet.writing.part4.taskA.sampleAnswer,
+        'part4A'
       );
       const clientAnalysis2 = analyzeTextClientSide(
         writingPart2Answer,
         currentTestSet.writing.part2.prompt,
         'formal',
-        currentTestSet.writing.part2.sampleAnswer
+        currentTestSet.writing.part2.sampleAnswer,
+        'part2'
       );
 
       const allDetectedMistakes = [
@@ -860,13 +912,14 @@ Respond ONLY with a JSON object matching this schema:
         urduExplanation: m.urduExplanation || 'گرائمر اور املا کی درستی ضروری ہے۔'
       }));
 
+      const fallbackScore = Math.min(25, Math.max(10, 23 - Math.round(allDetectedMistakes.length * 1.2)));
       const fallbackWritingEval: WritingEvaluation = {
-        score: Math.max(25, 45 - allDetectedMistakes.length * 2),
+        score: fallbackScore,
         bandRating: allDetectedMistakes.length <= 2 ? 'B2' : allDetectedMistakes.length <= 5 ? 'B1' : 'Intermediate',
         toneRegister: 'Formal',
         summaryFeedback: `Thorough evaluation completed. ${allDetectedMistakes.length} specific grammatical, spelling, and structural adjustments identified against Aptis benchmark criteria.`,
         urduSummary: `امتحان کے نمونہ جوابات سے موازنہ مکمل ہو گیا ہے۔ ${allDetectedMistakes.length} اہم نکات پر اصلاح تجویز کی گئی ہے۔`,
-        grammarScore: Math.max(5, 9 - Math.floor(allDetectedMistakes.filter(m => m.type === 'grammar').length / 2)),
+        grammarScore: Math.min(10, Math.max(5, 9 - Math.floor(allDetectedMistakes.filter(m => m.type === 'grammar').length / 2))),
         vocabularyScore: 8,
         cohesionScore: 8,
         sentences: fallbackSentences.length > 0 ? fallbackSentences : [
@@ -885,17 +938,81 @@ Respond ONLY with a JSON object matching this schema:
         prompt,
         fallbackWritingEval
       );
+
+      // Normalize parsed score to ensure out of 25
+      let finalWritingMarks = fallbackWritingEval.score;
+      if (typeof parsed?.score === 'number') {
+        if (parsed.score <= 25) {
+          finalWritingMarks = Math.max(0, Math.round(parsed.score));
+        } else if (parsed.score <= 50) {
+          finalWritingMarks = Math.max(0, Math.round((parsed.score / 50) * 25));
+        } else {
+          finalWritingMarks = Math.max(0, Math.round((parsed.score / 100) * 25));
+        }
+      }
+
+      parsed.score = finalWritingMarks;
       setWritingEvaluation(parsed);
+
+      // Sync verified writing score directly with examResult and localStorage
+      setExamResult(prev => {
+        if (!prev) return prev;
+        let newTotal = prev.totalScore;
+        if (prev.testMode === 'writing') {
+          newTotal = finalWritingMarks;
+        } else if (prev.testMode === 'full') {
+          newTotal = prev.grammarScore + prev.vocabScore + prev.readingScore + finalWritingMarks;
+        }
+        const max = prev.maxScore || (prev.testMode === 'full' ? 100 : prev.testMode === 'core' ? 50 : 25);
+        const newPct = Math.round((newTotal / max) * 100);
+        let newCefr: 'A1' | 'A2' | 'B1' | 'B2' | 'C' = 'A1';
+        if (newPct >= 80) newCefr = 'C';
+        else if (newPct >= 65) newCefr = 'B2';
+        else if (newPct >= 50) newCefr = 'B1';
+        else if (newPct >= 35) newCefr = 'A2';
+
+        const updated: ExamResult = {
+          ...prev,
+          writingScore: finalWritingMarks,
+          totalScore: newTotal,
+          percentage: newPct,
+          cefrLevel: newCefr,
+          isPassed: newPct >= 50,
+          sectionBreakdown: {
+            ...prev.sectionBreakdown,
+            writing: {
+              ...(prev.sectionBreakdown?.writing || { tasksCompleted: 5, totalTasks: 5 }),
+              marks: finalWritingMarks,
+              maxMarks: 25
+            }
+          }
+        };
+
+        try {
+          const stored = JSON.parse(localStorage.getItem('icap_exam_results') || '[]');
+          const idx = stored.findIndex((e: any) => e.id === updated.id);
+          if (idx !== -1) {
+            stored[idx] = updated;
+            localStorage.setItem('icap_exam_results', JSON.stringify(stored));
+            window.dispatchEvent(new CustomEvent('icap_exam_updated', { detail: updated }));
+          }
+        } catch (storageErr) {
+          console.warn('Failed to update result in localStorage:', storageErr);
+        }
+
+        return updated;
+      });
     } catch (e) {
       console.warn('AI writing evaluation fallback:', e);
       const fallbackAnalysis = analyzeTextClientSide(
         writingPart4BAnswer, 
         currentTestSet.writing.part4.taskB.prompt, 
         'formal',
-        currentTestSet.writing.part4.taskB.sampleAnswer
+        currentTestSet.writing.part4.taskB.sampleAnswer,
+        'part4B'
       );
       setWritingEvaluation({
-        score: 38,
+        score: 19,
         bandRating: 'B2',
         toneRegister: 'Formal',
         summaryFeedback: 'Thorough evaluation completed. Responses were verified against suggested examiner benchmark criteria.',
@@ -2223,6 +2340,20 @@ Respond ONLY with a JSON object matching this schema:
                   <span className="text-xl font-bold font-mono text-blue-300 block">{examResult.grammarScore + examResult.vocabScore} / 50</span>
                 </div>
               </div>
+            ) : examResult.testMode === 'reading' ? (
+              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+                <div className="p-5 rounded-2xl bg-slate-800/60 border border-blue-500/30 text-center space-y-1 bg-blue-500/5">
+                  <span className="text-xs text-blue-300 font-semibold">Reading Section (4 Parts)</span>
+                  <span className="text-2xl font-bold font-mono text-blue-400 block">{examResult.readingScore} / 25</span>
+                </div>
+              </div>
+            ) : examResult.testMode === 'writing' ? (
+              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+                <div className="p-5 rounded-2xl bg-slate-800/60 border border-amber-500/30 text-center space-y-1 bg-amber-500/5">
+                  <span className="text-xs text-amber-300 font-semibold">Writing Section (Parts 1–4)</span>
+                  <span className="text-2xl font-bold font-mono text-amber-400 block">{examResult.writingScore} / 25</span>
+                </div>
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
@@ -2235,11 +2366,11 @@ Respond ONLY with a JSON object matching this schema:
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">3. Reading</span>
-                  <span className="text-xl font-bold font-mono text-blue-400 block">{examResult.readingScore} / 50</span>
+                  <span className="text-xl font-bold font-mono text-blue-400 block">{examResult.readingScore} / 25</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-center space-y-1">
                   <span className="text-xs text-slate-400 font-semibold">4. Writing</span>
-                  <span className="text-xl font-bold font-mono text-amber-400 block">{examResult.writingScore} / 50</span>
+                  <span className="text-xl font-bold font-mono text-amber-400 block">{examResult.writingScore} / 25</span>
                 </div>
               </div>
             )}
@@ -2292,7 +2423,7 @@ Respond ONLY with a JSON object matching this schema:
                   <h3 className="text-base font-bold text-white">AI Writing Diagnostic & CEFR Evaluation</h3>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  Assessed Band: {writingEvaluation.bandRating} • Score: {writingEvaluation.score}/50
+                  Assessed Band: {writingEvaluation.bandRating} • Score: {writingEvaluation.score}/25
                 </span>
               </div>
 
