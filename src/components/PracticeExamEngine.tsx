@@ -893,16 +893,38 @@ Respond ONLY with a JSON object matching this schema:
         'part2'
       );
 
+      // Collect mistakes across all parts (1, 2, 3, 4A, 4B)
+      const part1Mistakes: any[] = [];
+      Object.entries(writingPart1Answers).forEach(([qId, ans]) => {
+        if (typeof ans === 'string' && ans.trim()) {
+          const res = analyzeTextClientSide(ans, 'Part 1 Short Answer', 'general', '', 'part1');
+          part1Mistakes.push(...res.mistakes);
+        }
+      });
+
+      const part3Mistakes: any[] = [];
+      Object.entries(writingPart3Answers).forEach(([cId, ans]) => {
+        if (typeof ans === 'string' && ans.trim()) {
+          const res = analyzeTextClientSide(ans, 'Part 3 Club Chat', 'formal', '', 'part3');
+          part3Mistakes.push(...res.mistakes);
+        }
+      });
+
       const allDetectedMistakes = [
         ...clientAnalysis4B.mistakes,
         ...clientAnalysis4A.mistakes,
-        ...clientAnalysis2.mistakes
+        ...clientAnalysis2.mistakes,
+        ...part3Mistakes,
+        ...part1Mistakes
       ];
 
-      const fallbackSentences = allDetectedMistakes.slice(0, 8).map(m => ({
+      const fallbackSentences = allDetectedMistakes.slice(0, 10).map(m => ({
         originalSentence: m.original,
         correctedSentence: m.replacement,
         errorType: m.type === 'spelling' ? 'Spelling' :
+                   m.type === 'capitalization' ? 'Capitalization' :
+                   m.type === 'subject_verb_agreement' ? 'Subject-Verb Agreement' :
+                   m.type === 'formatting' ? 'Formatting' :
                    m.type === 'grammar' ? 'Grammar' :
                    m.type === 'word_choice' ? 'Word Choice' :
                    m.type === 'sentence_structure' ? 'Sentence Structure' :
