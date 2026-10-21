@@ -67,10 +67,13 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
 
   // Categorize counts
   const grammarCount = mistakes.filter(m => m.type === 'grammar').length;
+  const subjectVerbCount = mistakes.filter(m => m.type === 'subject_verb_agreement').length;
   const spellingCount = mistakes.filter(m => m.type === 'spelling').length;
+  const capitalizationCount = mistakes.filter(m => m.type === 'capitalization').length;
+  const punctuationCount = mistakes.filter(m => m.type === 'punctuation').length;
   const wordChoiceCount = mistakes.filter(m => m.type === 'word_choice').length;
   const sentenceStructureCount = mistakes.filter(m => m.type === 'sentence_structure').length;
-  const punctuationCount = mistakes.filter(m => m.type === 'punctuation').length;
+  const formattingCount = mistakes.filter(m => m.type === 'formatting').length;
   const clarityCount = mistakes.filter(m => m.type === 'clarity').length;
   const toneCount = mistakes.filter(m => m.type === 'tone').length;
 
@@ -124,6 +127,15 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
       if (m.type === 'spelling') {
         badgeColor = 'bg-rose-500/25 text-rose-200 border-rose-400/60 underline decoration-rose-400 decoration-wavy';
         typeLabel = 'Spelling';
+      } else if (m.type === 'capitalization') {
+        badgeColor = 'bg-emerald-500/25 text-emerald-200 border-emerald-400/60 underline decoration-emerald-400';
+        typeLabel = 'Capitalization';
+      } else if (m.type === 'subject_verb_agreement') {
+        badgeColor = 'bg-orange-500/25 text-orange-200 border-orange-400/60 underline decoration-orange-400 decoration-dashed';
+        typeLabel = 'Subject-Verb';
+      } else if (m.type === 'formatting') {
+        badgeColor = 'bg-teal-500/25 text-teal-200 border-teal-400/60 underline decoration-teal-400';
+        typeLabel = 'Formatting';
       } else if (m.type === 'grammar') {
         badgeColor = 'bg-amber-500/25 text-amber-200 border-amber-400/60 underline decoration-amber-400 decoration-dashed';
         typeLabel = 'Grammar';
@@ -208,6 +220,20 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
             All Issues ({mistakes.length})
           </button>
 
+          {spellingCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveMistakeFilter('spelling')}
+              className={`px-2 py-1 rounded-lg font-bold text-[11px] transition ${
+                activeMistakeFilter === 'spelling'
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-rose-950/40 text-rose-300 border border-rose-800/40 hover:bg-rose-900/40'
+              }`}
+            >
+              Spelling ({spellingCount})
+            </button>
+          )}
+
           {grammarCount > 0 && (
             <button
               type="button"
@@ -222,17 +248,45 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
             </button>
           )}
 
-          {spellingCount > 0 && (
+          {subjectVerbCount > 0 && (
             <button
               type="button"
-              onClick={() => setActiveMistakeFilter('spelling')}
+              onClick={() => setActiveMistakeFilter('subject_verb_agreement')}
               className={`px-2 py-1 rounded-lg font-bold text-[11px] transition ${
-                activeMistakeFilter === 'spelling'
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-rose-950/40 text-rose-300 border border-rose-800/40 hover:bg-rose-900/40'
+                activeMistakeFilter === 'subject_verb_agreement'
+                  ? 'bg-orange-500 text-slate-950'
+                  : 'bg-orange-950/40 text-orange-300 border border-orange-800/40 hover:bg-orange-900/40'
               }`}
             >
-              Spelling ({spellingCount})
+              Subject-Verb ({subjectVerbCount})
+            </button>
+          )}
+
+          {capitalizationCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveMistakeFilter('capitalization')}
+              className={`px-2 py-1 rounded-lg font-bold text-[11px] transition ${
+                activeMistakeFilter === 'capitalization'
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/40'
+              }`}
+            >
+              Capitalization ({capitalizationCount})
+            </button>
+          )}
+
+          {punctuationCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveMistakeFilter('punctuation')}
+              className={`px-2 py-1 rounded-lg font-bold text-[11px] transition ${
+                activeMistakeFilter === 'punctuation'
+                  ? 'bg-yellow-500 text-slate-950'
+                  : 'bg-yellow-950/40 text-yellow-300 border border-yellow-800/40 hover:bg-yellow-900/40'
+              }`}
+            >
+              Punctuation ({punctuationCount})
             </button>
           )}
 
@@ -264,17 +318,17 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
             </button>
           )}
 
-          {punctuationCount > 0 && (
+          {formattingCount > 0 && (
             <button
               type="button"
-              onClick={() => setActiveMistakeFilter('punctuation')}
+              onClick={() => setActiveMistakeFilter('formatting')}
               className={`px-2 py-1 rounded-lg font-bold text-[11px] transition ${
-                activeMistakeFilter === 'punctuation'
-                  ? 'bg-yellow-500 text-slate-950'
-                  : 'bg-yellow-950/40 text-yellow-300 border border-yellow-800/40 hover:bg-yellow-900/40'
+                activeMistakeFilter === 'formatting'
+                  ? 'bg-teal-500 text-slate-950'
+                  : 'bg-teal-950/40 text-teal-300 border border-teal-800/40 hover:bg-teal-900/40'
               }`}
             >
-              Punctuation ({punctuationCount})
+              Formatting ({formattingCount})
             </button>
           )}
 
@@ -443,7 +497,16 @@ export const WritingFeedbackDisplay: React.FC<WritingFeedbackDisplayProps> = ({
               let typeBadgeClass = 'bg-rose-950/50 text-rose-300 border-rose-800/60';
               let typeName = 'Spelling Mistake';
 
-              if (m.type === 'grammar') {
+              if (m.type === 'capitalization') {
+                typeBadgeClass = 'bg-emerald-950/50 text-emerald-300 border-emerald-800/60';
+                typeName = 'Capitalization';
+              } else if (m.type === 'subject_verb_agreement') {
+                typeBadgeClass = 'bg-orange-950/50 text-orange-300 border-orange-800/60';
+                typeName = 'Subject-Verb Agreement';
+              } else if (m.type === 'formatting') {
+                typeBadgeClass = 'bg-teal-950/50 text-teal-300 border-teal-800/60';
+                typeName = 'Formatting & Layout';
+              } else if (m.type === 'grammar') {
                 typeBadgeClass = 'bg-amber-950/50 text-amber-300 border-amber-800/60';
                 typeName = 'Grammar Mistake';
               } else if (m.type === 'word_choice') {
