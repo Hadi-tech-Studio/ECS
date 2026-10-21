@@ -1,4 +1,5 @@
 import { ReadingSection1 } from '../types';
+import { generateSyntheticReadingSection1 } from './readingSection1AutoGenerator';
 
 /**
  * ============================================================================
@@ -4244,12 +4245,7 @@ export function markSeenPdfReadingSection1Id(id: string): void {
   try {
     const seen = getSeenPdfReadingSection1Ids();
     seen.add(id);
-    // If all 50 questions have been seen, reset to avoid starvation
-    if (seen.size >= PDF_READING_SECTION_1_POOL.length) {
-      localStorage.setItem(SEEN_READING_S1_KEY, JSON.stringify([id]));
-    } else {
-      localStorage.setItem(SEEN_READING_S1_KEY, JSON.stringify([...seen]));
-    }
+    localStorage.setItem(SEEN_READING_S1_KEY, JSON.stringify(Array.from(seen)));
   } catch {
     // ignore storage error
   }
@@ -4270,9 +4266,11 @@ export function clearSeenPdfReadingSection1Ids(): void {
 /**
  * Select a random Sentence Comprehension question strictly from the official PDF pool.
  * Guaranteed:
- * 1. Strictly from the 50 PDF questions (no external sources, no artificial questions).
+ * 1. Strictly from the 50 PDF questions first.
  * 2. Avoids repetition across attempts by checking localStorage history.
- * 3. Cycles cleanly when all questions have been attempted.
+ * 3. STRICT ZERO REPETITION: When all 50 PDF questions are exhausted, automatically
+ *    generates brand-new, unique Section 1 cloze passages matching the exact format,
+ *    so questions NEVER repeat across tests or attempts.
  */
 export function selectOfficialPdfReadingSection1(providedSeen?: Set<string>): ReadingSection1 {
   const seen = providedSeen || getSeenPdfReadingSection1Ids();
@@ -4285,14 +4283,9 @@ export function selectOfficialPdfReadingSection1(providedSeen?: Set<string>): Re
     const randomIndex = Math.floor(Math.random() * unseen.length);
     chosen = unseen[randomIndex];
   } else {
-    // All 50 have been seen; pick any at random and reset history
-    const randomIndex = Math.floor(Math.random() * PDF_READING_SECTION_1_POOL.length);
-    chosen = PDF_READING_SECTION_1_POOL[randomIndex];
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(SEEN_READING_S1_KEY, JSON.stringify([chosen.id]));
-      } catch {}
-    }
+    // All 50 PDF questions have been seen!
+    // Automatically generate brand-new, unique Section 1 passage so questions never repeat.
+    chosen = generateSyntheticReadingSection1(seen);
   }
 
   // Mark chosen question as seen
