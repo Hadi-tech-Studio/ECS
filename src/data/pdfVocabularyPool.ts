@@ -110,11 +110,129 @@ function toVocabDefinitionItem(q: RawPdfVocabQuestion): VocabDefinitionItem {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Authentic context sentences for Collocations (Word Combinations).
+// Disambiguates identical prompt leads (e.g., "highly ____.", "heavy ____.")
+// into clear, meaningful, realistic B2 sentences.
+// ---------------------------------------------------------------------------
+const COLLOC_CONTEXT_SENTENCES: Record<string, string> = {
+  "pdf-col-1": "The committee will convene tomorrow to make ____ regarding the merger proposal.",
+  "pdf-col-24": "The research team continues to make steady ____ on the vaccine development.",
+  "pdf-col-48": "Candidates should make every ____ to arrive punctually for their interview.",
+  "pdf-col-2": "The outdoor cricket match was postponed due to heavy ____.",
+  "pdf-col-116": "Commuters faced extensive delays because of heavy ____ on the central highway.",
+  "pdf-col-166": "Caring for an ailing family member can become a heavy ____ for young parents.",
+  "pdf-col-220": "The company director accepted a heavy ____ for the project delays.",
+  "pdf-col-3": "He drank a cup of strong ____ to stay alert during the long night shift.",
+  "pdf-col-112": "The lawyer presented a strong ____ supported by documented financial records.",
+  "pdf-col-141": "The startup faced strong ____ from established international retail brands.",
+  "pdf-col-165": "Meteorologists warned there is a strong ____ of thunderstorms this evening.",
+  "pdf-col-217": "She felt a strong ____ to pursue higher studies in environmental law.",
+  "pdf-col-7": "A dependable project manager is willing to take ____ for any team oversights.",
+  "pdf-col-23": "Entrepreneurs must occasionally take ____ to launch innovative technologies.",
+  "pdf-col-41": "After four hours of intense study, it is wise to take ____ and rest.",
+  "pdf-col-10": "An honorable business executive will never intentionally break ____.",
+  "pdf-col-42": "The counselor had to gently break ____ to the waiting family members.",
+  "pdf-col-11": "Scientists must not draw ____ until all experimental trials have concluded.",
+  "pdf-col-44": "The bright visual diagram helped to draw ____ to the primary conclusions.",
+  "pdf-col-12": "After lengthy negotiations, both parties finally managed to reach ____.",
+  "pdf-col-45": "The advisory panel could not reach ____ before reviewing the audit findings.",
+  "pdf-col-14": "Can you keep ____ regarding the unannounced management reorganization?",
+  "pdf-col-46": "Although they lived on different continents, they managed to keep ____ by email.",
+  "pdf-col-22": "The historic international conference will officially come ____ this afternoon.",
+  "pdf-col-50": "It took him several months to come ____ with the sudden loss of his job.",
+  "pdf-col-31": "Given the severe winter blizzard, an on-time train departure is highly ____.",
+  "pdf-col-169": "The newly adopted educational software proved to be highly ____ in trials.",
+  "pdf-col-182": "The firm hired a highly ____ chartered accountant to oversee compliance.",
+  "pdf-col-209": "Your generous financial contribution to the youth fund was highly ____.",
+  "pdf-col-33": "The two linguistic dialects are closely ____ in vocabulary and syntax.",
+  "pdf-col-171": "Patients in the post-operative ward are closely ____ by medical staff.",
+  "pdf-col-180": "The financial records were closely ____ by the statutory auditor.",
+  "pdf-col-193": "Climate fluctuations are closely ____ with global industrial emissions.",
+  "pdf-col-34": "Affordable broadband internet should be widely ____ in all rural communities.",
+  "pdf-col-172": "She is widely ____ as one of the leading economists of her generation.",
+  "pdf-col-188": "The scientific theory of plate tectonics is now widely ____ worldwide.",
+  "pdf-col-35": "The operations manager was fully ____ of the production bottleneck.",
+  "pdf-col-174": "The emergency response brigade was fully ____ for any natural disaster.",
+  "pdf-col-36": "Human rights observers are deeply ____ about the proposed restrictions.",
+  "pdf-col-170": "The cultural tradition is deeply ____ in the region’s agrarian history.",
+  "pdf-col-187": "The entire auditorium was deeply ____ by the speaker’s personal story.",
+  "pdf-col-208": "He stated publicly that he deeply ____ his careless choice of words.",
+  "pdf-col-37": "Cardiovascular specialists strongly ____ thirty minutes of daily walking.",
+  "pdf-col-173": "Environmental activists strongly ____ the construction of the coal plant.",
+  "pdf-col-189": "His early architectural designs were strongly ____ by traditional motifs.",
+  "pdf-col-198": "The faculty members strongly ____ the proposed student council initiatives.",
+  "pdf-col-38": "Before changing career paths, you should seriously ____ all alternatives.",
+  "pdf-col-181": "Fortunately, neither commuter was seriously ____ in the bus collision.",
+  "pdf-col-51": "The small neighborhood bakery grew popular entirely through word ____.",
+  "pdf-col-239": "The dictionary provides an accurate word ____ for each technical entry.",
+  "pdf-col-241": "The lexical test evaluated students on natural word ____ and collocations.",
+  "pdf-col-68": "Metropolitan commuters rely on affordable public ____ to reach work daily.",
+  "pdf-col-101": "Recent surveys show a clear shift in public ____ regarding climate policy.",
+  "pdf-col-228": "Taking a speech class helped him overcome his nervousness about public ____.",
+  "pdf-col-69": "The company published its comprehensive annual ____ on the corporate portal.",
+  "pdf-col-225": "The financial loan eligibility depends directly upon verified annual ____.",
+  "pdf-col-88": "Solving practical day-to-day problems often requires nothing more than common ____.",
+  "pdf-col-127": "Both research teams collaborated effectively because they shared a common ____.",
+  "pdf-col-223": "In modern office culture, flexible remote hours have become a common ____.",
+  "pdf-col-93": "Graduates attended the university employment fair to explore career ____.",
+  "pdf-col-248": "After completing his apprenticeship, he embarked on a promising career ____.",
+  "pdf-col-98": "Continuous professional training is vital for long-term personal ____.",
+  "pdf-col-151": "Candidates must ensure that all personal ____ on the form are accurate.",
+  "pdf-col-100": "The scholarship committee evaluates candidates strictly on academic ____.",
+  "pdf-col-249": "New university courses will be introduced at the start of the next academic ____.",
+  "pdf-col-107": "Preserving biodiversity is of great ____ to the global ecological balance.",
+  "pdf-col-134": "The international youth conference concluded with great ____.",
+  "pdf-col-167": "The new infrastructure project required a great ____ of initial investment.",
+  "pdf-col-218": "The experienced captain navigated through the storm with great ____.",
+  "pdf-col-108": "Access to affordable healthcare remains a major ____ across developing regions.",
+  "pdf-col-133": "Rising levels of industrial pollution have sparked major ____ among citizens.",
+  "pdf-col-213": "Developing an efficient renewable battery was heralded as a major ____.",
+  "pdf-col-109": "Traffic congestion in the city center has become an increasingly serious ____.",
+  "pdf-col-214": "Ignoring structural building codes can result in serious ____.",
+  "pdf-col-110": "The senior advisor made a valuable ____ to the committee’s final strategy.",
+  "pdf-col-162": "Failing the trial exam taught him a valuable ____ about preparation.",
+  "pdf-col-212": "Her fluent bilingual proficiency made her a valuable ____ to the team.",
+  "pdf-col-111": "The prosecution failed to produce clear ____ proving the defendant’s guilt.",
+  "pdf-col-146": "The workshop supervisor provided clear ____ before students began the experiment.",
+  "pdf-col-114": "Despite living far apart, she remained a close ____ throughout adulthood.",
+  "pdf-col-115": "The two universities established a close ____ in scientific research.",
+  "pdf-col-128": "The trainee paid close ____ to the senior accountant’s explanation.",
+  "pdf-col-221": "The antique vase revealed minute cracks upon closer ____.",
+  "pdf-col-120": "The mentor held high ____ for the talented young apprentice.",
+  "pdf-col-154": "Upgrading digital security systems was given top priority and high ____.",
+  "pdf-col-125": "The supreme court judges will issue their final ____ next Wednesday.",
+  "pdf-col-233": "University undergraduates are revising intensively for the final ____.",
+  "pdf-col-135": "Without proper funding and planning, the venture ended in complete ____.",
+  "pdf-col-219": "The audience listened to the poignant memorial speech in complete ____.",
+  "pdf-col-142": "Antitrust regulations are enforced to safeguard fair ____ in commercial markets.",
+  "pdf-col-222": "Both disputing parties agreed that the arbitrator reached a fair ____.",
+  "pdf-col-143": "The constitution guarantees equal ____ for all citizens regardless of background.",
+  "pdf-col-144": "Civil rights movements campaigned for decades to achieve equal ____ for all.",
+  "pdf-col-145": "Laboratory staff must follow strict ____ when handling chemical reagents.",
+  "pdf-col-210": "The publisher imposed a strict ____ for submitting the final manuscript.",
+  "pdf-col-157": "Childhood educational experiences can exert a lasting ____ on a person’s life.",
+  "pdf-col-158": "Her eloquent keynote address created a lasting ____ on the entire assembly.",
+  "pdf-col-163": "The university offers a broad ____ of elective humanities courses.",
+  "pdf-col-216": "The candidate demonstrated a broad ____ of contemporary global politics.",
+  "pdf-col-176": "Consumer product manuals are readily ____ on the manufacturer’s website.",
+  "pdf-col-197": "The defendant was honest enough to readily ____ that he had made a mistake.",
+  "pdf-col-178": "The diplomatic mission was carefully ____ over several months.",
+  "pdf-col-179": "The clinical experiment was carefully ____ to minimize researcher bias.",
+  "pdf-col-199": "Before signing any binding contract, you should carefully ____ all terms.",
+  "pdf-col-183": "The Nobel laureate is well ____ for his pioneering work in quantum mechanics.",
+  "pdf-col-184": "The debate team was well ____ to answer counterarguments persuasively.",
+  "pdf-col-185": "A healthy diet should be well ____ and contain essential vitamins.",
+  "pdf-col-229": "Students must obtain written ____ from the dean before taking leave.",
+  "pdf-col-231": "The examination consisted of an oral presentation followed by a written ____."
+};
+
 /**
  * Transforms a raw PDF Collocation Question into Aptis VocabCollocationItem
  */
 function toVocabCollocationItem(q: RawPdfVocabQuestion): VocabCollocationItem {
-  const cleanSentence = q.text
+  const customSentence = COLLOC_CONTEXT_SENTENCES[q.id];
+  const cleanSentence = customSentence || q.text
     .replace(/^Choose the word or phrase that best completes the collocation:\s*/i, '')
     .trim();
 
@@ -504,14 +622,31 @@ function pickPdfOrAutoGenerate(
   reservedInAttempt: Set<string>,
   namespace = 'pdf'
 ): RawPdfVocabQuestion[] {
+  const getWords = (q: RawPdfVocabQuestion) => {
+    const list: string[] = [q.correctAnswer.toLowerCase()];
+    if (category === 'Word Matching') {
+      const tw = q.text.replace(/^Choose the closest synonym of\s+/i, '').replace(/\.$/, '').trim().toLowerCase();
+      if (tw) list.push(tw);
+    }
+    return list;
+  };
+
   // 1. Pick strictly unseen questions from the official PDF pool first
   const diffPool = pdfPool.filter(q => getCalibratedDifficulty(q) === difficulty);
-  const availablePdf = diffPool.filter(q => !seenSet.has(q.id) && !reservedInAttempt.has(q.id));
+  const availablePdf = diffPool.filter(q => {
+    if (seenSet.has(q.id) || reservedInAttempt.has(q.id)) return false;
+    const words = getWords(q);
+    return !words.some(w => seenSet.has(`word:${w}`) || reservedInAttempt.has(`word:${w}`));
+  });
   const chosenFromPdf = shuffle(availablePdf).slice(0, count);
 
   chosenFromPdf.forEach(q => {
     seenSet.add(q.id);
     reservedInAttempt.add(q.id);
+    getWords(q).forEach(w => {
+      seenSet.add(`word:${w}`);
+      reservedInAttempt.add(`word:${w}`);
+    });
   });
 
   // 2. If all PDF questions for this category & difficulty are exhausted,
@@ -565,12 +700,14 @@ export interface SelectedOfficialVocabulary {
  *    preventing any question from repeating anywhere across tests or attempts.
  */
 export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
-  // Per-category seen sets (separate so tasks 1 & 5 never collide)
-  const seen1    = loadSeenSet(SEEN_KEYS.match1);
+  // Unified match seen set so Task 1 and Task 5 NEVER share or repeat words
+  const seenMatchUnified = new Set<string>([
+    ...loadSeenSet(SEEN_KEYS.match1), 
+    ...loadSeenSet(SEEN_KEYS.match5)
+  ]);
   const seen2    = loadSeenSet(SEEN_KEYS.def);
   const seen3    = loadSeenSet(SEEN_KEYS.colloc);
   const seen4    = loadSeenSet(SEEN_KEYS.usage);
-  const seen5    = loadSeenSet(SEEN_KEYS.match5);
 
   // Task 1 & 5 use DIFFERENT non-overlapping halves of matchQuestions
   const allMatch = PDF_VOCABULARY_1000.matchQuestions;
@@ -582,9 +719,9 @@ export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
 
   // --- TASK 1: Word Matching (2 Easy, 2 Moderate, 1 Difficult) ---
   const task1Raw = [
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Easy', 2, seen1, reservedThisAttempt, 't1'),
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Moderate', 2, seen1, reservedThisAttempt, 't1'),
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Difficult', 1, seen1, reservedThisAttempt, 't1')
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Easy', 2, seenMatchUnified, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Moderate', 2, seenMatchUnified, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Difficult', 1, seenMatchUnified, reservedThisAttempt, 't1')
   ];
 
   // --- TASK 2: Word Definitions (2 Easy, 2 Moderate, 1 Difficult) ---
@@ -610,19 +747,19 @@ export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
 
   // --- TASK 5: Context Matching (2 Easy, 2 Moderate, 1 Difficult) — uses DIFFERENT half of matchQuestions ---
   const task5Raw = [
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Easy', 2, seen5, reservedThisAttempt, 't5'),
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Moderate', 2, seen5, reservedThisAttempt, 't5'),
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Difficult', 1, seen5, reservedThisAttempt, 't5')
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Easy', 2, seenMatchUnified, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Moderate', 2, seenMatchUnified, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Difficult', 1, seenMatchUnified, reservedThisAttempt, 't5')
   ];
 
   // Persist all per-category seen sets
-  saveSeenSet(SEEN_KEYS.match1, seen1);
+  saveSeenSet(SEEN_KEYS.match1, seenMatchUnified);
   saveSeenSet(SEEN_KEYS.def,    seen2);
   saveSeenSet(SEEN_KEYS.colloc, seen3);
   saveSeenSet(SEEN_KEYS.usage,  seen4);
-  saveSeenSet(SEEN_KEYS.match5, seen5);
+  saveSeenSet(SEEN_KEYS.match5, seenMatchUnified);
   // Also update the legacy seen set for backwards compatibility
-  saveSeenPdfVocabIds(new Set([...seen1, ...seen2, ...seen3, ...seen4, ...seen5]));
+  saveSeenPdfVocabIds(new Set([...seenMatchUnified, ...seen2, ...seen3, ...seen4]));
 
   return {
     vocabWordMatching:       shuffle(task1Raw).map(toVocabWordMatchItem),
