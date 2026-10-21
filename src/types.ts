@@ -302,10 +302,10 @@ export interface ExamResult {
   timeSpentSeconds: number;
   grammarScore: number; // out of 25
   vocabScore: number; // out of 25
-  readingScore: number; // out of 50
-  writingScore: number; // out of 50
+  readingScore: number; // out of 25
+  writingScore: number; // out of 25
   totalScore: number; // marks obtained
-  maxScore?: number; // maximum possible marks (50 or 150)
+  maxScore?: number; // maximum possible marks (100 for full, 50 for core, 25 for reading/writing)
   percentage: number;
   cefrLevel: 'A1' | 'A2' | 'B1' | 'B2' | 'C';
   isPassed: boolean;
