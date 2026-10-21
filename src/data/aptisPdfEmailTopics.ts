@@ -1,4 +1,5 @@
 import { WritingPart4, WritingScenario } from '../types';
+import { generateSyntheticPart4EmailTask } from './writingAutoGenerator';
 
 export interface PdfEmailTopicMeta {
   number: number;
@@ -752,19 +753,14 @@ export function getSeenPdfEmailTopics(): number[] {
 }
 
 /**
- * Record a topic number as seen, cycling if all 50 have been seen
+ * Record a topic number as seen without repetition
  */
 export function markPdfEmailTopicSeen(topicNumber: number): void {
   if (typeof window === 'undefined') return;
   try {
     const current = getSeenPdfEmailTopics();
     const updated = Array.from(new Set([topicNumber, ...current]));
-    // If all 50 topics have been seen, reset to just the latest to allow fresh cycles
-    if (updated.length >= 50) {
-      localStorage.setItem(SEEN_PDF_EMAIL_TOPICS_KEY, JSON.stringify([topicNumber]));
-    } else {
-      localStorage.setItem(SEEN_PDF_EMAIL_TOPICS_KEY, JSON.stringify(updated));
-    }
+    localStorage.setItem(SEEN_PDF_EMAIL_TOPICS_KEY, JSON.stringify(updated));
   } catch {}
 }
 
@@ -865,15 +861,16 @@ export function selectFreshPdfPart4EmailTask(additionalSeenSet?: Set<string | nu
   // Filter pairs whose formal topic hasn't been seen recently
   const unseenPairs = PDF_TOPIC_PAIRS.filter(p => !seenFromStorage.has(p.formalNum));
 
-  let selectedPair = unseenPairs.length > 0 
-    ? unseenPairs[Math.floor(Math.random() * unseenPairs.length)]
-    : PDF_TOPIC_PAIRS[Math.floor(Math.random() * PDF_TOPIC_PAIRS.length)];
+  if (unseenPairs.length > 0) {
+    const selectedPair = unseenPairs[Math.floor(Math.random() * unseenPairs.length)];
+    markPdfEmailTopicSeen(selectedPair.formalNum);
+    markPdfEmailTopicSeen(selectedPair.informalNum);
+    return createPart4FromPdfTopics(selectedPair.formalNum, selectedPair.informalNum);
+  }
 
-  // Mark selected topics as seen in storage
-  markPdfEmailTopicSeen(selectedPair.formalNum);
-  markPdfEmailTopicSeen(selectedPair.informalNum);
-
-  return createPart4FromPdfTopics(selectedPair.formalNum, selectedPair.informalNum);
+  // All 30 PDF pairs have been seen!
+  // Automatically generate brand-new, unique Part 4 email task matching ICAP ECS syllabus & difficulty
+  return generateSyntheticPart4EmailTask(new Set());
 }
 
 /**
