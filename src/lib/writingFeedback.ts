@@ -52,6 +52,7 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'seperate': 'separate',
   'seperated': 'separated',
   'seperately': 'separately',
+  'seperation': 'separation',
   'recieve': 'receive',
   'recieved': 'received',
   'recieving': 'receiving',
@@ -59,8 +60,10 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'occuring': 'occurring',
   'occurr': 'occur',
   'occurance': 'occurrence',
+  'occurence': 'occurrence',
   'writting': 'writing',
   'writen': 'written',
+  'writter': 'writer',
   'informtion': 'information',
   'infomation': 'information',
   'managment': 'management',
@@ -70,8 +73,11 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'tellling': 'telling',
   'becuase': 'because',
   'becouse': 'because',
+  'becasue': 'because',
   'definately': 'definitely',
   'definate': 'definite',
+  'definitly': 'definitely',
+  'defenitely': 'definitely',
   'neccessary': 'necessary',
   'necesary': 'necessary',
   'acheive': 'achieve',
@@ -79,8 +85,10 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'truely': 'truly',
   'tommorrow': 'tomorrow',
   'tommorow': 'tomorrow',
+  'tomorow': 'tomorrow',
   'calender': 'calendar',
   'goverment': 'government',
+  'govrenment': 'government',
   'liabilty': 'liability',
   'liabilites': 'liabilities',
   'procedue': 'procedure',
@@ -100,20 +108,29 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'freinds': 'friends',
   'sucess': 'success',
   'sucessful': 'successful',
+  'succesful': 'successful',
+  'succesfully': 'successfully',
+  'sucessfully': 'successfully',
   'suprise': 'surprise',
   'beleive': 'believe',
   'beleived': 'believed',
+  'belive': 'believe',
+  'beleiving': 'believing',
   'enought': 'enough',
   'thier': 'their',
   'wierd': 'weird',
   'alot': 'a lot',
+  'allot': 'a lot',
   'comunication': 'communication',
   'auditer': 'auditor',
   'acounting': 'accounting',
+  'acountant': 'accountant',
+  'accountent': 'accountant',
   'responsibilty': 'responsibility',
   'responisble': 'responsible',
   'resposible': 'responsible',
   'dificult': 'difficult',
+  'diffcult': 'difficult',
   'confermation': 'confirmation',
   'schedul': 'schedule',
   'refering': 'referring',
@@ -137,6 +154,7 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'comittee': 'committee',
   'disapear': 'disappear',
   'enviroment': 'environment',
+  'enviornment': 'environment',
   'foriegn': 'foreign',
   'harrass': 'harass',
   'independant': 'independent',
@@ -146,25 +164,77 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'noticable': 'noticeable',
   'prefered': 'preferred',
   'proffesional': 'professional',
+  'proffesion': 'profession',
+  'profesion': 'profession',
   'referance': 'reference',
   'relavent': 'relevant',
   'supercede': 'supersede',
   'tendancy': 'tendency',
   'unfortunatly': 'unfortunately',
+  'unfortuanatly': 'unfortunately',
+  'unfortunetly': 'unfortunately',
   'busines': 'business',
+  'buisness': 'business',
+  'bussiness': 'business',
+  'busness': 'business',
   'experiance': 'experience',
+  'experence': 'experience',
   'explaning': 'explaining',
   'dissapointed': 'disappointed',
   'appriciate': 'appreciate',
   'sinserely': 'sincerely',
+  'sincerly': 'sincerely',
+  'sencerely': 'sincerely',
   'faithfull': 'faithfully',
   'intrested': 'interested',
+  'intersted': 'interested',
+  'intrest': 'interest',
+  'intresting': 'interesting',
   'sugestion': 'suggestion',
   'conveniance': 'convenience',
   'cancelation': 'cancellation',
   'availibility': 'availability',
-  'attendence': 'attendance'
+  'attendence': 'attendance',
+  'studing': 'studying',
+  'comming': 'coming',
+  'runing': 'running',
+  'swiming': 'swimming',
+  'realy': 'really',
+  'allways': 'always',
+  'peaple': 'people',
+  'pepole': 'people',
+  'diffrent': 'different',
+  'differant': 'different',
+  'futher': 'further',
+  'hobbys': 'hobbies',
+  'activites': 'activities',
+  'leasure': 'leisure',
+  'comfertable': 'comfortable',
+  'confortable': 'comfortable',
+  'beutiful': 'beautiful',
+  'agrement': 'agreement',
+  'knowlege': 'knowledge',
+  'langauge': 'language',
+  'yeasterday': 'yesterday',
+  'wich': 'which',
+  'woud': 'would',
+  'coud': 'could',
+  'shoud': 'should',
+  'everyting': 'everything',
+  'somthing': 'something',
+  'noting': 'nothing',
+  'anyting': 'anything'
 };
+
+// Whitelist of valid common words, names, abbreviations, and field answers that must NEVER be flagged as spelling errors
+export const VALID_WORDS_WHITELIST = new Set([
+  'karachi', 'lahore', 'islamabad', 'rawalpindi', 'faisalabad', 'peshawar', 'quetta', 'multan', 'sialkot', 'gujranwala',
+  'pakistan', 'pakistani', 'icap', 'ca', 'acca', 'cima', 'cfa', 'ifrs', 'gaap', 'audit', 'auditor', 'auditing',
+  'chartered', 'accountant', 'accountancy', 'trainee', 'article', 'articleship', 'ledger', 'debit', 'credit',
+  'reading', 'cricket', 'football', 'music', 'traveling', 'travelling', 'cooking', 'swimming', 'badminton', 'tennis',
+  'books', 'novels', 'english', 'urdu', 'hi', 'hello', 'hey', 'dear', 'thanks', 'regards', 'sincerely', 'faithfully',
+  'gym', 'badminton', 'hobbies', 'hobby', 'student', 'finance', 'manager', 'consultant', 'officer', 'executive'
+]);
 
 // Grammar & Idiom / Collocation rules with regex patterns
 export interface GrammarRule {
@@ -870,8 +940,13 @@ function generateBenchmarkComparisonNotes(
   studentText: string,
   sampleAnswer?: string,
   targetWordCount?: string,
-  register: 'formal' | 'informal' | 'general' = 'formal'
+  register: 'formal' | 'informal' | 'general' = 'formal',
+  taskType: 'part1' | 'part2' | 'part3' | 'part4A' | 'part4B' | 'general' = 'general'
 ): string {
+  if (taskType === 'part1') {
+    return 'Concise form entry accurately aligns with Part 1 specifications (1–5 words). Valid direct answers and alternative responses are fully accepted.';
+  }
+
   if (!sampleAnswer || !sampleAnswer.trim()) {
     return 'Evaluated against ICAP English Communication Skills exam criteria for grammatical accuracy, cohesion, and register.';
   }
@@ -882,30 +957,50 @@ function generateBenchmarkComparisonNotes(
   const notes: string[] = [];
 
   // 1. Length & Task Fulfillment
-  if (studentWords < Math.round(sampleWords * 0.6)) {
-    notes.push(`Response length (${studentWords} words) is below the benchmark model answer (${sampleWords} words); expand development of ideas to fully address all task prompts.`);
-  } else if (studentWords > Math.round(sampleWords * 1.6)) {
-    notes.push(`Response length (${studentWords} words) exceeds standard concise exam length (${sampleWords} words); aim for tighter conciseness without sacrificing essential points.`);
+  if (taskType === 'part2') {
+    if (studentWords >= 15 && studentWords <= 35) {
+      notes.push(`Word count (${studentWords} words) meets the required Part 2 target (20–30 words) with concise, relevant details.`);
+    } else if (studentWords < 15) {
+      notes.push(`Response (${studentWords} words) is slightly brief for Part 2; aim for 20–30 words to fully explain your points.`);
+    } else {
+      notes.push(`Response (${studentWords} words) addresses the prompt clearly; keeping it closer to 20–30 words ensures maximum conciseness.`);
+    }
+  } else if (taskType === 'part3') {
+    if (studentWords >= 25 && studentWords <= 45) {
+      notes.push(`Word count (${studentWords} words) satisfies the Part 3 social club chat requirement (30–40 words) with natural conversational flow.`);
+    } else if (studentWords < 25) {
+      notes.push(`Response (${studentWords} words) is a bit short; expand with a reason or example to reach 30–40 words.`);
+    } else {
+      notes.push(`Word count (${studentWords} words) provides comprehensive detail for club chat communication.`);
+    }
   } else {
-    notes.push(`Word count (${studentWords} words) is well balanced and aligns closely with the benchmark model answer (${sampleWords} words).`);
+    if (studentWords < Math.round(sampleWords * 0.6)) {
+      notes.push(`Response length (${studentWords} words) is below the benchmark model answer (${sampleWords} words); expand development of ideas to fully address all task prompts.`);
+    } else if (studentWords > Math.round(sampleWords * 1.6)) {
+      notes.push(`Response length (${studentWords} words) exceeds standard concise exam length (${sampleWords} words); aim for tighter conciseness without sacrificing essential points.`);
+    } else {
+      notes.push(`Word count (${studentWords} words) is well balanced and aligns closely with the benchmark model answer (${sampleWords} words).`);
+    }
   }
 
   // 2. Register & Salutation Alignment
-  const hasFormalSalutation = /^(Dear\s+[A-Za-z\s.,]+|To\s+the\s+President)/i.test(studentText.trim());
-  const sampleHasFormalSalutation = /^(Dear\s+[A-Za-z\s.,]+|To\s+the\s+President)/i.test(sampleAnswer.trim());
+  if (taskType === 'part4B' || (register === 'formal' && taskType !== 'part1' && taskType !== 'part2')) {
+    const hasFormalSalutation = /^(Dear\s+[A-Za-z\s.,]+|To\s+the\s+President)/i.test(studentText.trim());
+    const sampleHasFormalSalutation = /^(Dear\s+[A-Za-z\s.,]+|To\s+the\s+President)/i.test(sampleAnswer.trim());
 
-  if (register === 'formal' && sampleHasFormalSalutation && !hasFormalSalutation) {
-    notes.push(`Missing formal salutation compared to model solution (e.g. 'Dear Sir/Madam,' or 'Dear President,').`);
+    if (sampleHasFormalSalutation && !hasFormalSalutation) {
+      notes.push(`Missing formal salutation compared to model solution (e.g. 'Dear Sir/Madam,' or 'Dear President,').`);
+    }
+
+    const hasFormalSignoff = /(Yours sincerely|Yours faithfully|Kind regards|Best regards)/i.test(studentText.trim());
+    const sampleHasFormalSignoff = /(Yours sincerely|Yours faithfully)/i.test(sampleAnswer.trim());
+
+    if (sampleHasFormalSignoff && !hasFormalSignoff) {
+      notes.push(`Missing appropriate formal institutional sign-off found in model solution (e.g. 'Yours sincerely,').`);
+    }
   }
 
-  const hasFormalSignoff = /(Yours sincerely|Yours faithfully|Kind regards|Best regards)/i.test(studentText.trim());
-  const sampleHasFormalSignoff = /(Yours sincerely|Yours faithfully)/i.test(sampleAnswer.trim());
-
-  if (register === 'formal' && sampleHasFormalSignoff && !hasFormalSignoff) {
-    notes.push(`Missing appropriate formal institutional sign-off found in model solution (e.g. 'Yours sincerely,').`);
-  }
-
-  if (register === 'informal') {
+  if (register === 'informal' && (taskType === 'part4A' || taskType === 'general')) {
     const hasInformalGreeting = /^(Hi|Hey|Hello\s+[A-Za-z]+|Dear\s+[A-Za-z]+)/i.test(studentText.trim());
     if (!hasInformalGreeting) {
       notes.push(`Model solution uses a friendly casual opening (e.g., 'Hi [Name],') suitable for a peer or friend.`);
@@ -924,7 +1019,8 @@ export function analyzeTextClientSide(
   text: string,
   contextPrompt?: string,
   register: 'formal' | 'informal' | 'general' = 'formal',
-  sampleAnswer?: string
+  sampleAnswer?: string,
+  taskType: 'part1' | 'part2' | 'part3' | 'part4A' | 'part4B' | 'general' = 'general'
 ): WritingFeedbackResult {
   if (!text || !text.trim()) {
     return {
@@ -956,6 +1052,11 @@ export function analyzeTextClientSide(
     const startIndex = wordMatch.index;
     const endIndex = startIndex + rawWord.length;
 
+    // Never flag whitelisted words, common valid accounting words, or Pakistani cities
+    if (VALID_WORDS_WHITELIST.has(lowerWord)) {
+      continue;
+    }
+
     if (SPELLING_DICTIONARY[lowerWord]) {
       let correctedWord = SPELLING_DICTIONARY[lowerWord];
       // Preserve case
@@ -978,8 +1079,13 @@ export function analyzeTextClientSide(
 
   // 2. Check for Grammar, Sentence Structure, Word Choice, Punctuation, Clarity, and Tone Rules
   for (const rule of GRAMMAR_AND_STYLE_RULES) {
-    // If informal register and rule is tone related to contractions, skip
-    if (register === 'informal' && rule.type === 'tone' && rule.explanation.includes('contractions')) {
+    // If Part 1: skip tone, contractions, and stylistic rules (only real spelling/grammar)
+    if (taskType === 'part1' && (rule.type === 'tone' || rule.type === 'clarity')) {
+      continue;
+    }
+
+    // If informal register or Part 3 (club chat): allow contractions and casual phrases
+    if ((register === 'informal' || taskType === 'part3') && rule.type === 'tone' && rule.explanation.includes('contractions')) {
       continue;
     }
 
@@ -1026,8 +1132,8 @@ export function analyzeTextClientSide(
     }
   }
 
-  // 3. Check for contractions in formal register
-  if (register === 'formal') {
+  // 3. Check for contractions in formal register (ONLY in formal emails like Task 4B, never in Part 1, 2, or 3)
+  if (register === 'formal' && taskType !== 'part1' && taskType !== 'part2' && taskType !== 'part3') {
     const formalContractions: Record<string, string> = {
       "don't": "do not",
       "can't": "cannot",
@@ -1075,20 +1181,30 @@ export function analyzeTextClientSide(
   }
 
   // 4. Check for missing terminal punctuation
-  const trimmed = text.trim();
-  if (trimmed.length > 0 && !/[.!?]$/.test(trimmed)) {
-    const lastChar = trimmed.slice(-1);
-    const lastIndex = text.lastIndexOf(lastChar);
-    mistakes.push({
-      id: `punct-${mistakeCounter++}`,
-      original: lastChar,
-      replacement: `${lastChar}.`,
-      type: 'punctuation',
-      explanation: 'Sentence lacks terminal punctuation. Add a concluding period.',
-      urduExplanation: 'جملے کے اختتام پر فل اسٹاپ (.) لگانا لازمی ہے۔',
-      startIndex: lastIndex,
-      endIndex: lastIndex + 1
-    });
+  // CRITICAL FIX: Eliminate false full-stop (.) errors!
+  // In Part 1: Form field entries (1-5 words) do NOT require full stops (e.g. "Accountant", "Lahore, Pakistan", "Reading books").
+  // In Part 2 and Part 3: Short responses, conversational chat messages, or single clauses do NOT require strict periods.
+  // Terminal punctuation is ONLY checked for formal continuous emails/paragraphs (Task 4B, Task 4A) with 10+ words.
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const isPart123 = taskType === 'part1' || taskType === 'part2' || taskType === 'part3';
+  const shouldCheckTerminalPunctuation = !isPart123 && wordCount >= 10 && (taskType === 'part4B' || taskType === 'part4A' || taskType === 'general');
+
+  if (shouldCheckTerminalPunctuation) {
+    const trimmed = text.trim();
+    if (trimmed.length > 0 && !/[.!?]$/.test(trimmed)) {
+      const lastChar = trimmed.slice(-1);
+      const lastIndex = text.lastIndexOf(lastChar);
+      mistakes.push({
+        id: `punct-${mistakeCounter++}`,
+        original: lastChar,
+        replacement: `${lastChar}.`,
+        type: 'punctuation',
+        explanation: 'Formal paragraph lacks terminal punctuation. Add a concluding period.',
+        urduExplanation: 'باضابطہ پیراگراف کے اختتام پر فل اسٹاپ (.) لگانا لازمی ہے۔',
+        startIndex: lastIndex,
+        endIndex: lastIndex + 1
+      });
+    }
   }
 
   // Sort mistakes by startIndex
@@ -1116,12 +1232,18 @@ export function analyzeTextClientSide(
 
   // Calculate scores based on error density and task requirements
   const totalMistakes = mistakes.length;
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
 
-  let baseScore = 94;
-  baseScore -= totalMistakes * 5;
-  if (baseScore < 45) baseScore = 45;
-  if (baseScore > 98) baseScore = 98;
+  let baseScore = 95;
+  if (taskType === 'part1') {
+    // Part 1: Clean short answers get 100%
+    baseScore = totalMistakes === 0 ? 100 : Math.max(50, 100 - totalMistakes * 15);
+  } else if (taskType === 'part2' || taskType === 'part3') {
+    baseScore = totalMistakes === 0 ? 98 : Math.max(55, 95 - totalMistakes * 8);
+  } else {
+    baseScore -= totalMistakes * 5;
+    if (baseScore < 45) baseScore = 45;
+    if (baseScore > 98) baseScore = 98;
+  }
 
   let bandRating = 'CA Professional';
   if (baseScore < 60) bandRating = 'Beginner';
@@ -1143,14 +1265,18 @@ export function analyzeTextClientSide(
   if (clarityErrors > 0) detectedCategories.push(`${clarityErrors} clarity`);
 
   const summaryFeedback = totalMistakes === 0
-    ? 'Outstanding response! Demonstrates grammatical accuracy, appropriate vocabulary choice, and compliant tone register matching the benchmark model.'
+    ? (taskType === 'part1'
+        ? 'Excellent! Valid, concise response accurately provided with correct spelling.'
+        : 'Outstanding response! Demonstrates grammatical accuracy, appropriate vocabulary choice, and compliant tone register matching the benchmark model.')
     : `Identified ${totalMistakes} writing ${totalMistakes === 1 ? 'issue' : 'issues'} (${detectedCategories.join(', ')}). Review the highlighted errors below and examine how the improved version aligns with the suggested answer.`;
 
   const urduSummary = totalMistakes === 0
-    ? 'شاندار تحریر! گرامر اور الفاظ کا چناؤ بالکل درست ہے۔'
+    ? (taskType === 'part1'
+        ? 'بہترین جواب! معلومات بالکل درست اور واضح فراہم کی گئی ہیں۔'
+        : 'شاندار تحریر! گرامر اور الفاظ کا چناؤ بالکل درست ہے۔')
     : `آپ کی تحریر میں ${totalMistakes} غلطیاں نوٹ کی گئی ہیں۔ ہر غلطی کی تصحیح اور مکمل بہتر ورژن نیچے فراہم کر دیا گیا ہے۔`;
 
-  const benchmarkNotes = generateBenchmarkComparisonNotes(text, sampleAnswer, undefined, register);
+  const benchmarkNotes = generateBenchmarkComparisonNotes(text, sampleAnswer, undefined, register, taskType);
 
   return {
     originalText: text,
@@ -1176,14 +1302,18 @@ export function analyzeTextClientSide(
  */
 export async function analyzeWritingWithMistakes(
   text: string,
-  scenarioContext?: { title?: string; prompt?: string; recipient?: string; sampleAnswer?: string },
+  scenarioContext?: { title?: string; prompt?: string; recipient?: string; sampleAnswer?: string; taskType?: 'part1' | 'part2' | 'part3' | 'part4A' | 'part4B' | 'general' },
   targetRegister: 'formal' | 'informal' | 'general' = 'formal'
 ): Promise<WritingFeedbackResult> {
+  const taskType = scenarioContext?.taskType || 'general';
+  const isShortOrInformalPart = taskType === 'part1' || taskType === 'part2' || taskType === 'part3';
+
   const fallback = analyzeTextClientSide(
     text,
     scenarioContext?.prompt,
     targetRegister,
-    scenarioContext?.sampleAnswer
+    scenarioContext?.sampleAnswer,
+    taskType
   );
 
   if (!text || !text.trim()) {
@@ -1193,14 +1323,21 @@ export async function analyzeWritingWithMistakes(
   const systemPrompt = `You are a Senior Lead Examiner for ICAP English Communication Skills (ECS) and Aptis General Writing.
 Carefully examine the student's submitted response and COMPARE IT with the suggested benchmark model answer.
 Your mission is to perform a thorough, uncompromising error analysis:
-1. Detect and identify ALL mistakes without missing any:
+1. Detect and identify genuine mistakes:
    - Grammar (tense consistency, subject-verb agreement, prepositions, articles, passive voice)
    - Spelling (misspelled words, typos)
    - Word Choice (imprecise or inappropriate diction compared to the benchmark answer)
-   - Sentence Structure (run-ons, comma splices, fragments, awkward syntax)
-   - Punctuation (capitalization of 'I', commas, missing periods, apostrophes)
+   - Sentence Structure (run-ons, comma splices, awkward syntax)
+   - Punctuation (capitalization of 'I', commas, apostrophes)
    - Clarity (redundant expressions, ambiguous phrases, wordy sentences)
    - Tone (formal vs. informal register compliance, salutations, sign-offs)
+
+CRITICAL INSTRUCTIONS FOR ACCURACY (ELIMINATING FALSE POSITIVES):
+- For Part 1, Part 2, and Part 3: DO NOT penalize or flag missing terminal punctuation (periods/full stops at the end of the text). Short form responses (e.g., job titles, city names, brief hobbies) and conversational chat messages do NOT require terminal full stops.
+- Accept valid short answers, alternative phrases, and synonyms that fulfill the prompt requirements.
+- Whitelist and NEVER flag as spelling errors: Pakistani city names (Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, Quetta, etc.), common Pakistani names, or standard accounting/business terminology (ICAP, CA, ledger, audit, debit, credit, voucher, accrual).
+- Focus strictly on real grammatical violations, genuine misspellings, or inappropriate tone for the given task.
+
 2. For each mistake, specify:
    - original: the EXACT substring from student text containing the mistake (what is wrong)
    - replacement: the clean, corrected replacement snippet (corrected version)
@@ -1235,6 +1372,7 @@ CRITICAL: Return ONLY valid JSON matching this schema:
 }`;
 
   const userPrompt = `Context/Prompt: "${scenarioContext?.title || ''} - ${scenarioContext?.prompt || 'Business & Exam Writing'}"
+Task Type: ${taskType}
 Target Register: ${targetRegister}
 Suggested Benchmark Model Answer:
 """
@@ -1270,8 +1408,6 @@ ${text}
         const originalSnippet = m.original || m.originalSentence || m.error || m.mistake || m.text || '';
         const replacementSnippet = m.replacement || m.correctedSentence || m.correction || m.suggested || m.suggestion || '';
         if (!originalSnippet || !replacementSnippet) continue;
-        const startIndex = text.indexOf(originalSnippet);
-        const endIndex = startIndex !== -1 ? startIndex + originalSnippet.length : 0;
 
         let detectedType: WritingMistakeType = 'grammar';
         const rawTypeStr = (m.type || m.errorType || '').toLowerCase();
@@ -1281,6 +1417,17 @@ ${text}
         else if (rawTypeStr.includes('struct') || rawTypeStr.includes('syntax') || rawTypeStr.includes('run-on')) detectedType = 'sentence_structure';
         else if (rawTypeStr.includes('clar') || rawTypeStr.includes('redund')) detectedType = 'clarity';
         else if (rawTypeStr.includes('tone') || rawTypeStr.includes('regis')) detectedType = 'tone';
+
+        // Filter out false terminal punctuation errors on Parts 1, 2, and 3
+        if (isShortOrInformalPart && detectedType === 'punctuation') {
+          const expl = (m.explanation || '').toLowerCase();
+          if (expl.includes('full stop') || expl.includes('period') || expl.includes('terminal') || originalSnippet === '.' || replacementSnippet === '.') {
+            continue;
+          }
+        }
+
+        const startIndex = text.indexOf(originalSnippet);
+        const endIndex = startIndex !== -1 ? startIndex + originalSnippet.length : 0;
 
         mappedMistakes.push({
           id: `ai-${mIdx++}`,
@@ -1344,6 +1491,7 @@ export async function evaluateExamWritingTask(
     prompt: string;
     targetWordCount?: string;
     register?: 'formal' | 'informal' | 'general';
+    taskType?: 'part1' | 'part2' | 'part3' | 'part4A' | 'part4B' | 'general';
   }
 ): Promise<WritingFeedbackResult> {
   return analyzeWritingWithMistakes(
@@ -1351,7 +1499,8 @@ export async function evaluateExamWritingTask(
     {
       title: taskInfo.taskName,
       prompt: taskInfo.prompt,
-      sampleAnswer: sampleAnswer
+      sampleAnswer: sampleAnswer,
+      taskType: taskInfo.taskType
     },
     taskInfo.register || 'formal'
   );
@@ -1368,12 +1517,14 @@ export function evaluateExamWritingTaskSync(
     prompt: string;
     targetWordCount?: string;
     register?: 'formal' | 'informal' | 'general';
+    taskType?: 'part1' | 'part2' | 'part3' | 'part4A' | 'part4B' | 'general';
   }
 ): WritingFeedbackResult {
   return analyzeTextClientSide(
     studentText,
     taskInfo.prompt,
     taskInfo.register || 'formal',
-    sampleAnswer
+    sampleAnswer,
+    taskInfo.taskType || 'general'
   );
 }
