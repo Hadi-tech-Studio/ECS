@@ -82,7 +82,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         map[q.id] = evaluateExamWritingTaskSync(
           text,
           q.sampleAnswer,
-          { taskName: `Part 1: ${q.prompt}`, prompt: q.prompt, targetWordCount: '1–5 words', register: 'general' }
+          { taskName: `Part 1: ${q.prompt}`, prompt: q.prompt, targetWordCount: '1–5 words', register: 'general', taskType: 'part1' }
         );
       }
     });
@@ -95,7 +95,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
     return evaluateExamWritingTaskSync(
       safeWritingPart2Answer,
       testSet.writing.part2.sampleAnswer,
-      { taskName: 'Part 2: Short Form Filling', prompt: testSet.writing.part2.prompt, targetWordCount: '20–30 words', register: 'formal' }
+      { taskName: 'Part 2: Short Form Filling', prompt: testSet.writing.part2.prompt, targetWordCount: '20–30 words', register: 'formal', taskType: 'part2' }
     );
   }, [safeWritingPart2Answer, testSet.writing?.part2]);
 
@@ -107,7 +107,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
         map[chat.id] = evaluateExamWritingTaskSync(
           text,
           chat.sampleAnswer,
-          { taskName: `Part 3: Response to ${chat.memberName}`, prompt: chat.message, targetWordCount: '30–40 words', register: 'formal' }
+          { taskName: `Part 3: Response to ${chat.memberName}`, prompt: chat.message, targetWordCount: '30–40 words', register: 'formal', taskType: 'part3' }
         );
       }
     });
@@ -119,7 +119,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
     return evaluateExamWritingTaskSync(
       safeWritingPart4AAnswer,
       testSet.writing.part4.taskA.sampleAnswer,
-      { taskName: 'Task 4A: Informal Email', prompt: testSet.writing.part4.taskA.prompt, targetWordCount: '40–60 words', register: 'informal' }
+      { taskName: 'Task 4A: Informal Email', prompt: testSet.writing.part4.taskA.prompt, targetWordCount: '40–60 words', register: 'informal', taskType: 'part4A' }
     );
   }, [safeWritingPart4AAnswer, testSet.writing?.part4?.taskA]);
 
@@ -128,7 +128,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
     return evaluateExamWritingTaskSync(
       safeWritingPart4BAnswer,
       testSet.writing.part4.taskB.sampleAnswer,
-      { taskName: 'Task 4B: Formal Email', prompt: testSet.writing.part4.taskB.prompt, targetWordCount: '120–150 words', register: 'formal' }
+      { taskName: 'Task 4B: Formal Email', prompt: testSet.writing.part4.taskB.prompt, targetWordCount: '120–150 words', register: 'formal', taskType: 'part4B' }
     );
   }, [safeWritingPart4BAnswer, testSet.writing?.part4?.taskB]);
 
@@ -167,7 +167,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           const res = await evaluateExamWritingTask(
             safeWritingPart2Answer,
             testSet.writing.part2.sampleAnswer,
-            { taskName: 'Part 2: Short Form Filling', prompt: testSet.writing.part2.prompt, register: 'formal' }
+            { taskName: 'Part 2: Short Form Filling', prompt: testSet.writing.part2.prompt, register: 'formal', taskType: 'part2' }
           );
           if (!isCancelled && res) setPart2Feedback(res);
         } catch {
@@ -184,7 +184,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
               const res = await evaluateExamWritingTask(
                 text,
                 chat.sampleAnswer,
-                { taskName: `Part 3: Response to ${chat.memberName}`, prompt: chat.message, register: 'formal' }
+                { taskName: `Part 3: Response to ${chat.memberName}`, prompt: chat.message, register: 'formal', taskType: 'part3' }
               );
               if (!isCancelled && res) {
                 setPart3Feedbacks(prev => ({ ...prev, [chat.id]: res }));
@@ -202,7 +202,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           const res = await evaluateExamWritingTask(
             safeWritingPart4AAnswer,
             testSet.writing.part4.taskA.sampleAnswer,
-            { taskName: 'Task 4A: Informal Email', prompt: testSet.writing.part4.taskA.prompt, register: 'informal' }
+            { taskName: 'Task 4A: Informal Email', prompt: testSet.writing.part4.taskA.prompt, register: 'informal', taskType: 'part4A' }
           );
           if (!isCancelled && res) setPart4AFeedback(res);
         } catch {
@@ -216,7 +216,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
           const res = await evaluateExamWritingTask(
             safeWritingPart4BAnswer,
             testSet.writing.part4.taskB.sampleAnswer,
-            { taskName: 'Task 4B: Formal Email', prompt: testSet.writing.part4.taskB.prompt, register: 'formal' }
+            { taskName: 'Task 4B: Formal Email', prompt: testSet.writing.part4.taskB.prompt, register: 'formal', taskType: 'part4B' }
           );
           if (!isCancelled && res) setPart4BFeedback(res);
         } catch {
