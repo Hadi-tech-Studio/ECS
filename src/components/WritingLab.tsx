@@ -157,7 +157,15 @@ Return pure JSON matching this exact structure:
         sentences: detailedFeedback.mistakes.map(m => ({
           originalSentence: m.original,
           correctedSentence: m.replacement,
-          errorType: m.type === 'spelling' ? 'Spelling Mistake' : m.type === 'grammar' ? 'Grammar Mistake' : m.type === 'tone' ? 'Tone / Register Error' : 'Word Choice / Mechanics',
+          errorType: m.type === 'spelling' ? 'Spelling Mistake' :
+                     m.type === 'capitalization' ? 'Capitalization Error' :
+                     m.type === 'subject_verb_agreement' ? 'Subject-Verb Agreement' :
+                     m.type === 'punctuation' ? 'Punctuation Error' :
+                     m.type === 'formatting' ? 'Formatting & Layout' :
+                     m.type === 'grammar' ? 'Grammar Mistake' :
+                     m.type === 'word_choice' ? 'Word Choice' :
+                     m.type === 'sentence_structure' ? 'Sentence Structure' :
+                     m.type === 'clarity' ? 'Clarity & Conciseness' : 'Tone / Register Error',
           explanation: m.explanation,
           urduExplanation: m.urduExplanation
         }))
