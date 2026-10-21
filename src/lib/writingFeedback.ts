@@ -16,7 +16,10 @@ export type WritingMistakeType =
   | 'word_choice' 
   | 'sentence_structure' 
   | 'clarity' 
-  | 'tone';
+  | 'tone'
+  | 'capitalization'
+  | 'subject_verb_agreement'
+  | 'formatting';
 
 export interface WritingMistake {
   id: string;
@@ -223,7 +226,164 @@ export const SPELLING_DICTIONARY: Record<string, string> = {
   'everyting': 'everything',
   'somthing': 'something',
   'noting': 'nothing',
-  'anyting': 'anything'
+  'anyting': 'anything',
+  'conferance': 'conference',
+  'buletin': 'bulletin',
+  'incedent': 'incident',
+  'incidently': 'incidentally',
+  'occassion': 'occasion',
+  'ocassion': 'occasion',
+  'occassionally': 'occasionally',
+  'dissapoint': 'disappoint',
+  'disatisfied': 'dissatisfied',
+  'dissatisfaction': 'dissatisfaction',
+  'inconvienience': 'inconvenience',
+  'inconvinience': 'inconvenience',
+  'unconvienient': 'inconvenient',
+  'persue': 'pursue',
+  'persuing': 'pursuing',
+  'necessery': 'necessary',
+  'completly': 'completely',
+  'defanitely': 'definitely',
+  'cancelld': 'cancelled',
+  'disscusion': 'discussion',
+  'discus': 'discuss',
+  'allready': 'already',
+  'familar': 'familiar',
+  'hight': 'height',
+  'humourous': 'humorous',
+  'imediately': 'immediately',
+  'immediatly': 'immediately',
+  'inteligence': 'intelligence',
+  'libary': 'library',
+  'mischevious': 'mischievous',
+  'particuler': 'particular',
+  'persistant': 'persistent',
+  'posible': 'possible',
+  'posibly': 'possibly',
+  'relavence': 'relevance',
+  'resistence': 'resistance',
+  'sensable': 'sensible',
+  'surprize': 'surprise',
+  'vaccuum': 'vacuum',
+  'vacum': 'vacuum',
+  'vehical': 'vehicle',
+  'comunicate': 'communicate',
+  'discription': 'description',
+  'sugest': 'suggest',
+  'whitch': 'which',
+  'whith': 'with',
+  'becaus': 'because',
+  'anouncement': 'announcement',
+  'anounce': 'announce',
+  'aplication': 'application',
+  'apology': 'apology',
+  'arive': 'arrive',
+  'arival': 'arrival',
+  'asociation': 'association',
+  'asistant': 'assistant',
+  'asistance': 'assistance',
+  'becomming': 'becoming',
+  'carefull': 'careful',
+  'carefully': 'carefully',
+  'certian': 'certain',
+  'colum': 'column',
+  'congradulations': 'congratulations',
+  'concience': 'conscience',
+  'conscientous': 'conscientious',
+  'decieve': 'deceive',
+  'disasterous': 'disastrous',
+  'dosen\'t': 'doesn\'t',
+  'dosent': 'doesn\'t',
+  'easely': 'easily',
+  'elagant': 'elegant',
+  'enterance': 'entrance',
+  'equiptment': 'equipment',
+  'especialy': 'especially',
+  'excelent': 'excellent',
+  'facinating': 'fascinating',
+  'finaly': 'finally',
+  'foward': 'forward',
+  'fourward': 'forward',
+  'grammer': 'grammar',
+  'grammatic': 'grammatical',
+  'greatfull': 'grateful',
+  'gratefull': 'grateful',
+  'happend': 'happened',
+  'hopeing': 'hoping',
+  'ignorence': 'ignorance',
+  'imaginery': 'imaginary',
+  'immitate': 'imitate',
+  'interupt': 'interrupt',
+  'irrisponsible': 'irresponsible',
+  'knowlegeable': 'knowledgeable',
+  'lenght': 'length',
+  'lisence': 'license',
+  'lonley': 'lonely',
+  'loosing': 'losing',
+  'mathmatics': 'mathematics',
+  'medecine': 'medicine',
+  'minature': 'miniature',
+  'mischeif': 'mischief',
+  'naturely': 'naturally',
+  'neice': 'niece',
+  'nieghbor': 'neighbor',
+  'nieghbour': 'neighbour',
+  'nineth': 'ninth',
+  'ninty': 'ninety',
+  'oppinion': 'opinion',
+  'originaly': 'originally',
+  'paralel': 'parallel',
+  'parliment': 'parliament',
+  'passtime': 'pastime',
+  'peacefull': 'peaceful',
+  'peice': 'piece',
+  'percieve': 'perceive',
+  'permenant': 'permanent',
+  'playwrite': 'playwright',
+  'politican': 'politician',
+  'posses': 'possess',
+  'potatos': 'potatoes',
+  'preceed': 'precede',
+  'preceeding': 'preceding',
+  'prescence': 'presence',
+  'privelege': 'privilege',
+  'procede': 'proceed',
+  'probaly': 'probably',
+  'propoganda': 'propaganda',
+  'publically': 'publicly',
+  'questionaire': 'questionnaire',
+  'readible': 'readable',
+  'reciept': 'receipt',
+  'religeous': 'religious',
+  'rememberance': 'remembrance',
+  'restaraunt': 'restaurant',
+  'resturant': 'restaurant',
+  'rythm': 'rhythm',
+  'saftey': 'safety',
+  'satelite': 'satellite',
+  'secratary': 'secretary',
+  'secretry': 'secretary',
+  'sieze': 'seize',
+  'similer': 'similar',
+  'skillfull': 'skillful',
+  'speach': 'speech',
+  'temperment': 'temperament',
+  'therefor': 'therefore',
+  'threshhold': 'threshold',
+  'throught': 'through',
+  'tounge': 'tongue',
+  'twelth': 'twelfth',
+  'tyrany': 'tyranny',
+  'unforseen': 'unforeseen',
+  'unplesant': 'unpleasant',
+  'usefull': 'useful',
+  'valuble': 'valuable',
+  'villiage': 'village',
+  'warrent': 'warrant',
+  'weild': 'wield',
+  'whereever': 'wherever',
+  'yeild': 'yield'
 };
 
 // Whitelist of valid common words, names, abbreviations, and field answers that must NEVER be flagged as spelling errors
@@ -233,7 +393,8 @@ export const VALID_WORDS_WHITELIST = new Set([
   'chartered', 'accountant', 'accountancy', 'trainee', 'article', 'articleship', 'ledger', 'debit', 'credit',
   'reading', 'cricket', 'football', 'music', 'traveling', 'travelling', 'cooking', 'swimming', 'badminton', 'tennis',
   'books', 'novels', 'english', 'urdu', 'hi', 'hello', 'hey', 'dear', 'thanks', 'regards', 'sincerely', 'faithfully',
-  'gym', 'badminton', 'hobbies', 'hobby', 'student', 'finance', 'manager', 'consultant', 'officer', 'executive'
+  'gym', 'badminton', 'hobbies', 'hobby', 'student', 'finance', 'manager', 'consultant', 'officer', 'executive',
+  'sir', 'madam', 'mr', 'mrs', 'ms', 'dr', 'association', 'society', 'club', 'president', 'secretary', 'committee'
 ]);
 
 // Grammar & Idiom / Collocation rules with regex patterns
@@ -247,49 +408,112 @@ export interface GrammarRule {
 
 export const GRAMMAR_AND_STYLE_RULES: GrammarRule[] = [
   // ==========================================
-  // 1. GRAMMAR: Subject-Verb Agreement & Tenses
+  // 1. SUBJECT-VERB AGREEMENT & TENSES
   // ==========================================
   {
     pattern: /\bhe don't\b/gi,
     replacement: 'he does not',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "Third-person singular subject 'he' requires 'does not' rather than 'don't'.",
     urduExplanation: "تیسرے شخص واحد فاعل (He) کے ساتھ 'does not' آتا ہے، 'don't' نہیں۔"
   },
   {
     pattern: /\bshe don't\b/gi,
     replacement: 'she does not',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "Third-person singular subject 'she' requires 'does not'.",
     urduExplanation: "فاعل (She) کے ساتھ 'does not' درست ہے۔"
   },
   {
     pattern: /\bit don't\b/gi,
     replacement: 'it does not',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "Third-person singular subject 'it' requires 'does not'.",
     urduExplanation: "فاعل (It) کے ساتھ 'does not' استعمال کریں۔"
   },
   {
+    pattern: /\b(he|she|it)\s+have\b/gi,
+    replacement: '$1 has',
+    type: 'subject_verb_agreement',
+    explanation: "Third-person singular subjects ('he', 'she', 'it') take 'has' instead of 'have'.",
+    urduExplanation: "واحد فاعل (he/she/it) کے ساتھ 'has' آتا ہے۔"
+  },
+  {
+    pattern: /\b(they|we|you)\s+has\b/gi,
+    replacement: '$1 have',
+    type: 'subject_verb_agreement',
+    explanation: "Plural subjects ('they', 'we', 'you') take 'have' instead of 'has'.",
+    urduExplanation: "جمع فاعل (they/we/you) کے ساتھ 'have' استعمال کریں۔"
+  },
+  {
+    pattern: /\b(they|we|you)\s+was\b/gi,
+    replacement: '$1 were',
+    type: 'subject_verb_agreement',
+    explanation: "Plural subjects take 'were' in past tense, not 'was'.",
+    urduExplanation: "جمع فاعل کے ساتھ ماضی میں 'were' آتا ہے۔"
+  },
+  {
+    pattern: /\b(he|she|it)\s+were\b/gi,
+    replacement: '$1 was',
+    type: 'subject_verb_agreement',
+    explanation: "Singular third-person subject takes 'was' in past tense.",
+    urduExplanation: "واحد فاعل کے ساتھ 'was' درست ہے۔"
+  },
+  {
+    pattern: /\b(he|she|it)\s+do\b/gi,
+    replacement: '$1 does',
+    type: 'subject_verb_agreement',
+    explanation: "Third-person singular subject requires 'does' rather than 'do'.",
+    urduExplanation: "واحد فاعل کے ساتھ 'does' آتا ہے۔"
+  },
+  {
     pattern: /\beveryone are\b/gi,
     replacement: 'everyone is',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "Indefinite pronoun 'everyone' takes a singular verb ('everyone is').",
     urduExplanation: "ضمیر 'everyone' ہمیشہ واحد فعل (is) کے ساتھ آتا ہے۔"
   },
   {
     pattern: /\beverybody are\b/gi,
     replacement: 'everybody is',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "Indefinite pronoun 'everybody' takes a singular verb ('everybody is').",
     urduExplanation: "'everybody' کے ساتھ واحد فعل 'is' آتا ہے۔"
   },
   {
+    pattern: /\b(everyone|everybody|someone|somebody|anyone|anybody|nobody|no one)\s+have\b/gi,
+    replacement: '$1 has',
+    type: 'subject_verb_agreement',
+    explanation: "Indefinite pronouns ('everyone', 'somebody', etc.) are grammatically singular and take 'has'.",
+    urduExplanation: "'everyone' یا 'somebody' کے ساتھ واحد فعل 'has' آتا ہے۔"
+  },
+  {
+    pattern: /\bthere is (many|several|few|two|three|four|five|multiple|various)\b/gi,
+    replacement: 'there are $1',
+    type: 'subject_verb_agreement',
+    explanation: "Plural predicate nouns require plural existential verb 'there are'.",
+    urduExplanation: "جمع اشیاء کے لیے 'there are' استعمال ہوتا ہے۔"
+  },
+  {
+    pattern: /\bthere are a\b/gi,
+    replacement: 'there is a',
+    type: 'subject_verb_agreement',
+    explanation: "Singular noun with article 'a' requires singular 'there is'.",
+    urduExplanation: "واحد اسم کے لیے 'there is a' درست ہے۔"
+  },
+  {
     pattern: /\beach of (them|us|the members|the students) are\b/gi,
     replacement: 'each of $1 is',
-    type: 'grammar',
+    type: 'subject_verb_agreement',
     explanation: "The subject 'each' is grammatically singular and requires the verb 'is'.",
     urduExplanation: "'each' کے بعد فعل ہمیشہ واحد (is) ہوتا ہے۔"
+  },
+  {
+    pattern: /\bone of the ([a-z]+) are\b/gi,
+    replacement: 'one of the $1 is',
+    type: 'subject_verb_agreement',
+    explanation: "Subject is 'one', which is singular and requires 'is'.",
+    urduExplanation: "'One of the...' کے ساتھ فعل ہمیشہ واحد (is) ہوتا ہے۔"
   },
   {
     pattern: /\bthe informations? (are|were)\b/gi,
@@ -731,56 +955,102 @@ export const GRAMMAR_AND_STYLE_RULES: GrammarRule[] = [
   },
 
   // ==========================================
-  // 4. PUNCTUATION: Mechanics, Capitalization & Spacing
+  // 4. CAPITALIZATION: Pronoun 'I', Proper Nouns, Days & Months
   // ==========================================
   {
     pattern: /\bi am writing\b/g,
     replacement: 'I am writing',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "The personal pronoun 'I' must always be capitalized.",
     urduExplanation: "انگریزی میں ضمیر 'I' ہمیشہ کیپٹل لکھا جاتا ہے۔"
   },
   {
     pattern: /\bi have\b/g,
     replacement: 'I have',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "Capitalize the personal pronoun 'I'.",
     urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
   },
   {
     pattern: /\bi will\b/g,
     replacement: 'I will',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "Capitalize the personal pronoun 'I'.",
     urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
   },
   {
     pattern: /\bi think\b/g,
     replacement: 'I think',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "Capitalize the personal pronoun 'I'.",
     urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
   },
   {
     pattern: /\bi would\b/g,
     replacement: 'I would',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "Capitalize the personal pronoun 'I'.",
     urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
   },
   {
     pattern: /\bi can\b/g,
     replacement: 'I can',
-    type: 'punctuation',
+    type: 'capitalization',
     explanation: "Capitalize the personal pronoun 'I'.",
     urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
   },
+  {
+    pattern: /\bi am\b/g,
+    replacement: 'I am',
+    type: 'capitalization',
+    explanation: "Capitalize the personal pronoun 'I'.",
+    urduExplanation: "ضمیر 'I' کو ہمیشہ کیپٹل لکھیں۔"
+  },
+  {
+    pattern: /\b(i)\b/g,
+    replacement: 'I',
+    type: 'capitalization',
+    explanation: "The personal pronoun 'I' must always be written in uppercase.",
+    urduExplanation: "ضمیر 'I' ہمیشہ کیپٹل لکھا جاتا ہے۔"
+  },
+  {
+    pattern: /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/g,
+    replacement: '$1',
+    type: 'capitalization',
+    explanation: "Days of the week are proper nouns and must begin with a capital letter.",
+    urduExplanation: "ہفتے کے دنوں کے نام کا پہلا حرف ہمیشہ کیپٹل ہوتا ہے۔"
+  },
+  {
+    pattern: /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/g,
+    replacement: '$1',
+    type: 'capitalization',
+    explanation: "Months of the year are proper nouns and must begin with a capital letter.",
+    urduExplanation: "مہینوں کے نام ہمیشہ کیپٹل حرف سے شروع ہوتے ہیں۔"
+  },
+  {
+    pattern: /\b(pakistan|pakistani|english|urdu)\b/g,
+    replacement: '$1',
+    type: 'capitalization',
+    explanation: "Country names, nationalities, and languages must be capitalized.",
+    urduExplanation: "ممالک، قومیتوں اور زبانوں کے نام ہمیشہ کیپٹل ہوتے ہیں۔"
+  },
+
+  // ==========================================
+  // 5. PUNCTUATION: Spacing & Transition Commas
+  // ==========================================
   {
     pattern: /\s+([,.:;!?])/g,
     replacement: '$1',
     type: 'punctuation',
     explanation: "No space should appear before a punctuation mark.",
     urduExplanation: "رموز اوقاف (کوما، فل اسٹاپ وغیرہ) سے پہلے خالی جگہ (Space) نہیں دی جاتی۔"
+  },
+  {
+    pattern: /([,;:])([A-Za-z])/g,
+    replacement: '$1 $2',
+    type: 'punctuation',
+    explanation: "Always insert a single space after a comma, colon, or semicolon.",
+    urduExplanation: "کوما، کولن یا سیمی کولن کے بعد ایک اسپیس دینا لازمی ہے۔"
   },
   {
     pattern: /([!?]){2,}/g,
@@ -790,11 +1060,36 @@ export const GRAMMAR_AND_STYLE_RULES: GrammarRule[] = [
     urduExplanation: "تحریر میں بار بار سوالیہ یا فجائیہ نشانات لگانا غیر پیشہ ورانہ ہے۔"
   },
   {
-    pattern: /\b(However|Furthermore|Therefore|In addition|First of all|On the other hand|Moreover)\s+([A-Za-z])/g,
+    pattern: /\b(However|Furthermore|Therefore|In addition|First of all|On the other hand|Moreover|In conclusion|Consequently|Meanwhile)\s+([A-Za-z])/g,
     replacement: '$1, $2',
     type: 'punctuation',
     explanation: "Introductory transition words require a following comma.",
     urduExplanation: "ابتدائی ربطی الفاظ (Transitions) کے بعد کوما لگانا لازمی ہے۔"
+  },
+
+  // ==========================================
+  // 6. FORMATTING: Salutations, Sign-offs & Layout
+  // ==========================================
+  {
+    pattern: /\bdear sir\b/gi,
+    replacement: 'Dear Sir/Madam,',
+    type: 'formatting',
+    explanation: "Formal email salutation should be written as 'Dear Sir/Madam,' followed by a comma.",
+    urduExplanation: "باضابطہ ای میل میں 'Dear Sir/Madam,' لکھ کر کوما لگائیں۔"
+  },
+  {
+    pattern: /\bdear (mr|ms|mrs|dr)\.?\s+([a-z]+)(?!,)/gi,
+    replacement: 'Dear $1. $2,',
+    type: 'formatting',
+    explanation: "Email salutations must conclude with a comma before beginning the letter body.",
+    urduExplanation: "ای میل کے آغاز میں القاب کے بعد کوما لگانا لازمی ہے۔"
+  },
+  {
+    pattern: /\b(yours sincerely|yours faithfully|best regards|kind regards)(?!\s*,)\b/gi,
+    replacement: '$1,',
+    type: 'formatting',
+    explanation: "Formal sign-offs must be followed by a comma (e.g., 'Yours sincerely,').",
+    urduExplanation: "خط کے اختتام پر 'Yours sincerely,' یا 'Kind regards,' کے بعد کوما لگانا ضروری ہے۔"
   },
 
   // ==========================================
@@ -1104,7 +1399,9 @@ export function analyzeTextClientSide(
 
       if (!alreadyCaptured) {
         let replacement = rule.replacement;
-        if (rule.replacement === '$1' && match[1]) {
+        if (rule.type === 'capitalization' && rule.replacement === '$1' && match[1]) {
+          replacement = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+        } else if (rule.replacement === '$1' && match[1]) {
           replacement = match[1];
         } else if (rule.replacement.includes('$1') && match[1]) {
           replacement = rule.replacement.replace('$1', match[1]);
@@ -1127,6 +1424,69 @@ export function analyzeTextClientSide(
           urduExplanation: rule.urduExplanation,
           startIndex,
           endIndex
+        });
+      }
+    }
+  }
+
+  // 3. Sentence-level capitalization & polite inquiry punctuation (for emails & Writing Hub)
+  if (taskType !== 'part1') {
+    const trimmed = text.trim();
+    if (trimmed.length > 0 && /^[a-z]/.test(trimmed)) {
+      const firstIdx = text.indexOf(trimmed[0]);
+      const alreadyCaptured = mistakes.some(m => firstIdx >= m.startIndex && firstIdx < m.endIndex);
+      if (!alreadyCaptured) {
+        mistakes.push({
+          id: `cap-${mistakeCounter++}`,
+          original: trimmed[0],
+          replacement: trimmed[0].toUpperCase(),
+          type: 'capitalization',
+          explanation: 'Sentences and formal emails must begin with a capital letter.',
+          urduExplanation: 'جملے یا خط کا پہلا حرف ہمیشہ کیپٹل (بڑا) ہونا چاہیے۔',
+          startIndex: firstIdx,
+          endIndex: firstIdx + 1
+        });
+      }
+    }
+
+    // Check sentence start after a period
+    const sentenceStartRegex = /([.!?]\s+)([a-z])/g;
+    let sMatch: RegExpExecArray | null;
+    while ((sMatch = sentenceStartRegex.exec(text)) !== null) {
+      const letterIndex = sMatch.index + sMatch[1].length;
+      const alreadyCaptured = mistakes.some(m => letterIndex >= m.startIndex && letterIndex < m.endIndex);
+      if (!alreadyCaptured) {
+        mistakes.push({
+          id: `cap-${mistakeCounter++}`,
+          original: sMatch[2],
+          replacement: sMatch[2].toUpperCase(),
+          type: 'capitalization',
+          explanation: 'The first word following a sentence-ending period must begin with a capital letter.',
+          urduExplanation: 'فل اسٹاپ کے بعد نئے جملے کا پہلا لفظ کیپٹل حرف سے شروع کریں۔',
+          startIndex: letterIndex,
+          endIndex: letterIndex + 1
+        });
+      }
+    }
+  }
+
+  // Direct polite request question mark check in emails
+  if (taskType === 'part4A' || taskType === 'part4B' || taskType === 'general') {
+    const questionRegex = /\b(could you please [^.!?\n]+|can you please [^.!?\n]+|would you mind [^.!?\n]+|may i ask [^.!?\n]+)(\.)/gi;
+    let qMatch: RegExpExecArray | null;
+    while ((qMatch = questionRegex.exec(text)) !== null) {
+      const dotIndex = qMatch.index + qMatch[0].length - 1;
+      const alreadyCaptured = mistakes.some(m => dotIndex >= m.startIndex && dotIndex < m.endIndex);
+      if (!alreadyCaptured) {
+        mistakes.push({
+          id: `punct-${mistakeCounter++}`,
+          original: '.',
+          replacement: '?',
+          type: 'punctuation',
+          explanation: "Direct polite requests and inquiries require a question mark ('?') rather than a period.",
+          urduExplanation: "سوالیہ یا استفساری جملے کے اختتام پر سوالیہ نشان (?) لگانا لازمی ہے۔",
+          startIndex: dotIndex,
+          endIndex: dotIndex + 1
         });
       }
     }
@@ -1322,26 +1682,29 @@ export async function analyzeWritingWithMistakes(
 
   const systemPrompt = `You are a Senior Lead Examiner for ICAP English Communication Skills (ECS) and Aptis General Writing.
 Carefully examine the student's submitted response and COMPARE IT with the suggested benchmark model answer.
-Your mission is to perform a thorough, uncompromising error analysis:
-1. Detect and identify genuine mistakes:
-   - Grammar (tense consistency, subject-verb agreement, prepositions, articles, passive voice)
-   - Spelling (misspelled words, typos)
-   - Word Choice (imprecise or inappropriate diction compared to the benchmark answer)
-   - Sentence Structure (run-ons, comma splices, awkward syntax)
-   - Punctuation (capitalization of 'I', commas, apostrophes)
-   - Clarity (redundant expressions, ambiguous phrases, wordy sentences)
-   - Tone (formal vs. informal register compliance, salutations, sign-offs)
+Your mission is to perform a thorough, uncompromising, multi-dimensional error analysis:
+1. Detect and identify ALL genuine mistakes across every category:
+   - Spelling: Misspelled words, letter transpositions, typos.
+   - Capitalization: Capitalization of 'I', start of sentences, proper nouns, days, months, and languages.
+   - Punctuation: Missing commas after transitions, question marks on direct requests, apostrophes, spacing around punctuation.
+   - Subject-Verb Agreement: Singular vs. plural matching (he has vs. he have, there is vs. there are, everyone is vs. everyone are, etc.).
+   - Grammar: Verb tenses, auxiliary verbs, modal verbs without 'to', infinitives, prepositions, and articles.
+   - Sentence Structure: Run-ons, comma splices, fragments, awkward syntax, and missing dummy subjects ('It is...').
+   - Word Choice: Imprecise diction, easily confused words (affect/effect, lose/loose, their/there, advice/advise), and collocations.
+   - Formatting: Formal email salutations, polite openings, paragraph layout, and appropriate sign-offs.
+   - Clarity: Redundant expressions, tautologies, and wordiness.
+   - Tone & Register: Formality compliance according to recipient (formal for management/firm, informal for friends/peers).
 
 CRITICAL INSTRUCTIONS FOR ACCURACY (ELIMINATING FALSE POSITIVES):
 - For Part 1, Part 2, and Part 3: DO NOT penalize or flag missing terminal punctuation (periods/full stops at the end of the text). Short form responses (e.g., job titles, city names, brief hobbies) and conversational chat messages do NOT require terminal full stops.
-- Accept valid short answers, alternative phrases, and synonyms that fulfill the prompt requirements.
+- In Part 1, Part 2, and Part 3: Focus on detecting and correcting ALL spelling mistakes while accepting valid concise wording and synonyms.
 - Whitelist and NEVER flag as spelling errors: Pakistani city names (Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, Quetta, etc.), common Pakistani names, or standard accounting/business terminology (ICAP, CA, ledger, audit, debit, credit, voucher, accrual).
-- Focus strictly on real grammatical violations, genuine misspellings, or inappropriate tone for the given task.
+- Focus strictly on genuine errors: real misspellings, real grammatical flaws, capitalization faults, or formatting omissions.
 
 2. For each mistake, specify:
    - original: the EXACT substring from student text containing the mistake (what is wrong)
    - replacement: the clean, corrected replacement snippet (corrected version)
-   - type: "grammar" | "spelling" | "punctuation" | "word_choice" | "sentence_structure" | "clarity" | "tone"
+   - type: "spelling" | "punctuation" | "grammar" | "sentence_structure" | "word_choice" | "capitalization" | "subject_verb_agreement" | "formatting" | "clarity" | "tone"
    - explanation: a specific, actionable reason explaining why this is wrong and how the correction improves it
    - urduExplanation: an Urdu explanation of the rule
 3. Provide an "improvedFullAnswer": a polished, pristine, fully improved version of the entire student draft that fixes all issues while preserving the student's meaning.
@@ -1354,7 +1717,7 @@ CRITICAL: Return ONLY valid JSON matching this schema:
     {
       "original": "exact error string",
       "replacement": "corrected string",
-      "type": "grammar" | "spelling" | "punctuation" | "word_choice" | "sentence_structure" | "clarity" | "tone",
+      "type": "spelling" | "punctuation" | "grammar" | "sentence_structure" | "word_choice" | "capitalization" | "subject_verb_agreement" | "formatting" | "clarity" | "tone",
       "explanation": "concise explanation",
       "urduExplanation": "اردو وضاحت"
     }
@@ -1412,9 +1775,12 @@ ${text}
         let detectedType: WritingMistakeType = 'grammar';
         const rawTypeStr = (m.type || m.errorType || '').toLowerCase();
         if (rawTypeStr.includes('spell')) detectedType = 'spelling';
+        else if (rawTypeStr.includes('capital')) detectedType = 'capitalization';
+        else if (rawTypeStr.includes('subject') || rawTypeStr.includes('agreement') || rawTypeStr.includes('s-v')) detectedType = 'subject_verb_agreement';
+        else if (rawTypeStr.includes('format') || rawTypeStr.includes('salutation') || rawTypeStr.includes('sign-off')) detectedType = 'formatting';
         else if (rawTypeStr.includes('punct')) detectedType = 'punctuation';
         else if (rawTypeStr.includes('word') || rawTypeStr.includes('vocab')) detectedType = 'word_choice';
-        else if (rawTypeStr.includes('struct') || rawTypeStr.includes('syntax') || rawTypeStr.includes('run-on')) detectedType = 'sentence_structure';
+        else if (rawTypeStr.includes('struct') || rawTypeStr.includes('syntax') || rawTypeStr.includes('run-on') || rawTypeStr.includes('splice')) detectedType = 'sentence_structure';
         else if (rawTypeStr.includes('clar') || rawTypeStr.includes('redund')) detectedType = 'clarity';
         else if (rawTypeStr.includes('tone') || rawTypeStr.includes('regis')) detectedType = 'tone';
 
