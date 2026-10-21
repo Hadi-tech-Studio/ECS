@@ -22,6 +22,7 @@
  */
 
 import { GrammarQuestion } from '../types';
+import { generateSyntheticGrammarMCQ } from './grammarAutoGenerator';
 
 export interface PdfGrammarItem extends GrammarQuestion {
   pdfNumber: number;
@@ -15509,16 +15510,16 @@ export function markPdfGrammarSeen(ids: string[], baseKeys: string[]): void {
     const existingIds = getSeenPdfGrammarIds();
     ids.forEach(id => existingIds.add(id));
     const idArr = Array.from(existingIds);
-    if (idArr.length > 600) {
-      idArr.splice(0, idArr.length - 400);
+    if (idArr.length > 50000) {
+      idArr.splice(0, idArr.length - 40000);
     }
     localStorage.setItem(SEEN_PDF_IDS_KEY, JSON.stringify(idArr));
 
     const existingBase = getSeenPdfBaseKeys();
     baseKeys.forEach(k => existingBase.add(k));
     const baseArr = Array.from(existingBase);
-    if (baseArr.length > 150) {
-      baseArr.splice(0, baseArr.length - 100);
+    if (baseArr.length > 50000) {
+      baseArr.splice(0, baseArr.length - 40000);
     }
     localStorage.setItem(SEEN_PDF_BASE_KEYS, JSON.stringify(baseArr));
   } catch {}
@@ -15533,16 +15534,18 @@ export function markPdfGrammarSeen(ids: string[], baseKeys: string[]): void {
  *   Gerunds and Infinitives: 3, Adverbs: 3, Conditionals: 3,
  *   Prepositions: 3, Collocation: 1, Connectors: 2, Comparatives: 2
  * - Clean options: pure choices without header/footer artifacts.
- * - Avoids repetition across attempts whenever possible.
+ * - STRICT ZERO REPETITION: If the PDF pool questions are exhausted for any category/difficulty,
+ *   it automatically generates brand-new, unique MCQs matching the same format, difficulty,
+ *   and ICAP ECS syllabus so that questions NEVER repeat across attempts.
  * - Guarantees 0 duplicate base sentences within the same test.
  */
 export function select25GrammarQuestionsFromPdf(
   seenIds: Set<string> = getSeenPdfGrammarIds(),
   seenBaseKeys: Set<string> = getSeenPdfBaseKeys()
 ): GrammarQuestion[] {
-  const selected: PdfGrammarItem[] = [];
-  const selectedIds = new Set<string>();
-  const selectedBaseKeys = new Set<string>();
+  const selected: GrammarQuestion[] = [];
+  const selectedIds = new Set<string>(seenIds);
+  const selectedBaseKeys = new Set<string>(seenBaseKeys);
 
   for (const req of OFFICIAL_GRAMMAR_DISTRIBUTION) {
     const poolForCat = PDF_GRAMMAR_POOL.filter(q => q.category === req.category);
@@ -15561,57 +15564,53 @@ export function select25GrammarQuestionsFromPdf(
         !selectedBaseKeys.has(q.baseSentenceKey)
       );
 
-      // Prioritize questions not seen in recent attempts
+      // Prioritize questions not seen anywhere in previous attempts
       const unseen = candidates.filter(q => 
         !seenIds.has(q.id) && 
         !seenBaseKeys.has(q.baseSentenceKey)
       );
 
-      const poolToUse = unseen.length > 0 ? unseen : candidates;
-      const shuffled = shuffleArray(poolToUse);
+      let picked: GrammarQuestion | undefined;
 
-      let picked = shuffled[0];
-
-      // Fallback: if difficulty slot had no unused base sentences, pick any other difficulty in same category
-      if (!picked) {
-        const anyDiff = poolForCat.filter(q => 
-          !selectedIds.has(q.id) && 
-          !selectedBaseKeys.has(q.baseSentenceKey)
-        );
-        const unseenAny = anyDiff.filter(q => !seenIds.has(q.id) && !seenBaseKeys.has(q.baseSentenceKey));
-        picked = shuffleArray(unseenAny.length > 0 ? unseenAny : anyDiff)[0];
+      if (unseen.length > 0) {
+        const item = shuffleArray(unseen)[0];
+        picked = {
+          id: item.id,
+          category: item.category,
+          difficulty: item.difficulty,
+          question: cleanPdfArtifacts(item.question),
+          options: item.options.map(opt => cleanPdfArtifacts(opt)),
+          correctIndex: item.correctIndex,
+          englishExplanation: item.englishExplanation,
+          urduExplanation: item.urduExplanation
+        };
+        selectedIds.add(item.id);
+        selectedBaseKeys.add(item.baseSentenceKey);
+      } else {
+        // PDF questions for this category and difficulty are exhausted!
+        // Automatically generate brand-new, unique MCQ matching the PDF's format, difficulty, and ICAP ECS syllabus.
+        picked = generateSyntheticGrammarMCQ(req.category, diff, selectedBaseKeys);
+        selectedIds.add(picked.id);
       }
 
       if (picked) {
         selected.push(picked);
-        selectedIds.add(picked.id);
-        selectedBaseKeys.add(picked.baseSentenceKey);
       }
     }
   }
 
-  // Ensure overall difficulty targets: 10 Easy, 10 Medium, 5 Hard
-  let easyCount = selected.filter(q => q.difficulty === 'Easy').length;
-  let mediumCount = selected.filter(q => q.difficulty === 'Medium').length;
-  let hardCount = selected.filter(q => q.difficulty === 'Hard').length;
-
-  // Final count check: must be exactly 25
-  if (selected.length < 25) {
-    const remaining = PDF_GRAMMAR_POOL.filter(q => 
-      !selectedIds.has(q.id) && 
-      !selectedBaseKeys.has(q.baseSentenceKey)
-    );
-    for (const extra of shuffleArray(remaining)) {
-      if (selected.length >= 25) break;
-      selected.push(extra);
-      selectedIds.add(extra.id);
-      selectedBaseKeys.add(extra.baseSentenceKey);
-    }
+  // Ensure overall count is exactly 25
+  while (selected.length < 25) {
+    const diff: 'Easy' | 'Medium' | 'Hard' = selected.length < 10 ? 'Easy' : selected.length < 20 ? 'Medium' : 'Hard';
+    const cat = OFFICIAL_GRAMMAR_DISTRIBUTION[selected.length % OFFICIAL_GRAMMAR_DISTRIBUTION.length].category;
+    const extra = generateSyntheticGrammarMCQ(cat, diff, selectedBaseKeys);
+    selected.push(extra);
+    selectedIds.add(extra.id);
   }
 
-  // Map to GrammarQuestion format with artifact cleaning
+  // Map to clean final format
   const finalQuestions: GrammarQuestion[] = selected.slice(0, 25).map((item, idx) => ({
-    id: `pdf-g-${idx + 1}-${item.pdfNumber}`,
+    id: item.id.startsWith('auto-g-') ? item.id : `pdf-g-${idx + 1}-${item.id.replace(/^pdf-mcq-/, '')}`,
     category: item.category,
     difficulty: item.difficulty,
     question: cleanPdfArtifacts(item.question),
@@ -15623,8 +15622,8 @@ export function select25GrammarQuestionsFromPdf(
 
   // Record chosen items to seen storage
   markPdfGrammarSeen(
-    selected.map(s => s.id),
-    selected.map(s => s.baseSentenceKey)
+    finalQuestions.map(s => s.id),
+    Array.from(selectedBaseKeys)
   );
 
   return finalQuestions;
