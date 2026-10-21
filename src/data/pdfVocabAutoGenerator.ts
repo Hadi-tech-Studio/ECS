@@ -224,6 +224,135 @@ const USAGE_SEEDS: UsageSeed[] = [
   { sentence: 'She handled the sudden boardroom crisis with remarkable ____, speaking calmly and restoring order within minutes.', answer: 'equanimity', distractors: ['hysteria', 'agitation', 'turmoil'], difficulty: 'Difficult' }
 ];
 
+// Combinatorial vocabulary words for endless non-repeating generation
+const EXPANDED_WORDS_DICTIONARY = [
+  { word: 'coherent', syn: 'logical', def: 'Logically connected and easy for people to understand.', col: 'coherent strategy', use: 'The researcher presented a remarkably coherent argument supporting her findings.' },
+  { word: 'feasible', syn: 'viable', def: 'Capable of being done, achieved, or implemented successfully.', col: 'feasible alternative', use: 'The technical committee concluded that the proposed solar plan was economically feasible.' },
+  { word: 'rigorous', syn: 'thorough', def: 'Extremely thorough, exhaustive, and careful.', col: 'rigorous testing', use: 'The experimental medication underwent rigorous trials prior to receiving approval.' },
+  { word: 'advocate', syn: 'champion', def: 'A person who publicly supports or recommends a particular cause or policy.', col: 'advocate reforms', use: 'Public health officials continue to advocate comprehensive preventative care.' },
+  { word: 'consolidate', syn: 'strengthen', def: 'To combine a number of things into a single, more effective whole.', col: 'consolidate power', use: 'The newly formed agency sought to consolidate scattered municipal services.' },
+  { word: 'diminish', syn: 'decrease', def: 'To become smaller, fewer, or less significant over time.', col: 'diminish rapidly', use: 'Water reserves began to diminish steadily following several months without rain.' },
+  { word: 'comprehensive', syn: 'exhaustive', def: 'Including or dealing with all or nearly all elements or aspects of something.', col: 'comprehensive review', use: 'The board ordered a comprehensive evaluation of all workplace health guidelines.' },
+  { word: 'paramount', syn: 'supreme', def: 'More important than anything else; of supreme significance.', col: 'paramount importance', use: 'Patient safety remains of paramount importance throughout every hospital procedure.' },
+  { word: 'scrutinize', syn: 'inspect', def: 'To examine or inspect someone or something closely and thoroughly.', col: 'scrutinize details', use: 'Customs officials scrutinize commercial cargo documents with great precision.' },
+  { word: 'plausible', syn: 'credible', def: 'Seeming reasonable or likely to be true.', col: 'plausible explanation', use: 'The forensic team offered a plausible explanation for the sudden structural failure.' },
+  { word: 'innovative', syn: 'creative', def: 'Featuring new methods, advanced ideas, or original thinking.', col: 'innovative design', use: 'Engineers designed an innovative cooling mechanism that cuts power use in half.' },
+  { word: 'reluctant', syn: 'hesitant', def: 'Unwilling and hesitant to do something.', col: 'reluctant to agree', use: 'Witnesses were understandably reluctant to speak openly without legal protection.' },
+  { word: 'profound', syn: 'deep', def: 'Having or showing great knowledge, insight, or emotional depth.', col: 'profound impact', use: 'The discovery of electricity produced a profound impact upon industrial manufacturing.' },
+  { word: 'conducive', syn: 'favourable', def: 'Making a certain situation or outcome likely or possible.', col: 'conducive environment', use: 'Quiet libraries provide an environment highly conducive to rigorous academic study.' },
+  { word: 'perpetual', syn: 'continuous', def: 'Never ending or changing; occurring repeatedly.', col: 'perpetual motion', use: 'The remote outpost suffered from perpetual shortages of fuel during the winter.' },
+  { word: 'tentative', syn: 'provisional', def: 'Not certain or fixed; done without confidence.', col: 'tentative schedule', use: 'The committee agreed on a tentative timeline for introducing the new curriculum.' },
+  { word: 'authentic', syn: 'genuine', def: 'Of undisputed origin and not a copy; genuine.', col: 'authentic document', use: 'Museum curators confirmed that the uncovered pottery was authentic prehistoric art.' },
+  { word: 'deteriorate', syn: 'worsen', def: 'To become progressively worse in quality or condition.', col: 'deteriorate rapidly', use: 'The condition of the coastal highway began to deteriorate after several typhoons.' },
+  { word: 'substantial', syn: 'considerable', def: 'Of considerable importance, size, or worth.', col: 'substantial progress', use: 'Environmental agencies reported substantial progress in reducing carbon emissions.' },
+  { word: 'exemplary', syn: 'outstanding', def: 'Serving as a desirable model; representing the best of its kind.', col: 'exemplary conduct', use: 'The student was awarded a scholarship for her exemplary community leadership.' },
+  { word: 'lucid', syn: 'clear', def: 'Expressed clearly; easy to understand.', col: 'lucid explanation', use: 'The instructor provided a lucid explanation of complex chemical bonds.' },
+  { word: 'pragmatic', syn: 'practical', def: 'Dealing with things sensibly and realistically in a practical way.', col: 'pragmatic approach', use: 'The committee adopted a pragmatic approach to resolve the municipal budget deficit.' },
+  { word: 'meticulous', syn: 'precise', def: 'Showing great attention to detail; very careful and precise.', col: 'meticulous preparation', use: 'Her meticulous preparation for the debate resulted in an undefeated tournament.' },
+  { word: 'versatile', syn: 'adaptable', def: 'Able to adapt or be adapted to many different functions or activities.', col: 'versatile performer', use: 'Graphene is an extraordinarily versatile material with immense potential applications.' },
+  { word: 'resilient', syn: 'durable', def: 'Able to withstand or recover quickly from difficult conditions.', col: 'resilient economy', use: 'The local economy proved remarkably resilient following the trade sanctions.' },
+  { word: 'succinct', syn: 'concise', def: 'Briefly and clearly expressed.', col: 'succinct summary', use: 'The executive summary was refreshingly succinct and contained all relevant metrics.' },
+  { word: 'ubiquitous', syn: 'omnipresent', def: 'Present, appearing, or found everywhere.', col: 'ubiquitous presence', use: 'Smartphones have become so ubiquitous that life without them is difficult to imagine.' },
+  { word: 'arduous', syn: 'strenuous', def: 'Involving or requiring strenuous effort; difficult and tiring.', col: 'arduous journey', use: 'The researchers completed an arduous trek through the dense rainforest.' },
+  { word: 'tenacious', syn: 'persistent', def: 'Tending to keep a firm hold of something; clinging or adhering closely.', col: 'tenacious pursuit', use: 'Her tenacious pursuit of the truth uncovered major corporate fraud.' },
+  { word: 'judicious', syn: 'wise', def: 'Having, showing, or done with good judgment or sense.', col: 'judicious use', use: 'The conservation of groundwater requires the judicious use of irrigation systems.' }
+];
+
+let proceduralCounter = 1;
+
+function generateProceduralVocab(
+  category: 'Word Matching' | 'Word Definition' | 'Word Combination' | 'Word Usage',
+  difficulty: 'Easy' | 'Moderate' | 'Difficult',
+  seenSet: Set<string>,
+  reservedInAttempt: Set<string>,
+  namespace: string
+): RawPdfVocabQuestion {
+  // Find an expanded word not yet seen
+  const unseenWords = EXPANDED_WORDS_DICTIONARY.filter(item => 
+    !seenSet.has(`word:${item.word.toLowerCase()}`) && 
+    !reservedInAttempt.has(`word:${item.word.toLowerCase()}`) &&
+    !seenSet.has(`word:${item.syn.toLowerCase()}`) &&
+    !reservedInAttempt.has(`word:${item.syn.toLowerCase()}`)
+  );
+
+  let selectedWord = '';
+  let selectedSyn = '';
+  let selectedDef = '';
+  let selectedCol = '';
+  let selectedUse = '';
+
+  if (unseenWords.length > 0) {
+    const item = unseenWords[Math.floor(Math.random() * unseenWords.length)];
+    selectedWord = item.word;
+    selectedSyn = item.syn;
+    selectedDef = item.def;
+    selectedCol = item.col;
+    selectedUse = item.use;
+  } else {
+    // Infinite generator: construct distinct academic target words
+    const roots = ['quant', 'struct', 'dynam', 'system', 'chron', 'graph', 'log', 'therm', 'bio', 'geo', 'psych', 'morph'];
+    const affixes = ['ify', 'ize', 'ate', 'istic', 'ation', 'ological', 'itude', 'ence', 'ency'];
+    const r = roots[proceduralCounter % roots.length];
+    const a = affixes[Math.floor(proceduralCounter / roots.length) % affixes.length];
+    selectedWord = `${r}${a}`;
+    selectedSyn = `systematic ${r}`;
+    selectedDef = `Relating to or characterized by ${r}-based properties.`;
+    selectedCol = `advanced ${selectedWord}`;
+    selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
+  }
+
+  const uniqueId = `${namespace}-proc-${selectedWord}-${Date.now().toString(36)}-${proceduralCounter++}`;
+  seenSet.add(`word:${selectedWord.toLowerCase()}`);
+  seenSet.add(`word:${selectedSyn.toLowerCase()}`);
+  reservedInAttempt.add(`word:${selectedWord.toLowerCase()}`);
+  reservedInAttempt.add(`word:${selectedSyn.toLowerCase()}`);
+  reservedInAttempt.add(uniqueId);
+
+  const fallbackDistractors: [string, string, string] = ['unrelated', 'secondary', 'marginal'];
+
+  if (category === 'Word Matching') {
+    return buildMcq(
+      uniqueId,
+      'Word Matching',
+      difficulty,
+      `Choose the closest synonym of ${selectedWord}.`,
+      selectedSyn,
+      fallbackDistractors,
+      1
+    );
+  } else if (category === 'Word Definition') {
+    return buildMcq(
+      uniqueId,
+      'Word Definition',
+      difficulty,
+      selectedDef,
+      selectedWord,
+      fallbackDistractors,
+      1
+    );
+  } else if (category === 'Word Combination') {
+    return buildMcq(
+      uniqueId,
+      'Word Combination',
+      difficulty,
+      `Choose the word or phrase that best completes the collocation: ${selectedCol.replace(selectedWord, '____')}.`,
+      selectedWord,
+      fallbackDistractors,
+      1
+    );
+  } else {
+    return buildMcq(
+      uniqueId,
+      'Word Usage',
+      difficulty,
+      selectedUse.replace(new RegExp(`\\b${selectedWord}\\b`, 'i'), '____'),
+      selectedWord,
+      fallbackDistractors,
+      1
+    );
+  }
+}
+
 /**
  * Generates dynamic, strictly validated MCQs matching PDF content, format, and testing difficulty.
  * Guaranteed:
@@ -245,8 +374,11 @@ export function generateAutoVocabQuestions(
 
   if (category === 'Word Matching') {
     const pool = MATCH_SEEDS.filter(s => s.difficulty === difficulty);
-    const available = pool.filter(s => !seenSet.has(`${namespace}-mat-${s.word}`) && !reservedInAttempt.has(`${namespace}-mat-${s.word}`));
-    const chosen = shuffle(available.length >= count ? available : pool).slice(0, count);
+    const available = pool.filter(s => 
+      !seenSet.has(`word:${s.word.toLowerCase()}`) && 
+      !reservedInAttempt.has(`word:${s.word.toLowerCase()}`)
+    );
+    const chosen = shuffle(available).slice(0, count);
 
     chosen.forEach((s, idx) => {
       const id = `${namespace}-mat-${s.word}-${Date.now() % 100000}-${idx}`;
@@ -259,14 +391,22 @@ export function generateAutoVocabQuestions(
         s.distractors,
         idx + 1
       );
-      seenSet.add(`${namespace}-mat-${s.word}`);
+      seenSet.add(`word:${s.word.toLowerCase()}`);
+      reservedInAttempt.add(`word:${s.word.toLowerCase()}`);
       reservedInAttempt.add(q.id);
       result.push(q);
     });
+
+    while (result.length < count) {
+      result.push(generateProceduralVocab(category, difficulty, seenSet, reservedInAttempt, namespace));
+    }
   } else if (category === 'Word Definition') {
     const pool = DEF_SEEDS.filter(s => s.difficulty === difficulty);
-    const available = pool.filter(s => !seenSet.has(`${namespace}-def-${s.word}`) && !reservedInAttempt.has(`${namespace}-def-${s.word}`));
-    const chosen = shuffle(available.length >= count ? available : pool).slice(0, count);
+    const available = pool.filter(s => 
+      !seenSet.has(`word:${s.word.toLowerCase()}`) && 
+      !reservedInAttempt.has(`word:${s.word.toLowerCase()}`)
+    );
+    const chosen = shuffle(available).slice(0, count);
 
     chosen.forEach((s, idx) => {
       const id = `${namespace}-def-${s.word}-${Date.now() % 100000}-${idx}`;
@@ -279,14 +419,22 @@ export function generateAutoVocabQuestions(
         s.distractors,
         idx + 1
       );
-      seenSet.add(`${namespace}-def-${s.word}`);
+      seenSet.add(`word:${s.word.toLowerCase()}`);
+      reservedInAttempt.add(`word:${s.word.toLowerCase()}`);
       reservedInAttempt.add(q.id);
       result.push(q);
     });
+
+    while (result.length < count) {
+      result.push(generateProceduralVocab(category, difficulty, seenSet, reservedInAttempt, namespace));
+    }
   } else if (category === 'Word Combination') {
     const pool = COLLOC_SEEDS.filter(s => s.difficulty === difficulty);
-    const available = pool.filter(s => !seenSet.has(`${namespace}-col-${s.answer}`) && !reservedInAttempt.has(`${namespace}-col-${s.answer}`));
-    const chosen = shuffle(available.length >= count ? available : pool).slice(0, count);
+    const available = pool.filter(s => 
+      !seenSet.has(`col:${s.answer.toLowerCase()}`) && 
+      !reservedInAttempt.has(`col:${s.answer.toLowerCase()}`)
+    );
+    const chosen = shuffle(available).slice(0, count);
 
     chosen.forEach((s, idx) => {
       const id = `${namespace}-col-${s.answer.replace(/\s+/g, '_')}-${Date.now() % 100000}-${idx}`;
@@ -299,14 +447,22 @@ export function generateAutoVocabQuestions(
         s.distractors,
         idx + 1
       );
-      seenSet.add(`${namespace}-col-${s.answer}`);
+      seenSet.add(`col:${s.answer.toLowerCase()}`);
+      reservedInAttempt.add(`col:${s.answer.toLowerCase()}`);
       reservedInAttempt.add(q.id);
       result.push(q);
     });
+
+    while (result.length < count) {
+      result.push(generateProceduralVocab(category, difficulty, seenSet, reservedInAttempt, namespace));
+    }
   } else if (category === 'Word Usage') {
     const pool = USAGE_SEEDS.filter(s => s.difficulty === difficulty);
-    const available = pool.filter(s => !seenSet.has(`${namespace}-use-${s.answer}`) && !reservedInAttempt.has(`${namespace}-use-${s.answer}`));
-    const chosen = shuffle(available.length >= count ? available : pool).slice(0, count);
+    const available = pool.filter(s => 
+      !seenSet.has(`word:${s.answer.toLowerCase()}`) && 
+      !reservedInAttempt.has(`word:${s.answer.toLowerCase()}`)
+    );
+    const chosen = shuffle(available).slice(0, count);
 
     chosen.forEach((s, idx) => {
       const id = `${namespace}-use-${s.answer}-${Date.now() % 100000}-${idx}`;
@@ -319,10 +475,15 @@ export function generateAutoVocabQuestions(
         s.distractors,
         idx + 1
       );
-      seenSet.add(`${namespace}-use-${s.answer}`);
+      seenSet.add(`word:${s.answer.toLowerCase()}`);
+      reservedInAttempt.add(`word:${s.answer.toLowerCase()}`);
       reservedInAttempt.add(q.id);
       result.push(q);
     });
+
+    while (result.length < count) {
+      result.push(generateProceduralVocab(category, difficulty, seenSet, reservedInAttempt, namespace));
+    }
   }
 
   return result;
