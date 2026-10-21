@@ -20,7 +20,7 @@ export interface TrackedQuestionItem {
 }
 
 const HISTORY_STORAGE_KEY = 'icap_student_question_history_v2';
-const MAX_HISTORY_ITEMS = 600;
+const MAX_HISTORY_ITEMS = 50000;
 
 // In-memory cache for blazing fast question retrieval
 let memoryHistoryCache: TrackedQuestionItem[] | null = null;
