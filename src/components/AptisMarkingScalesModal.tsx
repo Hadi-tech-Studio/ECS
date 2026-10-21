@@ -48,7 +48,7 @@ export const AptisMarkingScalesModal: React.FC<AptisMarkingScalesModalProps> = (
               <span>Assessment & Scoring Overview</span>
             </div>
             <p className="leading-relaxed">
-              The Aptis General test awards a scaled score from 0 to 50 for each of the test components (Core, Reading, Writing). The overall proficiency is mapped directly to the Common European Framework of Reference (CEFR) levels. In the ICAP ECS Course (CA Journey), achieving a minimum of CEFR B1/B2 level demonstrates solid professional business communication competence.
+              In the ICAP ECS Course (CA Journey), the full examination paper is exactly 100 marks: Grammar + Vocabulary (Core) = 50 marks, Reading + Writing = 50 marks (Reading: 25 marks, Writing: 25 marks). For individual section tests, scores and percentages are counted strictly for the specific section attempted (Core: 50 marks, Reading: 25 marks, Writing: 25 marks). The overall score maps directly to Common European Framework of Reference (CEFR) levels, where CEFR B1/B2 demonstrates professional competence.
             </p>
           </div>
 
