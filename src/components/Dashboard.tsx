@@ -141,7 +141,57 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const loadAnalyticsData = () => {
     try {
       const storedExamsStr = localStorage.getItem('icap_exam_results');
-      const exams: ExamResult[] = storedExamsStr ? JSON.parse(storedExamsStr) : [];
+      let exams: ExamResult[] = storedExamsStr ? JSON.parse(storedExamsStr) : [];
+      
+      // Normalize and sanitize any legacy exam results to the 100-mark framework
+      let hasChanges = false;
+      exams = exams.map(ex => {
+        const mode = ex.testMode || 'full';
+        if (mode === 'core') {
+          const maxScore = 50;
+          const totalScore = (ex.grammarScore || 0) + (ex.vocabScore || 0);
+          const percentage = Math.round((totalScore / maxScore) * 100);
+          return { ...ex, testMode: 'core', maxScore, totalScore, percentage, isPassed: percentage >= 50 };
+        } else if (mode === 'reading') {
+          const maxScore = 25;
+          let readingScore = ex.readingScore || 0;
+          if (readingScore > 25 || ex.maxScore === 50) {
+            readingScore = Math.min(25, Math.round((readingScore / 50) * 25));
+            hasChanges = true;
+          }
+          const totalScore = readingScore;
+          const percentage = Math.round((totalScore / maxScore) * 100);
+          return { ...ex, testMode: 'reading', readingScore, maxScore, totalScore, percentage, isPassed: percentage >= 50 };
+        } else if (mode === 'writing') {
+          const maxScore = 25;
+          let writingScore = ex.writingScore || 0;
+          if (writingScore > 25 || ex.maxScore === 50) {
+            writingScore = Math.min(25, Math.round((writingScore / 50) * 25));
+            hasChanges = true;
+          }
+          const totalScore = writingScore;
+          const percentage = Math.round((totalScore / maxScore) * 100);
+          return { ...ex, testMode: 'writing', writingScore, maxScore, totalScore, percentage, isPassed: percentage >= 50 };
+        } else {
+          // Full Exam: Grammar (25) + Vocab (25) + Reading (25) + Writing (25) = 100
+          const maxScore = 100;
+          let readingScore = ex.readingScore || 0;
+          let writingScore = ex.writingScore || 0;
+          if (ex.maxScore === 150 || readingScore > 25 || writingScore > 25) {
+            readingScore = Math.min(25, Math.round((readingScore / 50) * 25));
+            writingScore = Math.min(25, Math.round((writingScore / 50) * 25));
+            hasChanges = true;
+          }
+          const totalScore = (ex.grammarScore || 0) + (ex.vocabScore || 0) + readingScore + writingScore;
+          const percentage = Math.round((totalScore / maxScore) * 100);
+          return { ...ex, testMode: 'full', readingScore, writingScore, maxScore, totalScore, percentage, isPassed: percentage >= 50 };
+        }
+      });
+
+      if (hasChanges) {
+        localStorage.setItem('icap_exam_results', JSON.stringify(exams));
+      }
+
       setExamHistory(exams);
 
       const storedWritingStr = localStorage.getItem('icap_writing_results');
@@ -184,11 +234,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const getExamCorrectCount = (ex: ExamResult): number => {
     if (typeof ex.correctAnswers === 'number') return ex.correctAnswers;
     if (ex.testMode === 'core') return (ex.grammarScore || 0) + (ex.vocabScore || 0);
-    if (ex.testMode === 'reading') return Math.round(((ex.readingScore || 0) / 50) * 23);
-    if (ex.testMode === 'writing') return Math.round(((ex.writingScore || 0) / 50) * 5);
+    if (ex.testMode === 'reading') return Math.round(((ex.readingScore || 0) / 25) * 23);
+    if (ex.testMode === 'writing') return Math.round(((ex.writingScore || 0) / 25) * 5);
     const core = (ex.grammarScore || 0) + (ex.vocabScore || 0);
-    const reading = Math.round(((ex.readingScore || 0) / 50) * 23);
-    const writing = Math.round(((ex.writingScore || 0) / 50) * 5);
+    const reading = Math.round(((ex.readingScore || 0) / 25) * 23);
+    const writing = Math.round(((ex.writingScore || 0) / 25) * 5);
     return core + reading + writing;
   };
 
@@ -209,9 +259,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const getExamMaxScore = (ex: ExamResult): number => {
-    if (typeof ex.maxScore === 'number' && ex.maxScore > 0) return ex.maxScore;
-    if (ex.testMode === 'full') return 150;
-    return 50;
+    if (ex.testMode === 'core') return 50;
+    if (ex.testMode === 'reading') return 25;
+    if (ex.testMode === 'writing') return 25;
+    if (ex.testMode === 'full') return 100;
+    if (typeof ex.maxScore === 'number' && ex.maxScore > 0) {
+      if (ex.maxScore === 150) return 100;
+      return ex.maxScore;
+    }
+    return 100;
   };
 
   // Aggregated Overall Preparation Progress KPIs
@@ -1051,25 +1107,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                     <span className="text-[11px] font-bold text-slate-400 mr-1">Section Scores:</span>
                     
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      Grammar: <strong className="text-slate-900 dark:text-white font-bold">{attempt.grammarScore ?? 0}</strong>/25
-                    </span>
+                    {/* Grammar - only for full or core */}
+                    {(!attempt.testMode || attempt.testMode === 'full' || attempt.testMode === 'core') && (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Grammar: <strong className="text-slate-900 dark:text-white font-bold">{attempt.grammarScore ?? 0}</strong>/25
+                      </span>
+                    )}
 
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      Vocab: <strong className="text-slate-900 dark:text-white font-bold">{attempt.vocabScore ?? 0}</strong>/25
-                    </span>
+                    {/* Vocab - only for full or core */}
+                    {(!attempt.testMode || attempt.testMode === 'full' || attempt.testMode === 'core') && (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                        Vocab: <strong className="text-slate-900 dark:text-white font-bold">{attempt.vocabScore ?? 0}</strong>/25
+                      </span>
+                    )}
 
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                      Reading: <strong className="text-slate-900 dark:text-white font-bold">{attempt.readingScore ?? 0}</strong>/50
-                    </span>
+                    {/* Reading - only for full or reading */}
+                    {(!attempt.testMode || attempt.testMode === 'full' || attempt.testMode === 'reading') && (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Reading: <strong className="text-slate-900 dark:text-white font-bold">{attempt.readingScore ?? 0}</strong>/25
+                      </span>
+                    )}
 
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      Writing: <strong className="text-slate-900 dark:text-white font-bold">{attempt.writingScore ?? 0}</strong>/50
-                    </span>
+                    {/* Writing - only for full or writing */}
+                    {(!attempt.testMode || attempt.testMode === 'full' || attempt.testMode === 'writing') && (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                        Writing: <strong className="text-slate-900 dark:text-white font-bold">{attempt.writingScore ?? 0}</strong>/25
+                      </span>
+                    )}
 
                     <button
                       onClick={() => setExpandedAttemptId(isExpanded ? null : attempt.id)}
