@@ -1,5 +1,6 @@
 import { ReadingSection1 } from '../types';
 import { generateSyntheticReadingSection1 } from './readingSection1AutoGenerator';
+import { isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 /**
  * ============================================================================
@@ -4275,8 +4276,11 @@ export function clearSeenPdfReadingSection1Ids(): void {
 export function selectOfficialPdfReadingSection1(providedSeen?: Set<string>): ReadingSection1 {
   const seen = providedSeen || getSeenPdfReadingSection1Ids();
   
-  // Filter unseen questions
-  const unseen = PDF_READING_SECTION_1_POOL.filter(q => !seen.has(q.id));
+  // Filter unseen questions checking both localStorage ID and global semantic signatures
+  const unseen = PDF_READING_SECTION_1_POOL.filter(q => 
+    !seen.has(q.id) && 
+    !isGloballySeen('reading-s1', q.id, q.title)
+  );
   
   let chosen: ReadingSection1;
   if (unseen.length > 0) {
@@ -4288,8 +4292,9 @@ export function selectOfficialPdfReadingSection1(providedSeen?: Set<string>): Re
     chosen = generateSyntheticReadingSection1(seen);
   }
 
-  // Mark chosen question as seen
+  // Mark chosen question as seen locally and globally
   markSeenPdfReadingSection1Id(chosen.id);
+  markGloballySeen('reading-s1', [{ id: chosen.id, textOrTitle: chosen.title }]);
 
   return chosen;
 }
