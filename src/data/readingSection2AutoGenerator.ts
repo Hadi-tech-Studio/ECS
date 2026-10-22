@@ -7,13 +7,15 @@
  * - Generates 2 distinct Text Cohesion tasks per test.
  * - Each task has 6 sentences forming a coherent biographical, historical, or scientific narrative.
  * - Clear discourse markers, chronological progression, and cohesive reference words.
- * - Verified correctOrder permutations.
+ * - Verified correctOrder permutations [0..5].
  * - Full English and Urdu explanations.
- * - Zero repetition across tests or attempts.
+ * - STRICT ZERO REPETITION across tests or attempts with global seen tracking
+ *   and persistent counters across page refreshes.
  * ============================================================================
  */
 
 import { ReadingSection2, ReadingSection2Task } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 export interface Section2Seed {
   title: string;
@@ -98,85 +100,100 @@ export const SECTION_2_SEEDS: Section2Seed[] = [
       'Today, the internet forms an indispensable global backbone connecting billions of people, institutions, and economies.'
     ],
     explanation: 'Logical narrative: Begins with the late 1960s need for decentralized communications (0), explains vulnerabilities of circuit lines (3), introduces ARPANET packet switching (1), highlights Berners-Lee creating the World Wide Web in 1989 (4), notes 1990s commercial browser explosion (2), and ends with its ubiquitous global status today (5).',
-    urduExplanation: 'ٹیکنالوجی کا سفر: 1960ء کی دہائی میں غیر مرکزی نیٹ ورک کی ضرورت (0)، روایتی فون لائنوں کی کمزوری (3)، آرپانیٹ کا قیام (1)، 1989ء میں ٹم برنرز لی کی ویب کی ایجاد (4)، 1990ء کی دہائی میں انٹرنیٹ کا عام ہونا (2) اور عالمی ڈیجیٹل معیشت کی شہ رگ بننا (5)۔'
+    urduExplanation: 'انٹرنیٹ کی تاریخ: 1960ء کی دہائی میں محفوظ مواصلاتی نیٹ ورک کی ضرورت (0)، روایتی ٹیلی فون لائنوں کے خطرات (3)، ارپانیٹ اور پیکٹ سوئچنگ کا آغاز (1)، 1989ء میں ورلڈ وائڈ ویب کی ایجاد (4)، براؤزرز کی عام دستیابی (2) اور جدید معلوماتی نظام پر اثرات (5)۔'
   },
   {
-    title: 'The Development of the Steam Engine',
-    topic: 'Industrial Revolution & Mechanical Engineering',
+    title: 'The Rosetta Stone and Egyptian Hieroglyphs',
+    topic: 'Archaeology & Ancient Linguistics',
     correctOrder: [0, 2, 4, 1, 3, 5],
     sentences: [
-      'Early eighteenth-century coal mines in Britain were frequently crippled by severe underground flooding.',
-      'Thomas Newcomen designed the first atmospheric engine in 1712, though it consumed colossal quantities of coal.',
-      'In the 1760s, James Watt dramatically improved engine efficiency by introducing an independent steam condenser.',
-      'Watt’s rotary engine subsequently powered mechanized textile mills, blast furnaces, and locomotive rail transport.',
-      'This breakthrough reduced fuel consumption by seventy-five percent and enabled smooth rotational mechanical output.',
-      'Ultimately, the refined steam engine served as the primary mechanical catalyst of the Industrial Revolution.'
+      'For over a millennium, ancient Egyptian hieroglyphic inscriptions remained an undecipherable linguistic enigma.',
+      'In 1799, French soldiers fortifying a redoubt near Rashid uncovered a dark granodiorite slab inscribed with ancient scripts.',
+      'The artifact, known as the Rosetta Stone, displayed the identical decree in Greek, Demotic, and formal hieroglyphs.',
+      'Working tirelessly with Greek comparative texts, French scholar Jean-François Champollion finally cracked the phonetic code in 1822.',
+      'Because classical Greek was widely understood, philologists realized the stone provided an invaluable bilingual key.',
+      'This breakthrough unlocked thousands of historical papyri and temple carvings, revealing three millennia of Egyptian civilization.'
     ],
-    explanation: 'Narrative structure: Flooding in early coal mines (0), Newcomen engine (2), Watt adds independent condenser in 1760s (4), fuel consumption drops 75% (1), rotary power spreads to mills and rails (3), and steam engine catalyzes Industrial Revolution (5).',
-    urduExplanation: 'صنعتی انقلاب: کوئلے کی کانوں میں پانی بھر جانا (0)، نیوکامن کا پہلا انجن (2)، جیمز واٹ کی جانب سے علیحدہ کنڈینسر کا اضافہ (4)، ایندھن میں 75 فیصد بچت (1)، کارخانوں اور ریل میں استعمال (3) اور صنعتی انقلاب کے انجن کی حیثیت اختیار کرنا (5)۔'
+    explanation: 'Historical puzzle order: 1000-year mystery of hieroglyphs (0), French discovery of stone near Rashid in 1799 (2), trilingual inscriptions explained (4), Greek acting as the translation key (1), Champollion cracking code in 1822 (3), and the unsealing of ancient Egyptian history (5).',
+    urduExplanation: 'روزیٹا پتھر: ہیروگلیفس کا صدیوں پرانا راز (0)، 1799ء میں فرانسیسی فوجیوں کا دریافت کرنا (2)، تین زبانوں میں کندہ تحریر (4)، یونانی زبان کا کلیدی کردار (1)، 1822ء میں شمپولیون کی کامیابی (3) اور مصری تاریخ کے روشن دروازے (5)۔'
   },
   {
-    title: 'The Discovery of the Structure of DNA',
-    topic: 'Genetics & Molecular Biology',
+    title: 'The Construction of the Panama Canal',
+    topic: 'Civil Engineering & Maritime Trade',
     correctOrder: [0, 3, 1, 4, 2, 5],
     sentences: [
-      'By the mid-twentieth century, biologists understood that chromosomes carried hereditary information but could not explain the physical mechanism.',
-      'At King’s College London, chemist Rosalind Franklin produced critical X-ray diffraction photographs of crystallized DNA fibers.',
-      'Their famous double-helix model immediately demonstrated how genetic replication occurs through complementary base pairing.',
-      'Her exquisite Photograph 51 clearly revealed the characteristic helical geometry of the nucleic acid molecule.',
-      'Using this structural evidence, James Watson and Francis Crick constructed a three-dimensional molecular model in Cambridge in 1953.',
-      'Today, this foundational discovery underpins modern genetic medicine, biotechnology, and genomic forensics.'
+      'Throughout the nineteenth century, merchant ships navigating between New York and San Francisco endured a perilous 13,000-mile voyage around Cape Horn.',
+      'A French consortium led by Ferdinand de Lesseps attempted sea-level excavation in 1881 but collapsed due to tropical disease and landslides.',
+      'American engineers redesigned the project with massive lock chambers and conquered yellow fever through mosquito eradication.',
+      'The treacherous waters and fierce storms around South America’s southern tip claimed hundreds of vessels and crew annually.',
+      'In August 1914, the Panama Canal officially opened, dramatically slashing transit times between the Atlantic and Pacific oceans.',
+      'Today, expanded locks accommodate massive container vessels, preserving the canal as an indispensable artery of world trade.'
     ],
-    explanation: 'Logical chronology: Biologists uncertain of genetic mechanism (0), Rosalind Franklin captures X-ray photos (3), Photograph 51 reveals helical geometry (1), Watson and Crick construct 3D model in 1953 (4), model explains base-pair replication (2), and foundation of modern genetics (5).',
-    urduExplanation: 'ڈی این اے کی دریافت: جینیاتی راز کی نایابی (0)، روزالینڈ فرینکلن کی ایکسرے تصاویر (3)، فوٹو 51 میں ہیلیکل ساخت (1)، واٹسن اور کرک کا 1953ء میں ماڈل (4)، جینیاتی تقسیم کا انکشاف (2) اور جدید جینومکس کی بنیاد پر اختتام (5)۔'
+    explanation: 'Sequential narrative: The 13,000-mile voyage around Cape Horn (0), treacherous ocean storms claiming vessels (3), French attempt fails in 1881 (1), American lock redesign and disease control (4), official opening in August 1914 (2), and ongoing global trade significance today (5).',
+    urduExplanation: 'پانامہ نہر: کیپ ہارن کے گرد 13 ہزار میل کا دشوار سفر (0)، طوفانی لہروں کے خطرات (3)، 1881ء میں فرانسیسی مہم کی ناکامی (1)، امریکی انجینئرز کی لاک ڈیزائن اور صفائی (4)، 1914ء میں افتتاح (2) اور جدید عالمی تجارت کا اہم راستہ (5)۔'
   },
   {
-    title: 'The Invention of the Marine Chronometer',
-    topic: 'Maritime History & Horological Navigation',
+    title: 'Marie Curie and the Science of Radioactivity',
+    topic: 'Nuclear Physics & Chemistry',
     correctOrder: [0, 2, 4, 1, 3, 5],
     sentences: [
-      'For centuries, navigators could easily calculate latitude using the stars but lacked any reliable method to measure longitude at sea.',
-      'In 1707, an entire British naval fleet wrecked off the Scilly Isles due to disastrous navigational errors.',
-      'Spurred by this catastrophe, Parliament passed the Longitude Act of 1714, offering a massive reward for a precise solution.',
-      'Carpentry-trained clockmaker John Harrison devoted four decades to designing intricate friction-free marine clocks.',
-      'His masterpiece, the H4 sea watch, proved extraordinarily accurate during extensive Atlantic sea voyages in the 1760s.',
-      'Harrison’s chronometer revolutionized oceanic voyages, dramatically enhancing maritime trade safety across the globe.'
+      'In the late 1890s, French physicist Henri Becquerel observed that uranium salts spontaneously emitted mysterious energetic rays.',
+      'Intrigued by this unexplained phenomenon, Polish-born scientist Marie Curie began analyzing pitchblende ore in a modest Paris shed.',
+      'Through arduous chemical separation of tons of mineral pitchblende, she and Pierre Curie discovered two previously unknown elements.',
+      'She coined the scientific term "radioactivity" and earned the Nobel Prize in Physics in 1903 alongside Becquerel.',
+      'These newly isolated elements were named polonium, honoring her native homeland, and radium for its intense luminescence.',
+      'Her pioneering investigations laid the foundations for modern atomic physics, radiology, and contemporary cancer treatments.'
     ],
-    explanation: 'Chronological sequence: Inability to determine longitude (0), naval disaster off Scilly Isles in 1707 (2), Longitude Act of 1714 offering bounty (4), John Harrison designs marine clocks (1), H4 watch passes Atlantic tests in 1760s (3), and global trade safety transformed (5).',
-    urduExplanation: 'طول البلد کا تعین: بحری جہازوں کی گمشدگی (0)، 1707ء کا بحری سانحہ (2)، 1714ء کا برطانوی انعام (4)، جان ہیریسن کی محنت (1)، H4 گھڑی کی کامیابی (3) اور عالمی بحری تجارت کا تحفظ (5)۔'
+    explanation: 'Scientific discovery narrative: Becquerel observes uranium rays (0), Curie investigates pitchblende ore (2), separation of pitchblende leads to discoveries (4), naming polonium and radium (1), coining "radioactivity" and 1903 Nobel Prize (3), and foundational legacy in medicine and physics (5).',
+    urduExplanation: 'میری کیوری کی تحقیق: تابکاری کا مشاہدہ (0)، میری کیوری کی پیرس میں تحقیق (2)، معدنی کچ دھات سے نئے عناصر کی دریافت (4)، پولونیم اور ریڈیم کے نام (1)، 1903ء کا نوبل انعام (3) اور جدید میڈیکل فزکس و کینسر کے علاج کی بنیاد (5)۔'
   },
   {
-    title: 'The Wright Brothers and Controlled Powered Flight',
-    topic: 'Aviation Engineering & Modern Transport',
+    title: 'The Evolution of the Electric Battery',
+    topic: 'Electrochemical Science & Storage',
     correctOrder: [0, 3, 1, 4, 2, 5],
     sentences: [
-      'Throughout the nineteenth century, numerous ambitious aviators attempted powered flight, but all suffered catastrophic crashes.',
-      'Brothers Wilbur and Orville Wright deduced that mechanical control, rather than raw engine power, was the critical unsolved hurdle.',
-      'Through exhaustive wind-tunnel experiments with hundreds of miniature airfoil shapes, they developed three-axis flight control.',
-      'Previous aviation pioneers had mistakenly focused solely on building larger wings and heavier steam propulsion units.',
-      'On December 17, 1903, at Kitty Hawk, North Carolina, their Flyer achieved the first sustained, controlled powered heavier-than-air flight.',
-      'Within a few decades, aviation evolved from experimental sand-dune gliders into a transformative worldwide transportation network.'
+      'In the late eighteenth century, Italian anatomist Luigi Galvani believed animal muscle tissue generated its own intrinsic electrical fluid.',
+      'Countering this theory, physicist Alessandro Volta demonstrated that electrical current resulted from contact between dissimilar metals separated by brine.',
+      'In 1859, Gaston Planté invented the rechargeable lead-acid battery, enabling practical energy storage for industrial machinery.',
+      'Galvani’s famous frog-leg twitches sparked fierce scientific debate across European universities regarding the true origin of electricity.',
+      'By stacking alternating discs of zinc and copper with moistened cardboard, Volta constructed the first functional voltaic pile in 1800.',
+      'Today, advanced lithium-ion and solid-state batteries power the global transition toward electric transportation and clean energy grids.'
     ],
-    explanation: 'Narrative order: 19th century crashes (0), mistaken focus of previous inventors (3), Wrights recognize control as key (1), wind-tunnel tests lead to 3-axis control (4), historic Kitty Hawk flight in 1903 (2), and worldwide air travel (5).',
-    urduExplanation: 'ہوابازی کی تاریخ: ابتدائی پروازوں کی ناکامیاں (0)، بڑے پنکھوں کی غلط دوڑ (3)، رائٹ برادران کا کنٹرول پر توجہ دینا (1)، ونڈ ٹنل کے تجربات (4)، 1903ء کی کامیاب تاریخی پرواز (2) اور عالمی ہوائی نظام پر اختتام (5)۔'
+    explanation: 'Evolutionary timeline: Galvani animal electricity concept (0), European debate over frog-leg twitches (3), Volta counters with chemical contact theory (1), Voltaic pile constructed in 1800 (4), Planté creates rechargeable battery in 1859 (2), and modern lithium-ion transition (5).',
+    urduExplanation: 'برقی بیٹری کی تاریخ: گالوانی کا نظریہ (0)، سائنسدانوں کا مباحثہ (3)، وولٹا کا دو مختلف دھاتوں کا اصول (1)، 1800ء میں وولٹائیک پائل (4)، 1859ء میں ری چارج ایبل بیٹری (2) اور جدید لیتھیم آئن انرجی اسٹوریج (5)۔'
   },
   {
-    title: 'The Green Revolution and Agricultural Science',
+    title: 'The Hubble Space Telescope and Cosmic Observations',
+    topic: 'Astrophysics & Space Exploration',
+    correctOrder: [0, 3, 1, 4, 2, 5],
+    sentences: [
+      'For centuries, astronomers on Earth contended with atmospheric turbulence that blurred telescopic views of distant celestial bodies.',
+      'To circumvent this barrier, NASA and ESA collaborated to launch the Hubble Space Telescope into low-Earth orbit in 1990.',
+      'A daring 1993 space shuttle servicing mission installed corrective optics, restoring crystal-clear vision to the orbiting observatory.',
+      'Ground-based optical observatories suffered severely from light pollution, air currents, and moisture absorption.',
+      'Early transmissions revealed a tragic spherical aberration in the telescope’s primary mirror, producing fuzzy, distorted images.',
+      'Over three decades, Hubble’s iconic deep-field imagery has transformed our understanding of cosmic age, black holes, and dark energy.'
+    ],
+    explanation: 'Narrative structure: Earth atmospheric blurring problem (0), light pollution and air distortion (3), Hubble launched in 1990 (1), flawed mirror discovered (4), 1993 servicing mission corrects optics (2), and three decades of revolutionary imagery (5).',
+    urduExplanation: 'ہبل خلائی دوربین: زمین پر فضائی رکاوٹیں اور دھندلا پن (0)، آلودگی کے اثرات (3)، 1990ء میں ہبل کی خلا میں روانگی (1)، آئینے میں نقص کی دریافت (4)، 1993ء کا مرمتی مشن (2) اور کائنات کی عمر اور بلیک ہولز پر انقلابی انکشافات (5)۔'
+  },
+  {
+    title: 'The Agricultural Green Revolution',
     topic: 'Agronomy & Global Food Security',
-    correctOrder: [0, 2, 4, 1, 3, 5],
+    correctOrder: [0, 3, 1, 4, 2, 5],
     sentences: [
-      'In the mid-twentieth century, rapidly expanding human populations in developing nations faced the looming specter of catastrophic famine.',
-      'Traditional cereal crops possessed slender stems that buckled under the weight of heavy seed heads when fertilized.',
-      'Agronomist Norman Borlaug bred semi-dwarf, disease-resistant wheat varieties in Mexico that channeled nutrients into robust grains.',
-      'When these high-yield varieties were introduced to India and Pakistan during the 1960s, agricultural harvests doubled within five years.',
-      'Combined with improved irrigation and fertilizer techniques, Borlaug’s agricultural package averted widespread starvation across Asia.',
-      'Borlaug was awarded the 1970 Nobel Peace Prize for saving an estimated one billion human lives through food security.'
+      'By the mid-twentieth century, soaring global populations threatened catastrophic famines across developing nations in Asia and Latin America.',
+      'Agronomist Norman Borlaug conducted intensive plant-breeding trials in Mexico to develop semi-dwarf, disease-resistant wheat varieties.',
+      'Combined with improved irrigation and synthetic fertilizers, these high-yield varieties doubled crop yields across India and Pakistan within a decade.',
+      'Traditional grain varieties featured tall, slender stalks that readily collapsed under heavy fertilizer application and rainstorms.',
+      'His innovative dwarf varieties resisted lodging, channeling nutrients directly into plump grain heads rather than unproductive stems.',
+      'Credited with saving over one billion lives from starvation, Borlaug was awarded the Nobel Peace Prize in 1970 for his agricultural triumph.'
     ],
-    explanation: 'Narrative structure: Threat of mid-20th century famines (0), tall wheat stems buckling under fertilizer (2), Norman Borlaug develops semi-dwarf varieties (4), double harvests in Pakistan/India in 1960s (1), famine averted across Asia (3), and 1970 Nobel Peace Prize (5).',
-    urduExplanation: 'سبز انقلاب: قحط کا خطرہ (0)، گندم کی روایتی فصلوں کی کمزوری (2)، بورلاگ کا بونا اور طاقتور بیج تیار کرنا (4)، پاک و ہند میں پیداوار میں دگنا اضافہ (1)، قحط سالی سے بچاؤ (3) اور 1970ء کے نوبل انعام پر اختتام (5)۔'
+    explanation: 'Challenge-solution sequence: Mid-century famine threats (0), tall stalks collapsing under rain (3), Borlaug develops semi-dwarf wheat in Mexico (1), dwarf varieties channeling nutrients to grain (4), crop yields doubling in India and Pakistan (2), and Borlaug saving a billion lives with 1970 Nobel Prize (5).',
+    urduExplanation: 'سبز انقلاب: 20ویں صدی میں قحط کا خطرہ (0)، روایتی گندم کے پودوں کی کمزوری (3)، نارمن بورلاگ کی میکسیکو میں تحقیق (1)، بونے قد کی مضبوط گندم (4)، پاکستان اور بھارت میں پیداوار میں دوگنا اضافہ (2) اور 1970ء کا نوبل امن انعام (5)۔'
   },
   {
-    title: 'The Eradication of Smallpox in Public Health',
+    title: 'The Eradication of Smallpox',
     topic: 'Epidemiology & Global Public Health',
     correctOrder: [0, 3, 1, 4, 2, 5],
     sentences: [
@@ -251,51 +268,194 @@ export const SECTION_2_SEEDS: Section2Seed[] = [
     urduExplanation: 'ٹیلی فون کی ایجاد: ٹیلی گراف کی محدودیت (0)، بیل کی صوتی لہروں پر تحقیق (2)، واٹسن کے ساتھ ٹرانسمیٹر کی تیاری (4)، 1876ء کے پہلے الفاظ (1)، سگنلز کی صوتی تبدیلی (3) اور دنیا بھر میں ٹیلی فون کا جال بچھنا (5)۔'
   },
   {
-    title: 'The Microprocessor Revolution and Personal Computing',
-    topic: 'Semiconductor Electronics & Computing',
+    title: 'The Structure of DNA and the Molecular Biology Revolution',
+    topic: 'Genetics & Molecular Biochemistry',
     correctOrder: [0, 3, 1, 4, 2, 5],
     sentences: [
-      'In the 1960s, early digital computers were enormous, room-sized mainframes owned exclusively by defense agencies and elite universities.',
-      'In 1971, engineers at Intel integrated an entire central processing unit onto a single silicon chip, creating the Intel 4004.',
-      'This miniaturization lowered production costs exponentially and enabled the development of affordable microcomputers.',
-      'Thousands of individual vacuum tubes and discrete transistors made these mammoth machines prohibitively costly to operate.',
-      'By the late 1970s and 1980s, startups like Apple and IBM brought personal computers directly into ordinary classrooms and offices.',
-      'Today, billions of microprocessors power everything from handheld smartphones to automated hospital machinery.'
+      'In the mid-twentieth century, biologists recognized that chromosomes transmitted heredity, but the chemical architecture of genes was unknown.',
+      'At King’s College London, Rosalind Franklin used X-ray crystallography to produce "Photograph 51," revealing a sharp helical diffraction pattern.',
+      'This breakthrough demonstrated how hereditary information is duplicated, spawning the biotechnology and genetic medicine industries.',
+      'Without precise physical models, researchers debated fiercely whether genetic traits were encoded within complex proteins or nucleic acids.',
+      'Drawing on Franklin’s diffraction data, James Watson and Francis Crick constructed their legendary double-helix molecular model in 1953.',
+      'Today, genomic sequencing allows scientists to decipher ancestral migrations, diagnose hereditary diseases, and edit cellular DNA.'
     ],
-    explanation: 'Logical chronology: Room-sized mainframes in 1960s (0), vacuum tubes causing prohibitive costs (3), Intel integrates CPU onto single chip in 1971 (1), costs fall and microcomputers emerge (4), Apple and IBM bring PCs to offices (2), and billions of microchips today (5).',
-    urduExplanation: 'مائیکرو پروسیسر انقلاب: بڑے کمپیوٹرز (0)، ویکیوم ٹیوبوں کا مہنگا پن (3)، انٹیل کا 1971ء میں پہلا چپ بنانا (1)، مائیکرو کمپیوٹرز کا ظہور (4)، ایپل اور آئی بی ایم کا گھر گھر پہنچانا (2) اور جدید ڈیجیٹل دنیا کی تعمیر (5)۔'
+    explanation: 'Chronological discovery: Mystery of heredity chemical structure (0), debates whether proteins or nucleic acids stored traits (3), Rosalind Franklin takes Photograph 51 (1), Watson and Crick construct double helix model (4), explains DNA replication mechanism (2), and modern genomics today (5).',
+    urduExplanation: 'ڈی این اے کی ساخت: وراثت کے کیمیائی ڈھانچے کی تلاش (0)، پروٹین یا نیوکلیک ایسڈ پر مباحثہ (3)، روزالینڈ فرینکلن کا ایکسرے فوٹو (1)، واٹسن اور کرک کا ڈبل ہیلکس ماڈل (4)، نقالی کا طریقہ کار (2) اور جدید جینومکس پر اثرات (5)۔'
+  },
+  {
+    title: 'The James Webb Space Telescope and Infrared Astronomy',
+    topic: 'Cosmology & Space Instrumentation',
+    correctOrder: [0, 2, 4, 1, 3, 5],
+    sentences: [
+      'While the Hubble Space Telescope revolutionized optical astronomy, it could not peer through thick clouds of interstellar dust.',
+      'Cosmic dust particles scatter short optical wavelengths, leaving early galaxy formation largely invisible to conventional mirrors.',
+      'To overcome this observational limit, international agencies engineered the James Webb Space Telescope with gold-coated beryllium mirrors.',
+      'Launched on Christmas Day 2021, the observatory travelled one million miles into space to orbit the Sun-Earth Lagrange point L2.',
+      'Its ultra-cold infrared instruments penetrate dust clouds, capturing primordial light emitted shortly after the Big Bang.',
+      'Today, JWST provides unprecedented spectral data detailing atmospheric chemistry on distant exoplanets and cosmic evolution.'
+    ],
+    explanation: 'Logical progression: Hubble optical limits (0), cosmic dust scattering optical light (2), JWST engineered with gold-beryllium mirrors (4), launch in 2021 to L2 point (1), infrared instruments piercing cosmic dust (3), and discoveries of exoplanet atmospheres (5).',
+    urduExplanation: 'جیمز ویب خلائی دوربین: ہبل کی بصری حدود (0)، کائناتی گرد کے اثرات (2)، جیمز ویب کی تیاری (4)، 2021ء میں لانچ (1)، انفراریڈ کے ذریعے کائناتی دھول کے پار دیکھنا (3) اور دور دراز سیاروں کے ماحول کا مطالعہ (5)۔'
+  },
+  {
+    title: 'The Construction of the International Space Station',
+    topic: 'Aerospace Engineering & Orbital Science',
+    correctOrder: [0, 3, 1, 4, 2, 5],
+    sentences: [
+      'Following the conclusion of the Cold War, space agencies sought collaborative orbital ventures rather than competitive national space races.',
+      'In November 1998, Russia launched the Zarya control module, placing the foundational building block of the station into orbit.',
+      'Over the following decade, more than forty robotic and crewed assembly flights delivered laboratory modules, solar arrays, and living quarters.',
+      'Independent national space stations were prohibitively expensive to operate and lacked long-term scientific viability.',
+      'Weeks later, the American Space Shuttle Endeavour delivered the Unity node, successfully joining the first two pressurized sections.',
+      'Continuously crewed since November 2000, the station serves as a microgravity laboratory advancing medicine, materials, and human spaceflight.'
+    ],
+    explanation: 'Sequential assembly: Post-Cold War collaboration (0), prohibitive costs of separate stations (3), Russia launches Zarya in 1998 (1), Endeavour joins Unity node weeks later (4), 40 assembly flights add modules (2), and continuous human occupation since 2000 (5).',
+    urduExplanation: 'بین الاقوامی خلائی اسٹیشن: سرد جنگ کے بعد مشترکہ تحقیق (0)، الگ الگ اسٹیشنوں کے اخراجات (3)، 1998ء میں زاریا کا مدار میں داخل ہونا (1)، امریکی شٹل کے ذریعے جڑنا (4)، چالیس سے زائد پروازیں (2) اور سال 2000ء سے اب تک مسلسل تحقیق (5)۔'
+  },
+  {
+    title: 'The Evolution of Maritime Navigation and the Marine Chronometer',
+    topic: 'Horology & Maritime History',
+    correctOrder: [0, 2, 4, 1, 3, 5],
+    sentences: [
+      'For centuries, mariners could readily calculate their latitude using the stars but had no reliable method for determining longitude at sea.',
+      'Without precise longitude, sailing ships frequently drifted off course, leading to catastrophic shipwrecks on uncharted reefs.',
+      'In 1714, the British Parliament offered a fortune via the Longitude Act to anyone who could solve the navigational dilemma.',
+      'Self-taught Yorkshire clockmaker John Harrison realized that comparing local ship time with London solar time provided exact east-west distance.',
+      'After decades of meticulous craftsmanship, his H4 marine pocket chronometer kept exceptionally accurate time amid rough ocean waves.',
+      'Harrison’s seaworthy clock transformed maritime navigation, making global shipping and cartography infinitely safer.'
+    ],
+    explanation: 'Problem-solving chronology: Calculating latitude vs mystery of longitude (0), shipwrecks caused by longitude errors (2), 1714 Longitude Act reward (4), John Harrison compares ship time to London time (1), H4 chronometer withstands ocean voyages (3), and global shipping safety transformed (5).',
+    urduExplanation: 'سمندری گھڑی اور جہاز رانی: عرض بلد اور طول بلد کا مسئلہ (0)، جہازوں کے تباہ کن حادثات (2)، برطانوی پارلیمنٹ کا انعام (4)، جان ہیریسن کی گھڑی کا نظریہ (1)، ایچ 4 میرین کرونومیٹر کی کامیابی (3) اور عالمی جہاز رانی کا محفوظ بننا (5)۔'
   }
 ];
 
-let s2Counter = 1;
+/**
+ * Procedural story generator when pre-defined seeds are exhausted.
+ * Generates endless unique 6-sentence coherent narratives.
+ */
+function generateProceduralSection2Seed(index: number): Section2Seed {
+  const proceduralTopics = [
+    {
+      title: 'The Domestication of Wheat and the Neolithic Revolution',
+      topic: 'Archaeology & Human Civilization',
+      order: [0, 3, 1, 4, 2, 5],
+      s: [
+        'Before the advent of agriculture, human bands survived exclusively as nomadic hunter-gatherers following seasonal animal herds.',
+        'Around ten thousand years ago in the Fertile Crescent, hunter-gatherers began collecting and selecting wild grains with non-shattering rachis.',
+        'Consequently, reliable grain granaries fostered population booms, social specialization, and the rise of the world’s first permanent towns.',
+        'Constantly moving across unpredictable landscapes meant families suffered frequent food insecurity during harsh winters.',
+        'By deliberately replanting plump kernels, early villagers cultivated domesticated wheat and barley varieties that yielded bountiful harvests.',
+        'This agricultural shift fundamentally altered human social structures, laying the bedrock for all literate human civilizations.'
+      ],
+      en: 'Chronology: Nomadic hunting problem (0), winter food insecurity (3), wild grain selection in Fertile Crescent (1), deliberate replanting (4), granaries and permanent towns (2), and legacy of civilization (5).',
+      ur: 'زرعی انقلاب: شکاری دور (0)، خوراک کی قلت (3)، زرخیز ہلال میں گندم کی کاشت (1)، باقاعدہ فصلیں (4)، شہروں کا قیام (2) اور انسانی تہذیب کی بنیاد (5)۔'
+    },
+    {
+      title: 'The Discovery of Ocean Hydrothermal Vents',
+      topic: 'Marine Biology & Oceanography',
+      order: [0, 2, 4, 1, 3, 5],
+      s: [
+        'For generations, marine biologists assumed all complex life on Earth depended directly or indirectly on solar photosynthesis.',
+        'At depths exceeding two thousand meters, sunlight cannot penetrate, leaving abyssal ocean plains in perpetual freezing darkness.',
+        'In 1977, oceanographers piloting the submersible Alvin explored the Galapagos Rift and discovered mineral-rich underwater volcanic chimneys.',
+        'These volcanic plumes spewed superheated, mineral-laden fluids, sustaining dense biological communities of giant tube worms and crabs.',
+        'Geochemists discovered that specialized bacteria metabolized hydrogen sulfide, proving life could flourish via chemosynthesis without sunlight.',
+        'This landmark discovery revolutionized biological science and expanded the possibilities of discovering extraterrestrial life on icy moons.'
+      ],
+      en: 'Discovery sequence: Sunlight assumption (0), abyss in perpetual darkness (2), Alvin dives in 1977 (4), tube worms and crabs (1), chemosynthesis mechanism (3), and extraterrestrial astrobiology implications (5).',
+      ur: 'سمندری چشمے: سورج کی روشنی پر انحصار کا نظریہ (0)، گہرے سمندر کی تاریکی (2)، 1977ء میں ایلون کی غوطہ خوری (4)، حیات کا دریافت ہونا (1)، کیموسنتھیسس کا طریقہ (3) اور خلائی حیات کی تلاش میں اہمیت (5)۔'
+    },
+    {
+      title: 'The Wright Brothers and Controlled Powered Flight',
+      topic: 'Aeronautical Engineering & Aviation',
+      order: [0, 3, 1, 4, 2, 5],
+      s: [
+        'Throughout the nineteenth century, daring inventors attempted powered flight using steam engines, resulting in catastrophic crashes.',
+        'Wilbur and Orville Wright recognized that the fundamental barrier was not raw engine horsepower but aerodynamic three-axis control.',
+        'Using their wind tunnel data, they constructed the lightweight Flyer with counter-rotating wooden propellers and wing-warping cables.',
+        'Early aviators possessed no reliable mechanism to stabilize aircraft against crosswinds or steer them smoothly through mid-air maneuvers.',
+        'On December 17, 1903, at Kitty Hawk, Orville piloted the first sustained, controlled, heavier-than-air powered flight in history.',
+        'Within four decades, aviation evolved from fragile canvas gliders into transatlantic airliners, shrinking geographical distances worldwide.'
+      ],
+      en: 'Aviation milestone: 19th-century steam crashes (0), lack of stability mechanisms (3), Wright brothers focus on 3-axis control (1), wind tunnel and Flyer construction (4), Kitty Hawk flight in 1903 (2), and global aviation expansion (5).',
+      ur: 'رائٹ برادرز کی پرواز: ابتدائی ناکام تجربات (0)، توازن اور کنٹرول کا فقدان (3)، تین جہتی کنٹرول کا اصول (1)، ونڈ ٹنل اور فلائر کی تیاری (4)، 1903ء کی پہلی کامیاب پرواز (2) اور ہوابازی کا عالمی انقلاب (5)۔'
+    },
+    {
+      title: 'The Recovery of the Earth’s Ozone Layer',
+      topic: 'Atmospheric Chemistry & Environmental Law',
+      order: [0, 2, 4, 1, 3, 5],
+      s: [
+        'In the 1970s, atmospheric scientists warned that artificial chlorofluorocarbons (CFCs) were migrating into the upper stratosphere.',
+        'Stratospheric ozone filters out lethal solar ultraviolet radiation, shielding living organisms from cellular DNA damage.',
+        'In 1985, British Antarctic Survey scientists confirmed a catastrophic seasonal thinning of the ozone shield over Antarctica.',
+        'In response, world governments united in 1987 to ratify the landmark Montreal Protocol, mandating the phase-out of harmful propellants.',
+        'Laboratory tests proved chlorine atoms released by CFCs acted as catalytic destroyers, obliterating thousands of ozone molecules each.',
+        'Today, global ozone concentrations are actively healing, demonstrating that coordinated international environmental diplomacy can avert planetary crises.'
+      ],
+      en: 'Environmental progress: CFC warning in 1970s (0), ozone role in shielding UV (2), Antarctic hole discovered in 1985 (4), chlorine breakdown mechanism (1), Montreal Protocol signed in 1987 (3), and ozone healing today (5).',
+      ur: 'اوزون تہہ کا تحفظ: 1970ء میں سی ایف سی کا خطرہ (0)، اوزون کا حفاظتی کردار (2)، 1985ء میں انٹارکٹک شگاف کی تصدیق (4)، کیمیائی عمل (1)، 1987ء کا مانٹریال پروٹوکول (3) اور اوزون تہہ کی بحالی (5)۔'
+    }
+  ];
+
+  const selected = proceduralTopics[index % proceduralTopics.length];
+  const cycle = Math.floor(index / proceduralTopics.length) + 1;
+  const cycleTitle = cycle > 1 ? `${selected.title} (Part ${cycle})` : selected.title;
+
+  return {
+    title: cycleTitle,
+    topic: selected.topic,
+    sentences: [...selected.s],
+    correctOrder: [...selected.order],
+    explanation: selected.en,
+    urduExplanation: selected.ur
+  };
+}
 
 /**
  * Generates two completely distinct Text Cohesion tasks for a single test attempt.
  * Ensures Task 1 and Task 2 are distinct from one another and non-repeating across attempts.
  */
 export function generateReadingSection2Pair(seenIds: Set<string>): { task1: ReadingSection2Task; task2: ReadingSection2Task } {
-  const n = SECTION_2_SEEDS.length;
-  
-  // Pick two distinct seeds
-  let idx1 = (s2Counter - 1) % n;
-  let idx2 = s2Counter % n;
-  s2Counter += 2;
-
-  // If both indices somehow collide, shift idx2
-  if (idx1 === idx2) {
-    idx2 = (idx2 + 1) % n;
+  // 1. Gather all candidates from seeds that have NOT been seen globally
+  const unseenSeeds: Section2Seed[] = [];
+  for (const s of SECTION_2_SEEDS) {
+    if (!seenIds.has(s.title) && !isGloballySeen('reading-s2', '', s.title)) {
+      unseenSeeds.push(s);
+    }
   }
 
-  const seed1 = SECTION_2_SEEDS[idx1];
-  const seed2 = SECTION_2_SEEDS[idx2];
+  let seed1: Section2Seed;
+  let seed2: Section2Seed;
 
-  const uniqueId1 = `auto-reading-s2-t1-${Date.now().toString(36)}-${idx1}-${Math.floor(Math.random() * 1000)}`;
-  const uniqueId2 = `auto-reading-s2-t2-${Date.now().toString(36)}-${idx2}-${Math.floor(Math.random() * 1000)}`;
+  if (unseenSeeds.length >= 2) {
+    // Pick two distinct unseen seeds
+    seed1 = unseenSeeds[0];
+    seed2 = unseenSeeds[1];
+  } else if (unseenSeeds.length === 1) {
+    seed1 = unseenSeeds[0];
+    const counter = getNextGeneratorCounter('readingS2');
+    seed2 = generateProceduralSection2Seed(counter);
+  } else {
+    // All predefined seeds exhausted: generate dynamically unique procedural seeds
+    const c1 = getNextGeneratorCounter('readingS2');
+    const c2 = getNextGeneratorCounter('readingS2');
+    seed1 = generateProceduralSection2Seed(c1);
+    seed2 = generateProceduralSection2Seed(c2);
+  }
+
+  const uniqueId1 = `auto-reading-s2-t1-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
+  const uniqueId2 = `auto-reading-s2-t2-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
 
   seenIds.add(uniqueId1);
   seenIds.add(seed1.title);
   seenIds.add(uniqueId2);
   seenIds.add(seed2.title);
+
+  // Mark globally seen so they never reappear
+  markGloballySeen('reading-s2', [
+    { id: uniqueId1, textOrTitle: seed1.title },
+    { id: uniqueId2, textOrTitle: seed2.title }
+  ]);
 
   const task1: ReadingSection2Task = {
     id: uniqueId1,
@@ -329,7 +489,7 @@ export function generateReadingSection2Pair(seenIds: Set<string>): { task1: Read
 export function generateSyntheticReadingSection2(seenIds: Set<string>): ReadingSection2 {
   const { task1, task2 } = generateReadingSection2Pair(seenIds);
 
-  const combinedId = `auto-reading-s2-combined-${Date.now().toString(36)}-${s2Counter}`;
+  const combinedId = `auto-reading-s2-combined-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
   seenIds.add(combinedId);
 
   return {
