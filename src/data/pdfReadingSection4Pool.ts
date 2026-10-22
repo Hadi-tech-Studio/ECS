@@ -1,5 +1,6 @@
 import { ReadingSection4 } from '../types';
 import { generateSyntheticReadingSection4 } from './readingSection4AutoGenerator';
+import { isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 /**
  * Official ICAP ECS Long Text Comprehension Question Pool
@@ -2991,8 +2992,11 @@ export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSec
     }
   }
 
-  // Find candidate questions not yet seen
-  const candidates = safePool.filter(item => !currentSeen.has(item.id));
+  // Find candidate questions not yet seen locally or globally
+  const candidates = safePool.filter(item => 
+    !currentSeen.has(item.id) && 
+    !isGloballySeen('reading-s4', item.id, item.title)
+  );
 
   let chosen: ReadingSection4;
   if (candidates.length > 0) {
@@ -3006,7 +3010,7 @@ export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSec
   // Ensure 6 to 7 paragraphs
   chosen = ensureSixToSevenParagraphs(chosen);
 
-  // Record chosen ID to localStorage
+  // Record chosen ID to localStorage and global registry
   if (typeof window !== 'undefined') {
     try {
       currentSeen.add(chosen.id);
@@ -3015,6 +3019,7 @@ export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSec
       // ignore storage quota errors
     }
   }
+  markGloballySeen('reading-s4', [{ id: chosen.id, textOrTitle: chosen.title }]);
 
   return chosen;
 }
