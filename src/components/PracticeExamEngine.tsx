@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AptisTestSet, ExamResult, WritingEvaluation, StudentExamAnswers, ExamAttemptRecord, TopicImprovement } from '../types';
-import { ALL_APTIS_TEST_SETS, APTIS_TEST_SET_1, APTIS_TEST_SET_2 } from '../data/aptisMockData';
+import { APTIS_TEST_SET_1 } from '../data/aptisMockData';
 import { AptisAnswerKeyModal } from './AptisAnswerKeyModal';
 import { AptisMarkingScalesModal } from './AptisMarkingScalesModal';
 import { ExamSolutionReview } from './ExamSolutionReview';
@@ -44,9 +44,6 @@ import {
 } from '../lib/examEngineService';
 import { generateAiWritingPart4 } from '../lib/aiTestGenerator';
 import { selectFreshPart4EmailTask, isPart4DefaultOrBanned } from '../data/expandedPart4EmailPool';
-import { select25GrammarQuestionsFromPdf, cleanArtifacts } from '../data/pdfGrammarPool';
-import { selectOfficialPdfVocabulary } from '../data/pdfVocabularyPool';
-import { selectOfficialPdfReadingSection1 } from '../data/pdfReadingSection1Pool';
 import { recordQuestionsToStudentHistory } from '../lib/questionHistoryService';
 import { useTheme } from '../context/ThemeContext';
 
@@ -55,38 +52,7 @@ export const PracticeExamEngine: React.FC = () => {
   // Test Sets state initialized with a dynamic syllabus-aligned set
   const [testSets, setTestSets] = useState<AptisTestSet[]>(() => {
     const initialDyn = generateDynamicTestSet({ customTitle: 'Aptis ICAP Practice Exam #1' });
-    // Sanitize any static sets to guarantee grammar and vocabulary are strictly from official PDF
-    const sanitizedSets = ALL_APTIS_TEST_SETS.map(set => {
-      let updated = { ...set };
-      const officialVocab = selectOfficialPdfVocabulary();
-      updated = {
-        ...updated,
-        core: {
-          ...updated.core,
-          grammarQuestions: select25GrammarQuestionsFromPdf(new Set()),
-          vocabWordMatching: officialVocab.vocabWordMatching,
-          vocabDefinitions: officialVocab.vocabDefinitions,
-          vocabCollocations: officialVocab.vocabCollocations,
-          vocabSentenceCompletion: officialVocab.vocabSentenceCompletion,
-          vocabContextMatching: officialVocab.vocabContextMatching
-        },
-        reading: {
-          ...updated.reading,
-          section1: selectOfficialPdfReadingSection1()
-        }
-      };
-      if (isPart4DefaultOrBanned(updated.writing.part4)) {
-        updated = {
-          ...updated,
-          writing: {
-            ...updated.writing,
-            part4: selectFreshPart4EmailTask(new Set())
-          }
-        };
-      }
-      return updated;
-    });
-    return [initialDyn.testSet, ...sanitizedSets];
+    return [initialDyn.testSet];
   });
   const [selectedSetIndex, setSelectedSetIndex] = useState<number>(0);
   const currentTestSet = testSets[selectedSetIndex] || testSets[0] || APTIS_TEST_SET_1;
