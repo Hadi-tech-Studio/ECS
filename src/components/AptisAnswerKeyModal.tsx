@@ -31,6 +31,8 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
   const safeVocabContextAnswers = studentAnswers?.vocabContextAnswers || {};
   const safeReadingSec1Answers = studentAnswers?.readingSec1Answers || {};
   const safeReadingSec2Order = studentAnswers?.readingSec2Order;
+  const safeReadingSec2Order1 = studentAnswers?.readingSec2Order1 || studentAnswers?.readingSec2Order;
+  const safeReadingSec2Order2 = studentAnswers?.readingSec2Order2;
   const safeReadingSec3Answers = studentAnswers?.readingSec3Answers || {};
   const safeReadingSec4Answers = studentAnswers?.readingSec4Answers || {};
   const safeWritingPart1Answers = studentAnswers?.writingPart1Answers || studentAnswers?.writingPart1 || {};
@@ -390,47 +392,162 @@ export const AptisAnswerKeyModal: React.FC<AptisAnswerKeyModalProps> = ({
                 </div>
               </div>
 
-              {/* Section 2 */}
-              <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
-                <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section2.title}</h4>
-                <p className="text-xs text-slate-400">Topic: {testSet.reading.section2.topic}</p>
-                
-                {safeReadingSec2Order && (
-                  <div className="space-y-1.5 p-3 rounded-xl bg-slate-900 border border-slate-750">
-                    <span className="text-xs font-bold text-slate-300 block">Your Arranged Order:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {safeReadingSec2Order.map((origIdx, pos) => {
-                        const isCorrectPos = origIdx === testSet.reading.section2.correctOrder[pos];
-                        return (
-                          <span
-                            key={pos}
-                            className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${
-                              isCorrectPos ? 'bg-blue-950/40 border-blue-500/40 text-blue-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
-                            }`}
-                          >
-                            Step {pos + 1}: Sent #{origIdx + 1} {isCorrectPos ? '✓' : '✗'}
-                          </span>
-                        );
-                      })}
+              {/* Section 2 (Both Tasks) */}
+              <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-700/60 pb-2">
+                  <div>
+                    <h4 className="font-bold text-sm text-blue-300">{testSet.reading.section2.title}</h4>
+                    <p className="text-xs text-slate-400">
+                      {testSet.reading.section2.tasks && testSet.reading.section2.tasks.length === 2 ? '2 Interactive Tasks' : `Topic: ${testSet.reading.section2.topic}`}
+                    </p>
+                  </div>
+                  {testSet.reading.section2.tasks && testSet.reading.section2.tasks.length === 2 && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold text-xs">
+                      2 Tasks
+                    </span>
+                  )}
+                </div>
+
+                {testSet.reading.section2.tasks && testSet.reading.section2.tasks.length === 2 ? (
+                  <div className="space-y-4">
+                    {/* Task 1 */}
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-750 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[10px] uppercase">
+                          Task 1 of 2
+                        </span>
+                        <h5 className="text-xs font-bold text-white">{testSet.reading.section2.tasks[0].title}</h5>
+                      </div>
+
+                      {safeReadingSec2Order1 && (
+                        <div className="space-y-1 p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                          <span className="text-[10px] font-bold text-slate-400 block">Your Arranged Order:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {safeReadingSec2Order1.map((origIdx, pos) => {
+                              const isCorrectPos = origIdx === testSet.reading.section2.tasks![0].correctOrder[pos];
+                              return (
+                                <span
+                                  key={pos}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                                    isCorrectPos ? 'bg-blue-950/40 border-blue-500/40 text-blue-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                                  }`}
+                                >
+                                  #{origIdx + 1} {isCorrectPos ? '✓' : '✗'}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[11px] font-bold text-slate-300">Official Chronological Order:</div>
+                        {testSet.reading.section2.tasks[0].correctOrder.map((origIdx, orderNum) => (
+                          <div key={orderNum} className="flex items-start gap-2 text-xs p-2 rounded-lg bg-slate-800 border border-slate-700/60">
+                            <span className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center shrink-0 text-[10px]">
+                              {orderNum + 1}
+                            </span>
+                            <p className="text-slate-200 text-[11px] leading-snug">{testSet.reading.section2.tasks![0].sentences[origIdx]}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {showUrdu && testSet.reading.section2.tasks[0].urduExplanation && (
+                        <p className="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded-lg border border-amber-500/20">
+                          {testSet.reading.section2.tasks[0].urduExplanation}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Task 2 */}
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-750 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold text-[10px] uppercase">
+                          Task 2 of 2
+                        </span>
+                        <h5 className="text-xs font-bold text-white">{testSet.reading.section2.tasks[1].title}</h5>
+                      </div>
+
+                      {safeReadingSec2Order2 && (
+                        <div className="space-y-1 p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                          <span className="text-[10px] font-bold text-slate-400 block">Your Arranged Order:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {safeReadingSec2Order2.map((origIdx, pos) => {
+                              const isCorrectPos = origIdx === testSet.reading.section2.tasks![1].correctOrder[pos];
+                              return (
+                                <span
+                                  key={pos}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                                    isCorrectPos ? 'bg-purple-950/40 border-purple-500/40 text-purple-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                                  }`}
+                                >
+                                  #{origIdx + 1} {isCorrectPos ? '✓' : '✗'}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[11px] font-bold text-slate-300">Official Chronological Order:</div>
+                        {testSet.reading.section2.tasks[1].correctOrder.map((origIdx, orderNum) => (
+                          <div key={orderNum} className="flex items-start gap-2 text-xs p-2 rounded-lg bg-slate-800 border border-slate-700/60">
+                            <span className="w-4 h-4 rounded-full font-mono text-[10px] font-bold flex items-center justify-center shrink-0 bg-purple-500 text-slate-950">
+                              {orderNum + 1}
+                            </span>
+                            <p className="text-slate-200 text-[11px] leading-snug">{testSet.reading.section2.tasks![1].sentences[origIdx]}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {showUrdu && testSet.reading.section2.tasks[1].urduExplanation && (
+                        <p className="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded-lg border border-amber-500/20">
+                          {testSet.reading.section2.tasks[1].urduExplanation}
+                        </p>
+                      )}
                     </div>
                   </div>
-                )}
+                ) : (
+                  <div>
+                    {safeReadingSec2Order && (
+                      <div className="space-y-1.5 p-3 rounded-xl bg-slate-900 border border-slate-750">
+                        <span className="text-xs font-bold text-slate-300 block">Your Arranged Order:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {safeReadingSec2Order.map((origIdx, pos) => {
+                            const isCorrectPos = origIdx === testSet.reading.section2.correctOrder[pos];
+                            return (
+                              <span
+                                key={pos}
+                                className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${
+                                  isCorrectPos ? 'bg-blue-950/40 border-blue-500/40 text-blue-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                                }`}
+                              >
+                                Step {pos + 1}: Sent #{origIdx + 1} {isCorrectPos ? '✓' : '✗'}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
-                <div className="space-y-2 pt-2">
-                  <div className="text-xs font-bold text-white mb-1">Correct Chronological Order:</div>
-                  {testSet.reading.section2.correctOrder.map((origIdx, orderNum) => (
-                    <div key={orderNum} className="flex items-start gap-2.5 text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700/60">
-                      <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center shrink-0 text-[11px]">
-                        {orderNum + 1}
-                      </span>
-                      <p className="text-slate-200">{testSet.reading.section2.sentences[origIdx]}</p>
+                    <div className="space-y-2 pt-2">
+                      <div className="text-xs font-bold text-white mb-1">Correct Chronological Order:</div>
+                      {testSet.reading.section2.correctOrder.map((origIdx, orderNum) => (
+                        <div key={orderNum} className="flex items-start gap-2.5 text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700/60">
+                          <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center shrink-0 text-[11px]">
+                            {orderNum + 1}
+                          </span>
+                          <p className="text-slate-200">{testSet.reading.section2.sentences[origIdx]}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                {showUrdu && (
-                  <p className="text-xs text-amber-300/90 bg-amber-950/20 p-2.5 rounded-xl border border-amber-500/20 mt-2">
-                    {testSet.reading.section2.urduExplanation}
-                  </p>
+                    {showUrdu && (
+                      <p className="text-xs text-amber-300/90 bg-amber-950/20 p-2.5 rounded-xl border border-amber-500/20 mt-2">
+                        {testSet.reading.section2.urduExplanation}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
