@@ -1,5 +1,6 @@
 import { WritingPart4, WritingScenario } from '../types';
 import { generateSyntheticPart4EmailTask } from './writingAutoGenerator';
+import { isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 export interface PdfEmailTopicMeta {
   number: number;
@@ -858,19 +859,30 @@ export function selectFreshPdfPart4EmailTask(additionalSeenSet?: Set<string | nu
     });
   }
 
-  // Filter pairs whose formal topic hasn't been seen recently
-  const unseenPairs = PDF_TOPIC_PAIRS.filter(p => !seenFromStorage.has(p.formalNum));
+  // Filter pairs whose formal topic hasn't been seen recently or globally
+  const unseenPairs = PDF_TOPIC_PAIRS.filter(p => {
+    if (seenFromStorage.has(p.formalNum)) return false;
+    const formal = PDF_FORMAL_EMAIL_TOPICS[p.formalNum];
+    if (formal && isGloballySeen('writing-p4', `pdf-formal-${formal.number}`, formal.title)) return false;
+    return true;
+  });
 
   if (unseenPairs.length > 0) {
     const selectedPair = unseenPairs[Math.floor(Math.random() * unseenPairs.length)];
     markPdfEmailTopicSeen(selectedPair.formalNum);
     markPdfEmailTopicSeen(selectedPair.informalNum);
-    return createPart4FromPdfTopics(selectedPair.formalNum, selectedPair.informalNum);
+    const result = createPart4FromPdfTopics(selectedPair.formalNum, selectedPair.informalNum);
+    markGloballySeen('writing-p4', [{ id: result.id, textOrTitle: result.scenarioTopic || '' }]);
+    return result;
   }
 
   // All 30 PDF pairs have been seen!
   // Automatically generate brand-new, unique Part 4 email task matching ICAP ECS syllabus & difficulty
-  return generateSyntheticPart4EmailTask(new Set());
+  const seenStrings = new Set<string>();
+  if (additionalSeenSet) {
+    additionalSeenSet.forEach(v => seenStrings.add(String(v)));
+  }
+  return generateSyntheticPart4EmailTask(seenStrings);
 }
 
 /**
