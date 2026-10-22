@@ -65,6 +65,16 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
       ? studentAnswers.readingSec2Order
       : [0, 1, 2, 3, 4, 5];
   }, [studentAnswers?.readingSec2Order]);
+  const safeReadingSec2Order1 = useMemo(() => {
+    return studentAnswers?.readingSec2Order1 && studentAnswers.readingSec2Order1.length === 6
+      ? studentAnswers.readingSec2Order1
+      : safeReadingSec2Order;
+  }, [studentAnswers?.readingSec2Order1, safeReadingSec2Order]);
+  const safeReadingSec2Order2 = useMemo(() => {
+    return studentAnswers?.readingSec2Order2 && studentAnswers.readingSec2Order2.length === 6
+      ? studentAnswers.readingSec2Order2
+      : [0, 1, 2, 3, 4, 5];
+  }, [studentAnswers?.readingSec2Order2]);
   const safeReadingSec3Answers = useMemo(() => studentAnswers?.readingSec3Answers || {}, [studentAnswers?.readingSec3Answers]);
   const safeReadingSec4Answers = useMemo(() => studentAnswers?.readingSec4Answers || {}, [studentAnswers?.readingSec4Answers]);
   const safeWritingPart1Answers = useMemo(() => studentAnswers?.writingPart1Answers || studentAnswers?.writingPart1 || {}, [studentAnswers?.writingPart1Answers, studentAnswers?.writingPart1]);
@@ -281,10 +291,26 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
     p => safeReadingSec1Answers[p.gapId] === p.correctIndex
   ).length;
 
-  // Reading Sec 2
-  const correctReadingSec2 = safeReadingSec2Order.filter(
-    (val, idx) => val === testSet.reading.section2.correctOrder[idx]
-  ).length;
+  // Reading Sec 2 (Check 2 Tasks if available)
+  const hasTwoSec2Tasks = Array.isArray(testSet.reading.section2.tasks) && testSet.reading.section2.tasks.length === 2;
+  let correctReadingSec2 = 0;
+  let totalSec2Items = 6;
+
+  if (hasTwoSec2Tasks) {
+    const task1Correct = safeReadingSec2Order1.filter(
+      (val, idx) => val === testSet.reading.section2.tasks![0].correctOrder[idx]
+    ).length;
+    const task2Correct = safeReadingSec2Order2.filter(
+      (val, idx) => val === testSet.reading.section2.tasks![1].correctOrder[idx]
+    ).length;
+    correctReadingSec2 = task1Correct + task2Correct;
+    totalSec2Items = 12;
+  } else {
+    correctReadingSec2 = safeReadingSec2Order.filter(
+      (val, idx) => val === testSet.reading.section2.correctOrder[idx]
+    ).length;
+    totalSec2Items = 6;
+  }
 
   const correctReadingSec3 = testSet.reading.section3.questions.filter(
     q => (safeReadingSec3Answers[q.id] || '').toUpperCase() === q.correctPersonId.toUpperCase()
@@ -294,7 +320,7 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
     p => safeReadingSec4Answers[p.id] === p.correctHeadingIndex
   ).length;
 
-  const totalReading = testSet.reading.section1.paragraphs.length + 6 + testSet.reading.section3.questions.length + testSet.reading.section4.paragraphs.length;
+  const totalReading = testSet.reading.section1.paragraphs.length + totalSec2Items + testSet.reading.section3.questions.length + testSet.reading.section4.paragraphs.length;
   const correctReadingCount = correctReadingSec1 + correctReadingSec2 + correctReadingSec3 + correctReadingSec4;
 
   return (
@@ -1053,71 +1079,205 @@ export const ExamSolutionReview: React.FC<ExamSolutionReviewProps> = ({
             </div>
           </div>
 
-          {/* Reading Section 2: Ordering */}
-          <div className="space-y-4 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
-            <div className="flex items-center justify-between">
+          {/* Reading Section 2: Ordering (2 Tasks supported) */}
+          <div className="space-y-6 bg-slate-850/40 p-4 sm:p-5 rounded-2xl border border-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
                 <h5 className="text-xs font-bold text-blue-300 uppercase tracking-wider">
                   {testSet.reading.section2.title} (Chronological Sequencing)
                 </h5>
-                <p className="text-xs text-slate-400">Topic: {testSet.reading.section2.topic}</p>
+                <p className="text-xs text-slate-400">
+                  {hasTwoSec2Tasks ? '2 Interactive Tasks' : `Topic: ${testSet.reading.section2.topic}`}
+                </p>
               </div>
-              <span className="text-xs font-mono text-slate-400 font-bold">{correctReadingSec2}/6 positions correct</span>
+              <span className="text-xs font-mono text-slate-400 font-bold">
+                {correctReadingSec2}/{totalSec2Items} positions correct
+              </span>
             </div>
 
-            {/* Side-by-Side Ordering Comparison */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* Student's Arranged Order */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-750 space-y-2">
-                <span className="text-xs font-bold text-slate-300 block mb-2">Your Arranged Sequence:</span>
-                {safeReadingSec2Order.map((origIdx, pos) => {
-                  const isCorrectPos = origIdx === testSet.reading.section2.correctOrder[pos];
-                  return (
-                    <div
-                      key={pos}
-                      className={`p-2.5 rounded-lg border text-xs flex items-start gap-2 ${
-                        isCorrectPos ? 'bg-blue-950/20 border-blue-500/40 text-blue-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
-                      }`}
-                    >
-                      <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-slate-800 text-white">
-                        {pos + 1}
+            {hasTwoSec2Tasks ? (
+              <div className="space-y-6">
+                {/* Task 1 */}
+                <div className="space-y-4 p-4 rounded-xl bg-slate-900/60 border border-slate-750">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[10px] uppercase">
+                        Task 1 of 2
                       </span>
-                      <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.sentences[origIdx]}</p>
-                      <span className="text-[10px] font-bold shrink-0">{isCorrectPos ? '✓' : '✗'}</span>
+                      <h6 className="text-xs font-bold text-white mt-1">{testSet.reading.section2.tasks![0].title}</h6>
+                      <p className="text-[11px] text-slate-400">Topic: {testSet.reading.section2.tasks![0].topic}</p>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Official Correct Sequence */}
-              <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-2">
-                <span className="text-xs font-bold text-blue-300 block mb-2">Official Chronological Sequence:</span>
-                {testSet.reading.section2.correctOrder.map((origIdx, pos) => (
-                  <div
-                    key={pos}
-                    className="p-2.5 rounded-lg border border-blue-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
-                  >
-                    <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-blue-500 text-slate-950">
-                      {pos + 1}
-                    </span>
-                    <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.sentences[origIdx]}</p>
                   </div>
-                ))}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Student Order */}
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-[11px] font-bold text-slate-300 block mb-1">Your Arranged Sequence:</span>
+                      {safeReadingSec2Order1.map((origIdx, pos) => {
+                        const isCorrectPos = origIdx === testSet.reading.section2.tasks![0].correctOrder[pos];
+                        return (
+                          <div
+                            key={pos}
+                            className={`p-2 rounded-lg border text-xs flex items-start gap-2 ${
+                              isCorrectPos ? 'bg-blue-950/20 border-blue-500/40 text-blue-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                            }`}
+                          >
+                            <span className="w-4 h-4 rounded-full font-mono text-[9px] font-black flex items-center justify-center shrink-0 bg-slate-800 text-white">
+                              {pos + 1}
+                            </span>
+                            <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.tasks![0].sentences[origIdx]}</p>
+                            <span className="text-[10px] font-bold shrink-0">{isCorrectPos ? '✓' : '✗'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Official Order */}
+                    <div className="p-3.5 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-2">
+                      <span className="text-[11px] font-bold text-blue-300 block mb-1">Official Chronological Sequence:</span>
+                      {testSet.reading.section2.tasks![0].correctOrder.map((origIdx, pos) => (
+                        <div
+                          key={pos}
+                          className="p-2 rounded-lg border border-blue-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
+                        >
+                          <span className="w-4 h-4 rounded-full font-mono text-[9px] font-black flex items-center justify-center shrink-0 bg-blue-500 text-slate-950">
+                            {pos + 1}
+                          </span>
+                          <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.tasks![0].sentences[origIdx]}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span className="font-bold text-blue-400 block mb-1">Analysis & Discourse Cohesion:</span>
+                    {testSet.reading.section2.tasks![0].explanation}
+                  </div>
+                  {showUrdu && testSet.reading.section2.tasks![0].urduExplanation && (
+                    <p className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-500/20">
+                      {testSet.reading.section2.tasks![0].urduExplanation}
+                    </p>
+                  )}
+                </div>
+
+                {/* Task 2 */}
+                <div className="space-y-4 p-4 rounded-xl bg-slate-900/60 border border-slate-750">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold text-[10px] uppercase">
+                        Task 2 of 2
+                      </span>
+                      <h6 className="text-xs font-bold text-white mt-1">{testSet.reading.section2.tasks![1].title}</h6>
+                      <p className="text-[11px] text-slate-400">Topic: {testSet.reading.section2.tasks![1].topic}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Student Order */}
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-[11px] font-bold text-slate-300 block mb-1">Your Arranged Sequence:</span>
+                      {safeReadingSec2Order2.map((origIdx, pos) => {
+                        const isCorrectPos = origIdx === testSet.reading.section2.tasks![1].correctOrder[pos];
+                        return (
+                          <div
+                            key={pos}
+                            className={`p-2 rounded-lg border text-xs flex items-start gap-2 ${
+                              isCorrectPos ? 'bg-purple-950/20 border-purple-500/40 text-purple-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                            }`}
+                          >
+                            <span className="w-4 h-4 rounded-full font-mono text-[9px] font-black flex items-center justify-center shrink-0 bg-slate-800 text-white">
+                              {pos + 1}
+                            </span>
+                            <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.tasks![1].sentences[origIdx]}</p>
+                            <span className="text-[10px] font-bold shrink-0">{isCorrectPos ? '✓' : '✗'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Official Order */}
+                    <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/30 space-y-2">
+                      <span className="text-[11px] font-bold text-purple-300 block mb-1">Official Chronological Sequence:</span>
+                      {testSet.reading.section2.tasks![1].correctOrder.map((origIdx, pos) => (
+                        <div
+                          key={pos}
+                          className="p-2 rounded-lg border border-purple-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
+                        >
+                          <span className="w-4 h-4 rounded-full font-mono text-[9px] font-black flex items-center justify-center shrink-0 bg-purple-500 text-slate-950">
+                            {pos + 1}
+                          </span>
+                          <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.tasks![1].sentences[origIdx]}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span className="font-bold text-purple-400 block mb-1">Analysis & Discourse Cohesion:</span>
+                    {testSet.reading.section2.tasks![1].explanation}
+                  </div>
+                  {showUrdu && testSet.reading.section2.tasks![1].urduExplanation && (
+                    <p className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-500/20">
+                      {testSet.reading.section2.tasks![1].urduExplanation}
+                    </p>
+                  )}
+                </div>
               </div>
+            ) : (
+              <div>
+                {/* Side-by-Side Ordering Comparison */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Student's Arranged Order */}
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-750 space-y-2">
+                    <span className="text-xs font-bold text-slate-300 block mb-2">Your Arranged Sequence:</span>
+                    {safeReadingSec2Order.map((origIdx, pos) => {
+                      const isCorrectPos = origIdx === testSet.reading.section2.correctOrder[pos];
+                      return (
+                        <div
+                          key={pos}
+                          className={`p-2.5 rounded-lg border text-xs flex items-start gap-2 ${
+                            isCorrectPos ? 'bg-blue-950/20 border-blue-500/40 text-blue-200' : 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                          }`}
+                        >
+                          <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-slate-800 text-white">
+                            {pos + 1}
+                          </span>
+                          <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.sentences[origIdx]}</p>
+                          <span className="text-[10px] font-bold shrink-0">{isCorrectPos ? '✓' : '✗'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-            </div>
+                  {/* Official Correct Sequence */}
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-2">
+                    <span className="text-xs font-bold text-blue-300 block mb-2">Official Chronological Sequence:</span>
+                    {testSet.reading.section2.correctOrder.map((origIdx, pos) => (
+                      <div
+                        key={pos}
+                        className="p-2.5 rounded-lg border border-blue-500/20 bg-slate-900/60 text-xs flex items-start gap-2 text-slate-200"
+                      >
+                        <span className="w-5 h-5 rounded-full font-mono text-[10px] font-black flex items-center justify-center shrink-0 bg-blue-500 text-slate-950">
+                          {pos + 1}
+                        </span>
+                        <p className="flex-1 text-[11px] leading-snug">{testSet.reading.section2.sentences[origIdx]}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Explanation */}
-            <div className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-750">
-              <span className="font-bold text-blue-400 block mb-1">Cohesion & Chronology Analysis:</span>
-              {testSet.reading.section2.explanation}
-            </div>
+                {/* Explanation */}
+                <div className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-750 mt-4">
+                  <span className="font-bold text-blue-400 block mb-1">Cohesion & Chronology Analysis:</span>
+                  {testSet.reading.section2.explanation}
+                </div>
 
-            {showUrdu && testSet.reading.section2.urduExplanation && (
-              <p className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-500/20">
-                {testSet.reading.section2.urduExplanation}
-              </p>
+                {showUrdu && testSet.reading.section2.urduExplanation && (
+                  <p className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-500/20 mt-2">
+                    {testSet.reading.section2.urduExplanation}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
