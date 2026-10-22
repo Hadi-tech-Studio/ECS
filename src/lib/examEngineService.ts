@@ -747,12 +747,11 @@ function generateDynamicTestSetInternal(options?: {
 
   // 3. Select Reading Sections (Strictly from official PDF pool for Section 1 Sentence Comprehension)
   let readingSec1: ReadingSection1 = selectOfficialPdfReadingSection1();
-  let readingSec2: ReadingSection2 = selectFreshReadingSection(
-    EXPANDED_READING_SECTIONS.section2, 
-    'icap_seen_reading_s2_ids', 
-    APTIS_TEST_SET_1.reading.section2,
-    'reading-s2'
-  );
+  
+  // Generate 2 different Text Cohesion tasks in every test matching official pattern
+  let readingSec2: ReadingSection2 = generateSyntheticReadingSection2(getSeenKeys('icap_seen_reading_s2_ids'));
+  markSeenKeys('icap_seen_reading_s2_ids', [readingSec2.id, ...(readingSec2.tasks?.map(t => t.id) || [])], 50000);
+
   let readingSec3: ReadingSection3 = selectFreshReadingSection(
     EXPANDED_READING_SECTIONS.section3, 
     'icap_seen_reading_s3_ids', 
@@ -782,12 +781,24 @@ function generateDynamicTestSetInternal(options?: {
   };
 
   // Record reading passages to student history
-  recordQuestionsToStudentHistory([
+  const readingHistoryItems: Array<{ id: string; text: string; type: 'reading-s1' | 'reading-s2' | 'reading-s3' | 'reading-s4' }> = [
     { id: readingSec1.id, text: readingSec1.title, type: 'reading-s1' },
-    { id: readingSec2.id, text: readingSec2.title, type: 'reading-s2' },
     { id: readingSec3.id, text: readingSec3.title, type: 'reading-s3' },
     { id: readingSec4.id, text: readingSec4.title, type: 'reading-s4' }
-  ]);
+  ];
+
+  if (readingSec2.tasks && readingSec2.tasks.length === 2) {
+    readingHistoryItems.push(
+      { id: readingSec2.tasks[0].id, text: readingSec2.tasks[0].title, type: 'reading-s2' },
+      { id: readingSec2.tasks[1].id, text: readingSec2.tasks[1].title, type: 'reading-s2' }
+    );
+  } else {
+    readingHistoryItems.push(
+      { id: readingSec2.id, text: readingSec2.title, type: 'reading-s2' }
+    );
+  }
+
+  recordQuestionsToStudentHistory(readingHistoryItems);
 
   // 4. Select Writing Module (Fresh non-repeating tasks, member chats, notices, and emails)
   let selectedWriting: AptisWritingModule;
