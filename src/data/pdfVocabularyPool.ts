@@ -1,5 +1,6 @@
 import { VocabWordMatchItem, VocabDefinitionItem, VocabCollocationItem } from '../types';
 import rawPoolData from './pdfVocabulary1000Pool.json';
+import { isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 export interface RawPdfVocabQuestion {
   id: string;
@@ -582,29 +583,53 @@ const SEEN_KEYS = {
   synth:   'icap_seen_synth',    // Supplementary generated questions
 } as const;
 
+const GLOBAL_VOCAB_SEEN_KEY = 'icap_global_seen_vocab_all_tasks';
+const memorySeenVocabAll = new Set<string>();
+
+function loadAllVocabSeen(): Set<string> {
+  if (memorySeenVocabAll.size > 0) return memorySeenVocabAll;
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(GLOBAL_VOCAB_SEEN_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          arr.forEach((k: string) => memorySeenVocabAll.add(k));
+        }
+      }
+    } catch {}
+  }
+  return memorySeenVocabAll;
+}
+
+function saveAllVocabSeen(seen: Set<string>): void {
+  seen.forEach(k => memorySeenVocabAll.add(k));
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(GLOBAL_VOCAB_SEEN_KEY, JSON.stringify(Array.from(memorySeenVocabAll)));
+    } catch { /* quota */ }
+  }
+}
+
 function loadSeenSet(key: string): Set<string> {
-  if (typeof window === 'undefined') return new Set();
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw);
-    return new Set(Array.isArray(arr) ? arr : []);
-  } catch { return new Set(); }
+  const all = loadAllVocabSeen();
+  return all;
 }
 
 function saveSeenSet(key: string, seen: Set<string>): void {
-  if (typeof window === 'undefined') return;
-  try { localStorage.setItem(key, JSON.stringify(Array.from(seen))); } catch { /* quota */ }
+  saveAllVocabSeen(seen);
 }
 
 /** Clears ALL vocabulary seen-sets so the full pool restarts. */
 export function clearAllVocabSeenSets(): void {
   memorySeenVocabIds = new Set<string>();
+  memorySeenVocabAll.clear();
   if (typeof window === 'undefined') return;
   Object.values(SEEN_KEYS).forEach(k => {
     try { localStorage.removeItem(k); } catch { /* ignore */ }
   });
   try { localStorage.removeItem(SEEN_PDF_VOCAB_STORAGE_KEY); } catch { /* ignore */ }
+  try { localStorage.removeItem(GLOBAL_VOCAB_SEEN_KEY); } catch { /* ignore */ }
 }
 
 /**
@@ -635,6 +660,7 @@ function pickPdfOrAutoGenerate(
   const diffPool = pdfPool.filter(q => getCalibratedDifficulty(q) === difficulty);
   const availablePdf = diffPool.filter(q => {
     if (seenSet.has(q.id) || reservedInAttempt.has(q.id)) return false;
+    if (isGloballySeen('vocab', q.id, q.text)) return false;
     const words = getWords(q);
     return !words.some(w => seenSet.has(`word:${w}`) || reservedInAttempt.has(`word:${w}`));
   });
@@ -648,6 +674,10 @@ function pickPdfOrAutoGenerate(
       reservedInAttempt.add(`word:${w}`);
     });
   });
+
+  if (chosenFromPdf.length > 0) {
+    markGloballySeen('vocab', chosenFromPdf.map(q => ({ id: q.id, textOrTitle: q.text })));
+  }
 
   // 2. If all PDF questions for this category & difficulty are exhausted,
   // automatically generate brand-new, unique MCQs matching the PDF's format and difficulty.
@@ -700,14 +730,8 @@ export interface SelectedOfficialVocabulary {
  *    preventing any question from repeating anywhere across tests or attempts.
  */
 export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
-  // Unified match seen set so Task 1 and Task 5 NEVER share or repeat words
-  const seenMatchUnified = new Set<string>([
-    ...loadSeenSet(SEEN_KEYS.match1), 
-    ...loadSeenSet(SEEN_KEYS.match5)
-  ]);
-  const seen2    = loadSeenSet(SEEN_KEYS.def);
-  const seen3    = loadSeenSet(SEEN_KEYS.colloc);
-  const seen4    = loadSeenSet(SEEN_KEYS.usage);
+  // Unified seen set across all 5 tasks so NO word is ever repeated across any task or attempt
+  const unifiedVocabSeen = loadAllVocabSeen();
 
   // Task 1 & 5 use DIFFERENT non-overlapping halves of matchQuestions
   const allMatch = PDF_VOCABULARY_1000.matchQuestions;
@@ -719,47 +743,42 @@ export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
 
   // --- TASK 1: Word Matching (2 Easy, 2 Moderate, 1 Difficult) ---
   const task1Raw = [
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Easy', 2, seenMatchUnified, reservedThisAttempt, 't1'),
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Moderate', 2, seenMatchUnified, reservedThisAttempt, 't1'),
-    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Difficult', 1, seenMatchUnified, reservedThisAttempt, 't1')
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Easy', 2, unifiedVocabSeen, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Moderate', 2, unifiedVocabSeen, reservedThisAttempt, 't1'),
+    ...pickPdfOrAutoGenerate(matchPool1, 'Word Matching', 'Difficult', 1, unifiedVocabSeen, reservedThisAttempt, 't1')
   ];
 
   // --- TASK 2: Word Definitions (2 Easy, 2 Moderate, 1 Difficult) ---
   const task2Raw = [
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Easy', 2, seen2, reservedThisAttempt, 't2'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Moderate', 2, seen2, reservedThisAttempt, 't2'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Difficult', 1, seen2, reservedThisAttempt, 't2')
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Easy', 2, unifiedVocabSeen, reservedThisAttempt, 't2'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Moderate', 2, unifiedVocabSeen, reservedThisAttempt, 't2'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.defQuestions, 'Word Definition', 'Difficult', 1, unifiedVocabSeen, reservedThisAttempt, 't2')
   ];
 
   // --- TASK 3: Collocations (2 Easy, 2 Moderate, 1 Difficult) ---
   const task3Raw = [
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Easy', 2, seen3, reservedThisAttempt, 't3'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Moderate', 2, seen3, reservedThisAttempt, 't3'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Difficult', 1, seen3, reservedThisAttempt, 't3')
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Easy', 2, unifiedVocabSeen, reservedThisAttempt, 't3'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Moderate', 2, unifiedVocabSeen, reservedThisAttempt, 't3'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.collocQuestions, 'Word Combination', 'Difficult', 1, unifiedVocabSeen, reservedThisAttempt, 't3')
   ];
 
   // --- TASK 4: Word Usage / Sentence Completion (2 Easy, 2 Moderate, 1 Difficult) ---
   const task4Raw = [
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Easy', 2, seen4, reservedThisAttempt, 't4'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Moderate', 2, seen4, reservedThisAttempt, 't4'),
-    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Difficult', 1, seen4, reservedThisAttempt, 't4')
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Easy', 2, unifiedVocabSeen, reservedThisAttempt, 't4'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Moderate', 2, unifiedVocabSeen, reservedThisAttempt, 't4'),
+    ...pickPdfOrAutoGenerate(PDF_VOCABULARY_1000.usageQuestions, 'Word Usage', 'Difficult', 1, unifiedVocabSeen, reservedThisAttempt, 't4')
   ];
 
   // --- TASK 5: Context Matching (2 Easy, 2 Moderate, 1 Difficult) — uses DIFFERENT half of matchQuestions ---
   const task5Raw = [
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Easy', 2, seenMatchUnified, reservedThisAttempt, 't5'),
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Moderate', 2, seenMatchUnified, reservedThisAttempt, 't5'),
-    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Difficult', 1, seenMatchUnified, reservedThisAttempt, 't5')
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Easy', 2, unifiedVocabSeen, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Moderate', 2, unifiedVocabSeen, reservedThisAttempt, 't5'),
+    ...pickPdfOrAutoGenerate(matchPool5, 'Word Matching', 'Difficult', 1, unifiedVocabSeen, reservedThisAttempt, 't5')
   ];
 
-  // Persist all per-category seen sets
-  saveSeenSet(SEEN_KEYS.match1, seenMatchUnified);
-  saveSeenSet(SEEN_KEYS.def,    seen2);
-  saveSeenSet(SEEN_KEYS.colloc, seen3);
-  saveSeenSet(SEEN_KEYS.usage,  seen4);
-  saveSeenSet(SEEN_KEYS.match5, seenMatchUnified);
-  // Also update the legacy seen set for backwards compatibility
-  saveSeenPdfVocabIds(new Set([...seenMatchUnified, ...seen2, ...seen3, ...seen4]));
+  // Persist the unified seen set
+  saveAllVocabSeen(unifiedVocabSeen);
+  saveSeenPdfVocabIds(unifiedVocabSeen);
 
   return {
     vocabWordMatching:       shuffle(task1Raw).map(toVocabWordMatchItem),
