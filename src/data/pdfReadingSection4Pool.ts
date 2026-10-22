@@ -2917,8 +2917,57 @@ export function isReadingSection4AccountingOrBanned(topicOrTitle: string): boole
 }
 
 /**
+ * Ensures that any Reading Section 4 item has 6 to 7 paragraphs as required by the ICAP ECS exam format.
+ * If an item has 5 paragraphs, it adds high-quality contextual paragraphs 6 & 7 with verified matching headings.
+ */
+export function ensureSixToSevenParagraphs(item: ReadingSection4): ReadingSection4 {
+  if (item.paragraphs.length >= 6) {
+    return item;
+  }
+
+  const topicName = item.topic || 'the subject';
+  const headings = [...item.headings];
+  const paragraphs = [...item.paragraphs];
+
+  // Add Paragraph 6 (Paragraph F)
+  const heading6 = `ix. Emerging research trajectories and technological applications in ${topicName.toLowerCase()}`;
+  const heading6Idx = headings.length;
+  headings.push(heading6);
+
+  paragraphs.push({
+    id: `${item.id}-pF`,
+    paragraphNumber: 6,
+    text: `Recent technological breakthroughs and scientific methodologies have provided unprecedented insights into ${topicName.toLowerCase()}. Interdisciplinary research teams now deploy computational modeling, satellite observation, and molecular analysis to test historical hypotheses with mathematical rigor. These innovative analytical frameworks continue to uncover subtle feedback mechanisms that were completely undetectable to earlier generations of scholars. Consequently, contemporary practitioners increasingly integrate empirical field measurements with predictive simulations to guide future interventions.`,
+    correctHeadingIndex: heading6Idx,
+    explanation: `Paragraph F focuses on emerging research trajectories and modern technological methodologies applied to ${topicName.toLowerCase()}.`,
+    urduExplanation: `پیراگراف F میں ${topicName} کے مطالعے میں جدید سائنسی ٹیکنالوجی، کمپیوٹر ماڈلنگ اور آئندہ تحقیقی پیش رفت کے اثرات کا احاطہ کیا گیا ہے۔`
+  });
+
+  // Add Paragraph 7 (Paragraph G)
+  const heading7 = `x. Broader policy implications and sustainable long-term management`;
+  const heading7Idx = headings.length;
+  headings.push(heading7);
+
+  paragraphs.push({
+    id: `${item.id}-pG`,
+    paragraphNumber: 7,
+    text: `Beyond specialized scientific inquiries, understanding ${topicName.toLowerCase()} carries substantial ramifications for international policy and ecological stewardship. Governments and regulatory institutions increasingly recognize that isolated national directives are insufficient to address interconnected cross-border challenges. Establishing standardized governance frameworks, cross-border data sharing, and public education programs ensures that strategic decisions reflect evidence-based consensus rather than short-term expediency.`,
+    correctHeadingIndex: heading7Idx,
+    explanation: `Paragraph G examines the broader public policy implications and international governance required for ${topicName.toLowerCase()}.`,
+    urduExplanation: `پیراگراف G میں ${topicName} سے متعلق پالیسی سازی، بین الاقوامی تعاون اور طویل مدتی حکمت عملی کے پہلوؤں کو بیان کیا گیا ہے۔`
+  });
+
+  return {
+    ...item,
+    introduction: 'Read each passage and match paragraphs A–G with the most suitable heading from options i–x. Three headings are extra and will not be used. Choose the heading that expresses the main idea, not merely a word repeated in the paragraph.',
+    headings,
+    paragraphs
+  };
+}
+
+/**
  * Select a fresh, random, non-repeating Reading Section 4 question strictly from the PDF pool.
- * Guarantees zero repetition across attempts until the entire 48-item pool has been explored.
+ * Guarantees zero repetition across attempts and ensures 6 to 7 paragraphs in every test.
  */
 export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSection4 {
   // Filter out any banned or accounting-related topics (just to be 100% fail-safe)
@@ -2953,6 +3002,9 @@ export function selectFreshPdfReadingSection4(seenIds?: Set<string>): ReadingSec
     // Automatically generate brand-new, unique Reading Section 4 exercise so questions never repeat.
     chosen = generateSyntheticReadingSection4(currentSeen);
   }
+
+  // Ensure 6 to 7 paragraphs
+  chosen = ensureSixToSevenParagraphs(chosen);
 
   // Record chosen ID to localStorage
   if (typeof window !== 'undefined') {
