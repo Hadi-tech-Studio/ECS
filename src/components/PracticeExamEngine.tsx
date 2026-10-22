@@ -134,6 +134,8 @@ export const PracticeExamEngine: React.FC = () => {
   // Reading
   const [readingSec1Answers, setReadingSec1Answers] = useState<Record<string, number>>({});
   const [readingSec2Order, setReadingSec2Order] = useState<number[]>([0, 1, 2, 3, 4, 5]);
+  const [readingSec2Order1, setReadingSec2Order1] = useState<number[]>([0, 1, 2, 3, 4, 5]);
+  const [readingSec2Order2, setReadingSec2Order2] = useState<number[]>([0, 1, 2, 3, 4, 5]);
   const [readingSec3Answers, setReadingSec3Answers] = useState<Record<string, string>>({});
   const [readingSec4Answers, setReadingSec4Answers] = useState<Record<string, number>>({});
 
@@ -214,6 +216,8 @@ export const PracticeExamEngine: React.FC = () => {
     setVocabContextAnswers({});
     setReadingSec1Answers({});
     setReadingSec2Order([0, 1, 2, 3, 4, 5]);
+    setReadingSec2Order1([0, 1, 2, 3, 4, 5]);
+    setReadingSec2Order2([0, 1, 2, 3, 4, 5]);
     setReadingSec3Answers({});
     setReadingSec4Answers({});
     setWritingPart1Answers({});
@@ -259,6 +263,8 @@ export const PracticeExamEngine: React.FC = () => {
     }
     // Initialize default reading order
     setReadingSec2Order([0, 1, 2, 3, 4, 5]);
+    setReadingSec2Order1([0, 1, 2, 3, 4, 5]);
+    setReadingSec2Order2([0, 1, 2, 3, 4, 5]);
     setIsTimerRunning(true);
     setViewState('testing');
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -528,23 +534,59 @@ export const PracticeExamEngine: React.FC = () => {
       }
     });
 
-    // Section 2: 6 sentences reordering -> 6.25 pts max
-    const correctSeq = currentTestSet.reading.section2.correctOrder;
+    // Section 2: 2 Tasks (each 6 sentences) -> 6.25 pts max
+    const sec2Tasks = currentTestSet.reading.section2.tasks;
     let sec2Matches = 0;
     if (!topicTracker['Text Coherence & Sequencing']) {
       topicTracker['Text Coherence & Sequencing'] = { correct: 0, total: 0, module: 'Reading' };
     }
-    topicTracker['Text Coherence & Sequencing'].total += correctSeq.length;
-    readingSec2Order.forEach((val, idx) => {
-      if (val === correctSeq[idx]) {
-        sec2Matches += 1;
-        readingCorrect += 1;
-        topicTracker['Text Coherence & Sequencing'].correct += 1;
-      } else {
-        readingIncorrect += 1;
-      }
-    });
-    readingPoints += (sec2Matches / 6) * 6.25;
+
+    if (sec2Tasks && sec2Tasks.length === 2) {
+      topicTracker['Text Coherence & Sequencing'].total += 12;
+
+      // Task 1
+      const task1Seq = sec2Tasks[0].correctOrder;
+      let task1Matches = 0;
+      readingSec2Order1.forEach((val, idx) => {
+        if (val === task1Seq[idx]) {
+          task1Matches += 1;
+          readingCorrect += 1;
+          topicTracker['Text Coherence & Sequencing'].correct += 1;
+        } else {
+          readingIncorrect += 1;
+        }
+      });
+
+      // Task 2
+      const task2Seq = sec2Tasks[1].correctOrder;
+      let task2Matches = 0;
+      readingSec2Order2.forEach((val, idx) => {
+        if (val === task2Seq[idx]) {
+          task2Matches += 1;
+          readingCorrect += 1;
+          topicTracker['Text Coherence & Sequencing'].correct += 1;
+        } else {
+          readingIncorrect += 1;
+        }
+      });
+
+      sec2Matches = task1Matches + task2Matches;
+      readingPoints += (sec2Matches / 12) * 6.25;
+    } else {
+      // Single task fallback
+      const correctSeq = currentTestSet.reading.section2.correctOrder;
+      topicTracker['Text Coherence & Sequencing'].total += correctSeq.length;
+      readingSec2Order.forEach((val, idx) => {
+        if (val === correctSeq[idx]) {
+          sec2Matches += 1;
+          readingCorrect += 1;
+          topicTracker['Text Coherence & Sequencing'].correct += 1;
+        } else {
+          readingIncorrect += 1;
+        }
+      });
+      readingPoints += (sec2Matches / 6) * 6.25;
+    }
 
     // Section 3: 7 questions -> 6.25 pts
     if (!topicTracker['Multi-Text Information Matching']) {
@@ -564,17 +606,19 @@ export const PracticeExamEngine: React.FC = () => {
       }
     });
 
-    // Section 4: 5 paragraphs -> 6.25 pts (1.25 pts each)
+    // Section 4: 6-7 paragraphs -> 6.25 pts max (equally distributed per paragraph)
     if (!topicTracker['Paragraph Gist & Headings']) {
       topicTracker['Paragraph Gist & Headings'] = { correct: 0, total: 0, module: 'Reading' };
     }
-    currentTestSet.reading.section4.paragraphs.forEach((p) => {
+    const sec4Paras = currentTestSet.reading.section4.paragraphs;
+    const sec4PtsPerPara = 6.25 / (sec4Paras.length || 1);
+    sec4Paras.forEach((p) => {
       topicTracker['Paragraph Gist & Headings'].total += 1;
       const ans = readingSec4Answers[p.id];
-      if (ans === undefined || ans === null) {
+      if (ans === undefined || ans === null || ans === ('' as any)) {
         readingUnanswered += 1;
-      } else if (ans === p.correctHeadingIndex) {
-        readingPoints += 1.25;
+      } else if (Number(ans) === p.correctHeadingIndex) {
+        readingPoints += sec4PtsPerPara;
         readingCorrect += 1;
         topicTracker['Paragraph Gist & Headings'].correct += 1;
       } else {
@@ -1081,13 +1125,26 @@ Respond ONLY with a JSON object matching this schema:
     }
   };
 
-  // Reordering handler for Reading Section 2
-  const moveSentence = (fromIndex: number, toIndex: number) => {
-    if (toIndex < 0 || toIndex >= readingSec2Order.length) return;
-    const updated = [...readingSec2Order];
+  // Reordering handlers for Reading Section 2 (Both Tasks)
+  const moveSentence1 = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= readingSec2Order1.length) return;
+    const updated = [...readingSec2Order1];
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, moved);
+    setReadingSec2Order1(updated);
     setReadingSec2Order(updated);
+  };
+
+  const moveSentence2 = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= readingSec2Order2.length) return;
+    const updated = [...readingSec2Order2];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    setReadingSec2Order2(updated);
+  };
+
+  const moveSentence = (fromIndex: number, toIndex: number) => {
+    moveSentence1(fromIndex, toIndex);
   };
 
   // Reset exam to retake with a newly generated test set
@@ -1864,49 +1921,158 @@ Respond ONLY with a JSON object matching this schema:
                 </div>
               </div>
 
-              {/* Section 2 */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-                <div>
-                  <h3 className="text-lg font-bold text-blue-400">{currentTestSet.reading.section2.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Put the 6 sentences into the correct chronological order by using the Up/Down buttons.
-                  </p>
+              {/* Section 2: 2 Text Cohesion Tasks */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl">
+                <div className="border-b border-slate-800 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-lg font-bold text-blue-400">Section 2: Text Cohesion</h3>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Complete both tasks below. Put the 6 sentences into the correct chronological or logical order using the Up and Down buttons.
+                      </p>
+                    </div>
+                    {currentTestSet.reading.section2.tasks && currentTestSet.reading.section2.tasks.length === 2 && (
+                      <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold shrink-0 self-start sm:self-auto">
+                        2 Tasks Required
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  {readingSec2Order.map((origIdx, currentPosition) => (
-                    <div
-                      key={origIdx}
-                      className="p-4 rounded-2xl bg-slate-850 border border-slate-750 flex items-center justify-between gap-4 text-xs sm:text-sm text-slate-200"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center text-xs shrink-0">
-                          {currentPosition + 1}
-                        </span>
-                        <p>{currentTestSet.reading.section2.sentences[origIdx]}</p>
+                {currentTestSet.reading.section2.tasks && currentTestSet.reading.section2.tasks.length === 2 ? (
+                  <div className="space-y-8">
+                    {/* Task 1 */}
+                    <div className="space-y-4 p-5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 font-bold text-xs uppercase tracking-wider">
+                            Task 1 of 2
+                          </span>
+                          <h4 className="text-sm font-bold text-white mt-1.5">{currentTestSet.reading.section2.tasks[0].title}</h4>
+                          <p className="text-xs text-slate-400">Topic: {currentTestSet.reading.section2.tasks[0].topic}</p>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => moveSentence(currentPosition, currentPosition - 1)}
-                          disabled={currentPosition === 0}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
-                          title="Move Up"
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => moveSentence(currentPosition, currentPosition + 1)}
-                          disabled={currentPosition === readingSec2Order.length - 1}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
-                          title="Move Down"
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
+                      <div className="space-y-2.5">
+                        {readingSec2Order1.map((origIdx, currentPosition) => (
+                          <div
+                            key={origIdx}
+                            className="p-3.5 rounded-2xl bg-slate-850 border border-slate-750 flex items-center justify-between gap-4 text-xs sm:text-sm text-slate-200"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center text-xs shrink-0">
+                                {currentPosition + 1}
+                              </span>
+                              <p className="leading-snug">{currentTestSet.reading.section2.tasks![0].sentences[origIdx]}</p>
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => moveSentence1(currentPosition, currentPosition - 1)}
+                                disabled={currentPosition === 0}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                                title="Move Up"
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => moveSentence1(currentPosition, currentPosition + 1)}
+                                disabled={currentPosition === readingSec2Order1.length - 1}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                                title="Move Down"
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Task 2 */}
+                    <div className="space-y-4 p-5 rounded-2xl bg-slate-950/70 border border-slate-800 shadow-inner">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="px-2.5 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 font-bold text-xs uppercase tracking-wider">
+                            Task 2 of 2
+                          </span>
+                          <h4 className="text-sm font-bold text-white mt-1.5">{currentTestSet.reading.section2.tasks[1].title}</h4>
+                          <p className="text-xs text-slate-400">Topic: {currentTestSet.reading.section2.tasks[1].topic}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {readingSec2Order2.map((origIdx, currentPosition) => (
+                          <div
+                            key={origIdx}
+                            className="p-3.5 rounded-2xl bg-slate-850 border border-slate-750 flex items-center justify-between gap-4 text-xs sm:text-sm text-slate-200"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 font-mono font-bold flex items-center justify-center text-xs shrink-0">
+                                {currentPosition + 1}
+                              </span>
+                              <p className="leading-snug">{currentTestSet.reading.section2.tasks![1].sentences[origIdx]}</p>
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => moveSentence2(currentPosition, currentPosition - 1)}
+                                disabled={currentPosition === 0}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                                title="Move Up"
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => moveSentence2(currentPosition, currentPosition + 1)}
+                                disabled={currentPosition === readingSec2Order2.length - 1}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                                title="Move Down"
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {readingSec2Order.map((origIdx, currentPosition) => (
+                      <div
+                        key={origIdx}
+                        className="p-4 rounded-2xl bg-slate-850 border border-slate-750 flex items-center justify-between gap-4 text-xs sm:text-sm text-slate-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-mono font-bold flex items-center justify-center text-xs shrink-0">
+                            {currentPosition + 1}
+                          </span>
+                          <p>{currentTestSet.reading.section2.sentences[origIdx]}</p>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => moveSentence(currentPosition, currentPosition - 1)}
+                            disabled={currentPosition === 0}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                            title="Move Up"
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => moveSentence(currentPosition, currentPosition + 1)}
+                            disabled={currentPosition === readingSec2Order.length - 1}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30"
+                            title="Move Down"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Section 3 */}
@@ -2472,7 +2638,9 @@ Respond ONLY with a JSON object matching this schema:
                 vocabSentenceAnswers,
                 vocabContextAnswers,
                 readingSec1Answers,
-                readingSec2Order,
+                readingSec2Order: readingSec2Order1,
+                readingSec2Order1,
+                readingSec2Order2,
                 readingSec3Answers,
                 readingSec4Answers,
                 writingPart1: writingPart1Answers,
@@ -2508,7 +2676,9 @@ Respond ONLY with a JSON object matching this schema:
           vocabSentenceAnswers,
           vocabContextAnswers,
           readingSec1Answers,
-          readingSec2Order,
+          readingSec2Order: readingSec2Order1,
+          readingSec2Order1,
+          readingSec2Order2,
           readingSec3Answers,
           readingSec4Answers,
           writingPart1: writingPart1Answers,
