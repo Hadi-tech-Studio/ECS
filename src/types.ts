@@ -74,14 +74,26 @@ export interface ReadingSection1 {
   explanations: Record<string, { english: string; urdu: string }>;
 }
 
-export interface ReadingSection2 {
+export interface ReadingSection2Task {
   id: string;
+  taskNumber: number; // 1 or 2
   title: string;
   topic: string;
   correctOrder: number[]; // e.g. [0, 2, 4, 1, 3, 5]
   sentences: string[]; // 6 jumbled sentences
   explanation: string;
   urduExplanation: string;
+}
+
+export interface ReadingSection2 {
+  id: string;
+  title: string;
+  topic: string;
+  correctOrder: number[]; // e.g. [0, 2, 4, 1, 3, 5] (Task 1 for backwards compatibility)
+  sentences: string[]; // 6 jumbled sentences (Task 1 for backwards compatibility)
+  explanation: string;
+  urduExplanation: string;
+  tasks?: ReadingSection2Task[]; // Both Task 1 and Task 2
 }
 
 export interface ReadingSection3 {
@@ -332,6 +344,8 @@ export interface StudentExamAnswers {
   vocabContextAnswers: Record<string, string>;
   readingSec1Answers: Record<string, number>;
   readingSec2Order: number[];
+  readingSec2Order1?: number[];
+  readingSec2Order2?: number[];
   readingSec3Answers: Record<string, string>;
   readingSec4Answers: Record<string, number>;
   writingPart1Answers?: Record<string, string>;
