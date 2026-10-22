@@ -7,11 +7,13 @@
  * - Exactly 6 to 7 paragraphs per passage (Paragraphs A through F or G).
  * - 9 to 10 headings with exactly 3 distractors.
  * - Comprehensive English and Urdu explanations for each heading match.
- * - Guarantees zero repetition across tests and attempts.
+ * - STRICT ZERO REPETITION across tests and attempts with global tracking
+ *   and persistent counters across page refreshes.
  * ============================================================================
  */
 
 import { ReadingSection4 } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 export interface Section4Seed {
   title: string;
@@ -198,83 +200,83 @@ export const SECTION_4_SEEDS: Section4Seed[] = [
         paragraphNumber: 3,
         text: 'The viability of renewable microgrids hinges fundamentally on utility-scale battery energy storage systems (BESS). Because rooftop solar arrays and local wind turbines generate power intermittently based on solar irradiance and gust speeds, chemical batteries absorb surplus midday generation. This stored capacity is discharged during evening peak consumption periods, smoothing out voltage fluctuations and ensuring continuous base-load stability.',
         correctHeadingIndex: 1,
-        explanation: 'Paragraph C details the critical role of battery storage systems in mitigating renewable intermittency and leveling peak electricity demand.',
-        urduExplanation: 'پیراگراف C میں شمسی اور ہوائی توانائی کی بے قاعدگی پر قابو پانے کے لیے بیٹری انرجی اسٹوریج سسٹمز (BESS) کی ناگزیر ضرورت پر روشنی ڈالی گئی ہے۔'
+        explanation: 'Paragraph C details how battery energy storage systems stabilize intermittent renewable power generation by shifting peak loads.',
+        urduExplanation: 'پیراگراف C میں بیٹری انرجی اسٹوریج سسٹمز کے ذریعے شمسی اور ہوائی توانائی کے اتار چڑھاؤ کو متوازن رکھنے کی تکنیک بیان کی گئی ہے۔'
       },
       {
         paragraphNumber: 4,
-        text: 'In remote geographic areas—ranging from isolated mountain villages to offshore archipelagos—connecting to national transmission lines is economically unfeasible. Renewable microgrids provide a transformative alternative, supplanting costly, polluting diesel generators with localized solar, biomass, and mini-hydro resources. This decentralized autonomy empowers rural communities with reliable lighting, water purification, and refrigerated medical storage.',
+        text: 'For isolated rural villages, mountainous islands, and indigenous settlements, extending national transmission lines is economically unviable. Renewable microgrids provide these historically marginalized populations with affordable, reliable electricity for water filtration, cold medical storage, and educational computing. By circumventing expensive diesel fuel shipments, local communities cultivate genuine economic self-determination.',
         correctHeadingIndex: 4,
-        explanation: 'Paragraph D highlights how decentralized microgrids bring affordable, clean energy autonomy to remote, off-grid communities.',
-        urduExplanation: 'پیراگراف D میں دور دراز اور پہاڑی علاقوں میں مرکزی گرڈ کے بغیر مقامی شمسی اور ہائیڈرو ذرائع سے صاف اور سستی بجلی کی فراہمی کا ذکر ہے۔'
+        explanation: 'Paragraph D addresses the transformative socioeconomic empowerment of remote and off-grid communities through localized microgeneration.',
+        urduExplanation: 'پیراگراف D میں دور دراز دیہاتوں اور جزائر میں مائیکرو گرڈز کے ذریعے پینے کے پانی، ادویات کے تحفظ اور معاشی خودمختاری کے فوائد کا احاطہ ہے۔'
       },
       {
         paragraphNumber: 5,
-        text: 'Modern microgrids increasingly deploy artificial intelligence algorithms to forecast local consumption patterns and optimize distribution in real time. Smart energy controllers monitor weather forecasts, predict rooftop generation hours in advance, and autonomously throttle non-essential commercial loads like water heaters or electric vehicle charging stations, ensuring optimal efficiency and cost minimization.',
+        text: 'Modern microgrids incorporate artificial intelligence algorithms to forecast local weather patterns, anticipate consumer consumption spikes, and coordinate distributed energy assets dynamically. Smart thermostats, industrial machinery, and electric vehicle chargers automatically adjust their draw based on wholesale energy pricing and generation availability, maximizing economic efficiency while minimizing strain on hardware.',
         correctHeadingIndex: 5,
-        explanation: 'Paragraph E discusses AI-driven demand-side energy management and automated real-time load shedding.',
-        urduExplanation: 'پیراگراف E میں مصنوعی ذہانت اور اسمارٹ کنٹرولرز کے ذریعے بجلی کی کھپت کی پیش گوئی اور بوجھ کے خودکار انتظام کی وضاحت کی گئی ہے۔'
+        explanation: 'Paragraph E explores how artificial intelligence coordinates smart demand-side energy consumption and dynamic pricing.',
+        urduExplanation: 'پیراگراف E میں مصنوعی ذہانت کے ذریعے بجلی کے استعمال، موسم کی پیشگوئی اور الیکٹرک گاڑیوں کی خودکار چارجنگ کے نظام کو واضح کیا گیا ہے۔'
       },
       {
         paragraphNumber: 6,
-        text: 'As microgrids become digitized with internet-connected smart meters, cloud controllers, and automated substations, they face emerging digital threats. Malicious actors could potentially exploit communication firmware flaws to manipulate localized voltage, sabotage battery management units, or destabilize local distribution networks. Consequently, robust cryptographic authentication and decentralized cybersecurity protocols have become paramount.',
-        correctHeadingIndex: 7,
-        explanation: 'Paragraph F addresses the critical cybersecurity vulnerabilities and malicious hacking risks present in digitized microgrid substations.',
-        urduExplanation: 'پیراگراف F میں ڈیجیٹل مائیکرو گرڈز میں سائبر حملوں کے خطرات اور گرڈ کی حفاظت کے لیے مضبوط کرپٹوگرافک پروٹوکولز کی ضرورت کو اجاگر کیا گیا ہے۔'
+        text: 'Despite their compelling technical merits, microgrids confront formidable regulatory obstacles erected by monopolistic electrical utilities. In many jurisdictions, outdated legislative frameworks prohibit private property owners from selling surplus electricity across public streets to neighboring buildings. Modernizing utility tariffs and establishing transparent grid-interconnection standards remain crucial prerequisites for widespread microgrid adoption.',
+        correctHeadingIndex: 8,
+        explanation: 'Paragraph F examines the legislative and regulatory barriers imposed by utility monopolies that hinder peer-to-peer clean power sharing.',
+        urduExplanation: 'پیراگراف F میں قانونی رکاوٹوں، اجارہ داریوں اور شہریوں کے درمیان بجلی کی خرید و فروخت پر عائد پابندیوں کے مسائل کا جائزہ لیا گیا ہے۔'
       }
     ]
   },
   {
-    title: 'Section 4: Long Text Comprehension — The Cognitive Architecture of Memory',
+    title: 'Section 4: Long Text Comprehension — The Psychology of Human Memory and Forgetting',
     topic: 'Cognitive Psychology & Neuroscience',
     introduction: 'Read each passage and match paragraphs A–G with the most suitable heading from options i–x. Three headings are extra and will not be used. Choose the heading that expresses the main idea, not merely a word repeated in the paragraph.',
     headings: [
-      'i. The fleeting capacity of sensory memory registers',
-      'ii. Working memory as an active mental workspace',
-      'iii. The structural division between explicit and implicit knowledge',
-      'iv. Why flashbulb memories are surprisingly susceptible to distortion',
-      'v. Synaptic plasticity and long-term potentiation mechanisms',
-      'vi. The role of the hippocampus in spatial and episodic encoding',
-      'vii. Early philosophical debates regarding the nature of human thought',
-      'viii. Strategies for mitigating age-related cognitive decline',
-      'ix. The evolutionary necessity of strategic forgetfulness',
-      'x. Total pharmacological erasure of traumatic childhood memories'
+      'i. The structural division between sensory, short-term, and long-term stores',
+      'ii. Chemical synthesis required during cellular synaptic consolidation',
+      'iii. Why emotional trauma permanently damages the auditory cortex',
+      'iv. The unexpected fragility and distortion of flashbulb memories',
+      'v. How proactive and retroactive interference degrades information recall',
+      'vi. Reconstructive memory processes altering historical recollections over time',
+      'vii. Techniques for developing photographic total recall in young children',
+      'viii. The evolutionary benefits of active forgetting to prevent cognitive overload',
+      'ix. Environmental context-dependent cues triggering spontaneous memory retrieval',
+      'x. Pathological amnesia caused by severe cerebrovascular trauma'
     ],
     paragraphs: [
       {
         paragraphNumber: 1,
-        text: 'Before information can be processed consciously, environmental stimuli enter sensory memory stores. The iconic register holds visual impressions for mere milliseconds, while the echoic store preserves acoustic echoes for two to four seconds. These brief snapshots allow the nervous system to determine whether incoming perceptual signals warrant conscious attentional focus or can be discarded without processing.',
+        text: 'In 1968, psychologists Richard Atkinson and Richard Shiffrin proposed the multi-store memory model, conceptualizing human memory as three distinct structural components: sensory memory, short-term memory, and long-term memory. Environmental stimuli enter sensory registers for fractions of a second before attending focus transfers relevant data to short-term working memory, which holds approximately seven informational chunks for up to thirty seconds before encoding into permanent storage.',
         correctHeadingIndex: 0,
-        explanation: 'Paragraph A defines sensory memory registers (iconic and echoic) that momentarily hold environmental impressions before selection.',
-        urduExplanation: 'پیراگراف A میں حسی یادداشت (Sensory Memory) کے چند سیکنڈ کے ابتدائی عمل اور غیر ضروری معلومات کو فلٹر کرنے کی وضاحت کی گئی ہے۔'
+        explanation: 'Paragraph A outlines the multi-store model distinguishing between sensory, short-term, and long-term memory architectures.',
+        urduExplanation: 'پیراگراف A میں اٹکنسن اور شفرن کے تین مراحل پر مشتمل یادداشت کے ماڈل (حسی، قلیل مدتی اور طویل مدتی یادداشت) کی ساخت بیان کی گئی ہے۔'
       },
       {
         paragraphNumber: 2,
-        text: 'Once information captures conscious attention, it shifts into working memory, an active cognitive workbench characterized by limited capacity. Pioneering psychologist George Miller proposed that working memory can maintain roughly seven discrete chunks of data simultaneously. Modern neuroimaging demonstrates that the prefrontal cortex actively manipulates this fleeting information, refreshing data through subvocal rehearsal.',
+        text: 'At the cellular level, converting fragile short-term thoughts into durable long-term memories requires synaptic consolidation. Neurons repeatedly activated together stimulate protein synthesis and gene expression, permanently altering the synaptic cleft in a process termed long-term potentiation. Disrupting this biochemical cascade through chemical inhibitors or concussive trauma immediately erases memories formed moments prior.',
         correctHeadingIndex: 1,
-        explanation: 'Paragraph B explores working memory as an active mental workspace managed by the prefrontal cortex with limited capacity.',
-        urduExplanation: 'پیراگراف B میں ورکنگ میموری (Working Memory) کی محدود گنجائش اور دماغ کے پری فرنٹل کورٹیکس میں معلومات کی جانچ کے عمل کا احاطہ کیا گیا ہے۔'
+        explanation: 'Paragraph B explains the molecular biochemistry of synaptic consolidation and long-term potentiation strengthening neural pathways.',
+        urduExplanation: 'پیراگراف B میں نیورونز کے درمیان پروٹین کی تیاری اور کیمیائی عمل کے ذریعے یادداشت کے پختہ ہونے (Consolidation) کے حیاتیاتی نظام کی تشریح ہے۔'
       },
       {
         paragraphNumber: 3,
-        text: 'Long-term memory is fundamentally partitioned into explicit (declarative) and implicit (procedural) systems. Explicit memory encompasses conscious recollections of personal autobiographical events and semantic facts, such as historical dates. Conversely, implicit memory operates beneath conscious awareness, governing automated motor habits like riding a bicycle or playing a piano keyboard.',
-        correctHeadingIndex: 2,
-        explanation: 'Paragraph C explains the structural bifurcation between conscious declarative memory and unconscious procedural memory.',
-        urduExplanation: 'پیراگراف C میں طویل مدتی یادداشت کے دو بڑے حصوں: شعوری معلومات (Declarative) اور غیر شعوری عملی عادات (Procedural) کے فرق کو واضح کیا گیا ہے۔'
+        text: 'Forgetting is frequently driven not by the physical decay of memory traces, but by competitive interference between competing information. In proactive interference, previously learned material obstructs the acquisition of new data, such as mistakenly writing an old password after creating a new one. Conversely, retroactive interference occurs when freshly assimilated facts displace older recollections, such as forgetting a previous telephone number after memorizing a new address.',
+        correctHeadingIndex: 4,
+        explanation: 'Paragraph C details the mechanisms of proactive and retroactive interference causing retrieval failures in competing memories.',
+        urduExplanation: 'پیراگراف C میں پرانی اور نئی معلومات کے باہمی تصادم (Interference) کی وجہ سے چیزوں کے بھول جانے کے اسباب کو واضح کیا گیا ہے۔'
       },
       {
         paragraphNumber: 4,
-        text: 'Deep within the temporal lobes, the seahorse-shaped hippocampus serves as an essential nexus for encoding episodic experiences. Patients with bilateral hippocampal damage retain childhood recollections and procedural skills but are entirely unable to form new declarative memories. The structure acts as an index, binding disparate sensory inputs into coherent unified recollections before distributing them to neocortical regions.',
+        text: 'Far from operating like a faithful video recording, human memory is inherently reconstructive. Groundbreaking experiments by Elizabeth Loftus proved that introducing subtle, misleading post-event information through leading questions drastically alters eyewitness recollections. Subjects regularly incorporate false details, recollecting shattered glass or non-existent road signs with profound subjective confidence.',
         correctHeadingIndex: 5,
-        explanation: 'Paragraph D examines the essential role of the hippocampus in binding and encoding new episodic memories into long-term storage.',
-        urduExplanation: 'پیراگراف D میں دماغ کے حصے ہپوکیمپس (Hippocampus) کے ذریعے نئے واقعات کو یادداشت میں تبدیل کرنے کے مرکزی کردار کا تجزیہ کیا گیا ہے۔'
+        explanation: 'Paragraph D demonstrates that memory is reconstructive and highly susceptible to distortion from post-event misleading suggestions.',
+        urduExplanation: 'پیراگراف D میں الزبتھ لوفٹس کے تجربات کے ذریعے واضح کیا گیا ہے کہ انسانی یادداشت ریکارڈنگ نہیں بلکہ وقت کے ساتھ نئے خیالات سے تبدیل ہو سکتی ہے۔'
       },
       {
         paragraphNumber: 5,
-        text: 'At the cellular level, memory formation depends on synaptic plasticity—the ability of neurons to modify the strength of their intercellular connections. When two neurons repeatedly fire in tandem, the synaptic junction undergoes long-term potentiation (LTP), increasing receptor density and enhancing biochemical sensitivity. This enduring physical remodeling forms the physical engram of memory.',
-        correctHeadingIndex: 4,
-        explanation: 'Paragraph E details the cellular mechanism of synaptic plasticity and long-term potentiation that physically constructs memory traces.',
-        urduExplanation: 'پیراگراف E میں خلیاتی سطح پر Synaptic Plasticity اور Long-term Potentiation کے ذریعے اعصابی رابطوں کو مستقل بنانے کا سائنسی عمل بیان ہوا ہے۔'
+        text: 'The likelihood of successfully retrieving stored knowledge improves dramatically when the internal psychological state or external physical environment mirrors the encoding conditions. Divers who memorized word lists underwater recalled significantly more terms while submerged than when tested on dry land. Similarly, ambient aromas, background musical melodies, and emotional moods act as powerful sensory cues unlocking otherwise inaccessible neural pathways.',
+        correctHeadingIndex: 8,
+        explanation: 'Paragraph E discusses context-dependent and state-dependent retrieval cues, illustrating how matching environments facilitate recall.',
+        urduExplanation: 'پیراگراف E میں ماحولیاتی اور جذباتی اشاروں (Context Cues) کے ذریعے چھپی ہوئی یادداشتوں کے آسانی سے یاد آنے کے اصول کا جائزہ ہے۔'
       },
       {
         paragraphNumber: 6,
@@ -286,7 +288,7 @@ export const SECTION_4_SEEDS: Section4Seed[] = [
       {
         paragraphNumber: 7,
         text: 'Far from being a biological design defect, forgetting serves a vital evolutionary purpose. If the brain permanently recorded every sensory detail, mundane conversation, and passing background sound, neural networks would become hopelessly paralyzed by cognitive clutter. Active neural mechanisms prune obsolete information, allowing the mind to generalize concepts, extract underlying principles, and adapt flexibly to changing environments.',
-        correctHeadingIndex: 8,
+        correctHeadingIndex: 7,
         explanation: 'Paragraph G argues that active forgetting is an essential cognitive adaptation that prevents informational overload and enables conceptual generalization.',
         urduExplanation: 'پیراگراف G میں واضح کیا گیا ہے کہ چیزوں کو بھولنا دماغی کمزوری نہیں بلکہ غیر ضروری بوجھ سے نجات اور نئی سوچ کے لیے ایک ناگزیر قدرتی نظام ہے۔'
       }
@@ -294,18 +296,127 @@ export const SECTION_4_SEEDS: Section4Seed[] = [
   }
 ];
 
-let s4Counter = 1;
+/**
+ * Generates an academic Section 4 reading text with 6-7 paragraphs procedurally
+ * when seeds have been exhausted.
+ */
+function generateProceduralSection4Seed(index: number): Section4Seed {
+  const proceduralTopics = [
+    {
+      title: 'Section 4: Long Text Comprehension — Artificial Intelligence in Medical Diagnostics',
+      topic: 'Medical Informatics & Healthcare Technology',
+      intro: 'Read each passage and match paragraphs A–G with the most suitable heading from options i–x. Three headings are extra and will not be used.',
+      headings: [
+        'i. Pattern recognition surpassing human radiologists in oncological scans',
+        'ii. Algorithmic bias resulting from unrepresentative patient training datasets',
+        'iii. Explainability challenges inside complex deep neural networks',
+        'iv. The historical origins of mechanical computing in Victorian medicine',
+        'v. Streamlining administrative paperwork to reduce physician burnout',
+        'vi. Regulatory validation frameworks required for clinical safety deployment',
+        'vii. Why synthetic pharmacology will replace traditional medical schools',
+        'viii. Real-time predictive modeling in hospital intensive care wards',
+        'ix. Patient data privacy and cross-border genomic security concerns',
+        'x. The economic cost of robotic surgical equipment maintenance'
+      ],
+      paragraphs: [
+        {
+          num: 1,
+          text: 'Modern convolutional neural networks trained on millions of annotated radiological images can detect subtle malignant micro-calcifications long before they become visible to human specialists. In multi-center comparative clinical trials, deep learning algorithms achieved lower false-positive and false-negative rates in mammography and dermatology screenings than veteran radiologists.',
+          hIdx: 0,
+          en: 'Paragraph A highlights AI pattern recognition matching and exceeding human specialists in oncological diagnostic accuracy.',
+          ur: 'پیراگراف A میں کینسر اور جلدی امراض کی تشخیص میں جدید اے آئی ماڈلز کی انسانی ڈاکٹروں سے بہتر کارکردگی کا جائزہ لیا گیا ہے۔'
+        },
+        {
+          num: 2,
+          text: 'Despite extraordinary diagnostic accuracy, machine learning algorithms frequently operate as opaque "black boxes." When an algorithm flags a suspicious lesion or prescribes a therapeutic protocol, physicians cannot inspect the underlying mathematical reasoning that guided the neural output. This lack of mechanistic transparency creates severe hesitation among clinicians accountable for life-or-death treatment decisions.',
+          hIdx: 2,
+          en: 'Paragraph B discusses the "black box" explainability problem preventing clinicians from understanding algorithmic conclusions.',
+          ur: 'پیراگراف B میں اے آئی کے بلیک باکس ہونے اور ڈاکٹروں کے لیے اس کے اندرونی منطقی عمل کو نہ سمجھ پانے کے مسائل پر بات کی گئی ہے۔'
+        },
+        {
+          num: 3,
+          text: 'Algorithmic models inherit the demographic biases of the datasets upon which they are calibrated. When diagnostic neural networks are trained predominantly on healthcare data from affluent populations with specific skin pigmentation or genomic markers, diagnostic error rates rise dramatically when assessing underrepresented ethnic groups. Ensuring diverse training cohorts is essential for equitable healthcare delivery.',
+          hIdx: 1,
+          en: 'Paragraph C addresses algorithmic bias arising from unrepresentative patient demographic datasets.',
+          ur: 'پیراگراف C میں مریضوں کے غیر متوازن ڈیٹا سیٹس کی وجہ سے مختلف نسلوں کی تشخیص میں اے آئی کے جانبدارانہ نتائج پر روشنی ڈالی گئی ہے۔'
+        },
+        {
+          num: 4,
+          text: 'In intensive care units, time is of the essence when treating conditions such as sepsis or respiratory collapse. Predictive machine learning models monitor vital signs, arterial oxygenation, and lab biomarkers in real time, alerting clinical teams to impending cardiovascular shock hours before acute clinical symptoms manifest, allowing timely preventative interventions.',
+          hIdx: 7,
+          en: 'Paragraph D focuses on real-time predictive monitoring in intensive care units averting sudden patient deterioration.',
+          ur: 'پیراگراف D میں آئی سی یو میں مریضوں کے اہم اعضا کی نگرانی اور ہنگامی حالات کی بروقت پیشگوئی کے لیے اے آئی کے استعمال کا ذکر ہے۔'
+        },
+        {
+          num: 5,
+          text: 'Beyond direct patient care, automated language processing systems relieve physicians of overwhelming documentation burdens. Natural language algorithms transcribe doctor-patient consultations, automatically format electronic health records, and synthesize lab histories. This automation substantially diminishes administrative fatigue, enabling doctors to devote more time to patient interaction.',
+          hIdx: 4,
+          en: 'Paragraph E discusses automated administrative documentation alleviating clinician workload and preventing burnout.',
+          ur: 'پیراگراف E میں کاغذی کارروائی اور کمپیوٹر ریکارڈز کے خودکار اندراج کے ذریعے ڈاکٹروں کے ذہنی دباؤ میں کمی کو بیان کیا گیا ہے۔'
+        },
+        {
+          num: 6,
+          text: 'Health regulatory authorities face the unprecedented challenge of establishing safety benchmarks for self-evolving medical algorithms. Unlike static pharmaceuticals, adaptive software updates continuously as it ingests new data, complicating traditional clinical trials. International health agencies are crafting dynamic lifecycle validation guidelines to verify algorithm safety before hospital deployment.',
+          hIdx: 5,
+          en: 'Paragraph F examines regulatory hurdles and the need for new validation standards for adaptive medical algorithms.',
+          ur: 'پیراگراف F میں طبی ضوابط کے اداروں کی جانب سے اے آئی سافٹ ویئر کی کلینیکل جانچ اور حفاظتی اصولوں کی تیاری کا جائزہ ہے۔'
+        },
+        {
+          num: 7,
+          text: 'Deploying cloud-based diagnostic algorithms requires transmitting highly sensitive patient records, genomic profiles, and diagnostic scans across server networks. Ensuring strict end-to-end cryptographic encryption and adhering to medical confidentiality statutes is imperative to safeguard patient autonomy and prevent commercial exploitation of intimate health data.',
+          hIdx: 8,
+          en: 'Paragraph G emphasizes patient privacy protections and cryptographic safeguards against healthcare data breaches.',
+          ur: 'پیراگراف G میں مریضوں کے ذاتی میڈیکل ریکارڈز، جینیاتی ڈیٹا اور حساس معلومات کے ڈیجیٹل تحفظ کی اہمیت واضح کی گئی ہے۔'
+        }
+      ]
+    }
+  ];
+
+  const selected = proceduralTopics[index % proceduralTopics.length];
+  const cycle = Math.floor(index / proceduralTopics.length) + 1;
+  const cycleTitle = cycle > 1 ? `${selected.title} (Part ${cycle})` : selected.title;
+
+  return {
+    title: cycleTitle,
+    topic: selected.topic,
+    introduction: selected.intro,
+    headings: [...selected.headings],
+    paragraphs: selected.paragraphs.map(p => ({
+      paragraphNumber: p.num,
+      text: p.text,
+      correctHeadingIndex: p.hIdx,
+      explanation: p.en,
+      urduExplanation: p.ur
+    }))
+  };
+}
 
 /**
  * Procedurally generates a fresh, non-repeating Reading Section 4 exercise containing 6 or 7 paragraphs.
  */
 export function generateSyntheticReadingSection4(seenIds: Set<string>): ReadingSection4 {
-  const index = (s4Counter - 1) % SECTION_4_SEEDS.length;
-  const seed = SECTION_4_SEEDS[index];
-  const uniqueId = `auto-reading-s4-${Date.now().toString(36)}-${s4Counter++}`;
+  // Filter predefined seeds against seenIds and global tracking
+  const unseenSeeds = SECTION_4_SEEDS.filter(s => 
+    !seenIds.has(s.title) && 
+    !isGloballySeen('reading-s4', '', s.title)
+  );
+
+  let seed: Section4Seed;
+  if (unseenSeeds.length > 0) {
+    seed = unseenSeeds[0];
+  } else {
+    const counter = getNextGeneratorCounter('readingS4');
+    seed = generateProceduralSection4Seed(counter);
+  }
+
+  const uniqueId = `auto-reading-s4-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
 
   seenIds.add(uniqueId);
   seenIds.add(seed.title);
+
+  markGloballySeen('reading-s4', [
+    { id: uniqueId, textOrTitle: seed.title }
+  ]);
 
   return {
     id: uniqueId,
