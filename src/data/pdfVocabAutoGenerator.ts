@@ -1,4 +1,5 @@
 import { RawPdfVocabQuestion } from './pdfVocabularyPool';
+import { getNextGeneratorCounter } from '../lib/antiRepetitionTracker';
 
 // Fisher-Yates array shuffle
 function shuffle<T>(array: T[]): T[] {
@@ -255,10 +256,39 @@ const EXPANDED_WORDS_DICTIONARY = [
   { word: 'ubiquitous', syn: 'omnipresent', def: 'Present, appearing, or found everywhere.', col: 'ubiquitous presence', use: 'Smartphones have become so ubiquitous that life without them is difficult to imagine.' },
   { word: 'arduous', syn: 'strenuous', def: 'Involving or requiring strenuous effort; difficult and tiring.', col: 'arduous journey', use: 'The researchers completed an arduous trek through the dense rainforest.' },
   { word: 'tenacious', syn: 'persistent', def: 'Tending to keep a firm hold of something; clinging or adhering closely.', col: 'tenacious pursuit', use: 'Her tenacious pursuit of the truth uncovered major corporate fraud.' },
-  { word: 'judicious', syn: 'wise', def: 'Having, showing, or done with good judgment or sense.', col: 'judicious use', use: 'The conservation of groundwater requires the judicious use of irrigation systems.' }
+  { word: 'judicious', syn: 'wise', def: 'Having, showing, or done with good judgment or sense.', col: 'judicious use', use: 'The conservation of groundwater requires the judicious use of irrigation systems.' },
+  { word: 'articulate', syn: 'eloquent', def: 'Having or showing the ability to speak fluently and coherently.', col: 'articulate speaker', use: 'She gave an articulate defense of the proposed municipal environmental policy.' },
+  { word: 'benevolent', syn: 'kind', def: 'Well meaning and kindly in disposition and intent.', col: 'benevolent gesture', use: 'The anonymous donor made a benevolent contribution to build a children’s hospital.' },
+  { word: 'cognizant', syn: 'aware', def: 'Having knowledge or being aware of something.', col: 'cognizant of risks', use: 'Diplomats must remain constantly cognizant of cultural nuances during negotiations.' },
+  { word: 'discreet', syn: 'tactful', def: 'Careful and prudent in one’s speech or actions, especially to keep something secret.', col: 'discreet inquiry', use: 'The detective conducted discreet inquiries without alarming the suspects.' },
+  { word: 'equivocal', syn: 'ambiguous', def: 'Open to more than one interpretation; uncertain or questionable.', col: 'equivocal response', use: 'The politician offered an equivocal response when asked about increasing sales taxes.' },
+  { word: 'facilitate', syn: 'assist', def: 'To make an action or process easy or easier.', col: 'facilitate trade', use: 'The bilateral agreement was designed to facilitate cross-border commercial trade.' },
+  { word: 'gregarious', syn: 'sociable', def: 'Fond of company; sociable and outgoing.', col: 'gregarious nature', use: 'His gregarious personality made him exceptionally popular among university peers.' },
+  { word: 'imperative', syn: 'crucial', def: 'Of vital importance; crucial.', col: 'imperative duty', use: 'Immediate medical evacuation was imperative for the critically injured mountaineer.' },
+  { word: 'juxtapose', syn: 'compare', def: 'To place or deal with close together for contrasting effect.', col: 'juxtapose ideas', use: 'The exhibition juxtaposes contemporary modern sculptures with ancient bronze artifacts.' },
+  { word: 'lucrative', syn: 'profitable', def: 'Producing a great deal of profit.', col: 'lucrative contract', use: 'The technology company secured a lucrative government cybersecurity contract.' },
+  { word: 'manifest', syn: 'demonstrate', def: 'To display or show a quality or feeling by one’s acts or appearance.', col: 'manifest symptoms', use: 'The patient began to manifest classic symptoms of allergic respiratory distress.' },
+  { word: 'nostalgic', syn: 'sentimental', def: 'Characterized by or exhibiting feelings of wistful affection for the past.', col: 'nostalgic memory', use: 'Revisiting his childhood schoolhouse brought a warm, nostalgic smile to his face.' },
+  { word: 'orthodox', syn: 'traditional', def: 'Conforming to what is generally or traditionally accepted as right or true.', col: 'orthodox views', use: 'Modern economics frequently challenges orthodox monetary assumptions.' },
+  { word: 'pertinent', syn: 'relevant', def: 'Relevant or applicable to a particular matter; apposite.', col: 'pertinent information', use: 'The defense attorney cross-examined the witness regarding pertinent travel dates.' },
+  { word: 'quandary', syn: 'dilemma', def: 'A state of perplexity or uncertainty over what to do in a difficult situation.', col: 'ethical quandary', use: 'The committee faced a serious ethical quandary regarding experimental medical trials.' },
+  { word: 'redundant', syn: 'superfluous', def: 'Not or no longer needed or useful; superfluous.', col: 'redundant processes', use: 'Automation rendered several manual accounting reconciliation steps completely redundant.' },
+  { word: 'sporadic', syn: 'intermittent', def: 'Occurring at irregular intervals or only in a few places; scattered or isolated.', col: 'sporadic rainfall', use: 'The arid region received only sporadic rainfall during the winter growing season.' },
+  { word: 'tangible', syn: 'concrete', def: 'Perceptible by touch; clear and definite; real.', col: 'tangible results', use: 'The negotiations finally produced tangible benefits for factory workers.' },
+  { word: 'unprecedented', syn: 'unmatched', def: 'Never done or known before.', col: 'unprecedented growth', use: 'The renewable energy sector experienced unprecedented technological breakthroughs.' },
+  { word: 'validate', syn: 'confirm', def: 'Check or prove the validity or accuracy of something.', col: 'validate data', use: 'Independent laboratories were hired to validate the experimental water purity tests.' },
+  { word: 'alleviate', syn: 'relieve', def: 'Make suffering, deficiency, or a problem less severe.', col: 'alleviate pain', use: 'The newly approved pharmaceutical helps alleviate chronic inflammatory joint pain.' },
+  { word: 'circumvent', syn: 'bypass', def: 'Find a way around an obstacle or rule.', col: 'circumvent regulations', use: 'Corporations must not attempt to circumvent environmental protection statutes.' },
+  { word: 'frugal', syn: 'economical', def: 'Sparing or economical with regard to money or food.', col: 'frugal lifestyle', use: 'His frugal spending habits allowed him to accumulate substantial savings.' },
+  { word: 'indolent', syn: 'lazy', def: 'Wanting to avoid activity or exertion; lazy.', col: 'indolent worker', use: 'The supervisor replaced the indolent technician with a dedicated apprentice.' },
+  { word: 'malleable', syn: 'pliable', def: 'Able to be hammered or pressed permanently out of shape without breaking.', col: 'malleable metal', use: 'Gold is exceptionally malleable, making it ideal for crafting intricate jewelry.' },
+  { word: 'nuance', syn: 'subtlety', def: 'A subtle difference in or shade of meaning, expression, or sound.', col: 'subtle nuance', use: 'Translating classical poetry requires capturing every cultural and emotional nuance.' },
+  { word: 'opaque', syn: 'cloudy', def: 'Not able to be seen through; not transparent.', col: 'opaque glass', use: 'The conference room featured frosted, opaque glass panels for maximum privacy.' },
+  { word: 'prevalent', syn: 'widespread', def: 'Widespread in a particular area or at a particular time.', col: 'prevalent disease', use: 'Influenza remains highly prevalent across metropolitan schools during winter.' },
+  { word: 'robust', syn: 'strong', def: 'Strong and healthy; vigorous.', col: 'robust economy', use: 'The country weathered the international recession due to its robust industrial base.' },
+  { word: 'skeptical', syn: 'doubtful', def: 'Not easily convinced; having doubts or reservations.', col: 'skeptical attitude', use: 'Engineers were initially skeptical regarding the claims of the perpetual motor.' },
+  { word: 'utilitarian', syn: 'practical', def: 'Designed to be useful or practical rather than attractive.', col: 'utilitarian design', use: 'The emergency shelter was built with strictly utilitarian, durable concrete materials.' }
 ];
-
-let proceduralCounter = 1;
 
 function generateProceduralVocab(
   category: 'Word Matching' | 'Word Definition' | 'Word Combination' | 'Word Usage',
@@ -267,6 +297,7 @@ function generateProceduralVocab(
   reservedInAttempt: Set<string>,
   namespace: string
 ): RawPdfVocabQuestion {
+  let proceduralCounter = getNextGeneratorCounter('vocabProcedural');
   // Find an expanded word not yet seen
   const unseenWords = EXPANDED_WORDS_DICTIONARY.filter(item => 
     !seenSet.has(`word:${item.word.toLowerCase()}`) && 
@@ -289,16 +320,32 @@ function generateProceduralVocab(
     selectedCol = item.col;
     selectedUse = item.use;
   } else {
-    // Infinite generator: construct distinct academic target words
-    const roots = ['quant', 'struct', 'dynam', 'system', 'chron', 'graph', 'log', 'therm', 'bio', 'geo', 'psych', 'morph'];
-    const affixes = ['ify', 'ize', 'ate', 'istic', 'ation', 'ological', 'itude', 'ence', 'ency'];
-    const r = roots[proceduralCounter % roots.length];
-    const a = affixes[Math.floor(proceduralCounter / roots.length) % affixes.length];
-    selectedWord = `${r}${a}`;
-    selectedSyn = `systematic ${r}`;
-    selectedDef = `Relating to or characterized by ${r}-based properties.`;
-    selectedCol = `advanced ${selectedWord}`;
-    selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
+    // Infinite generator: construct distinct academic target words ensuring zero duplicates
+    const roots = ['quant', 'struct', 'dynam', 'system', 'chron', 'graph', 'log', 'therm', 'bio', 'geo', 'psych', 'morph', 'neuro', 'astro', 'hydro', 'spectro'];
+    const affixes = ['ify', 'ize', 'ate', 'istic', 'ation', 'ological', 'itude', 'ence', 'ency', 'able', 'ive', 'ment'];
+    let offset = 0;
+    while (offset < 1000) {
+      const idx = proceduralCounter + offset;
+      const r = roots[idx % roots.length];
+      const a = affixes[Math.floor(idx / roots.length) % affixes.length];
+      const candidate = `${r}${a}`;
+      if (!seenSet.has(`word:${candidate.toLowerCase()}`) && !reservedInAttempt.has(`word:${candidate.toLowerCase()}`)) {
+        selectedWord = candidate;
+        selectedSyn = `systematic ${r}`;
+        selectedDef = `Relating to or characterized by ${r}-based properties.`;
+        selectedCol = `advanced ${selectedWord}`;
+        selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
+        break;
+      }
+      offset++;
+    }
+    if (!selectedWord) {
+      selectedWord = `synthetic_${Date.now().toString(36)}_${proceduralCounter}`;
+      selectedSyn = `systematic function`;
+      selectedDef = `Relating to or characterized by specialized properties.`;
+      selectedCol = `advanced ${selectedWord}`;
+      selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
+    }
   }
 
   const uniqueId = `${namespace}-proc-${selectedWord}-${Date.now().toString(36)}-${proceduralCounter++}`;
