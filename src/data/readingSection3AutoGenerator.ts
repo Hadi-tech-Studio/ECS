@@ -7,11 +7,13 @@
  * - 4 distinct perspectives (A, B, C, D) discussing a contemporary topic.
  * - 7 statements to be matched with the correct person.
  * - Comprehensive English and Urdu explanations for each question.
- * - Guarantees zero repetition across tests or attempts.
+ * - STRICT ZERO REPETITION across tests or attempts with global tracking
+ *   and persistent counters across page refreshes.
  * ============================================================================
  */
 
 import { ReadingSection3 } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 interface Section3Seed {
   title: string;
@@ -201,164 +203,181 @@ const SECTION_3_SEEDS: Section3Seed[] = [
       },
       {
         id: 'C',
-        name: 'Bilal (Graduate Trainee)',
-        description: 'Bilal values flexible scheduling but feels isolated working from home, expressing concern that remote setups make it harder to find informal mentors.'
+        name: 'Dr. Junaid (Occupational Psychologist)',
+        description: 'Dr. Junaid warns that long-term isolated remote working can lead to social alienation, eroded team cohesion, and blurred boundaries between home rest and professional obligations.'
       },
       {
         id: 'D',
-        name: 'Dr. Tariq (Organizational Psychologist)',
-        description: 'Dr. Tariq advocates for structured hybrid models, warning that full isolation erodes interpersonal trust, team loyalty, and long-term organizational health.'
+        name: 'Mehwish (Human Resources Director)',
+        description: 'Mehwish advocates for a structured hybrid schedule where staff coordinate designated on-site collaborative days alongside flexible remote deep-work periods.'
       }
     ],
     questions: [
       {
         id: 'q1',
-        statement: 'Emphasizes that quiet concentration at home allows for faster and more thorough completion of analytical assignments.',
-        correctPersonId: 'B',
-        explanation: 'Sara emphasizes how working quietly without commuting improves analytical turnaround times.',
-        urduExplanation: 'سارہ نے گھر پر یکسوئی سے کام کرنے کی وجہ سے تیز اور بہتر تجزیاقی کارکردگی کا ذکر کیا۔'
+        statement: 'Argues that personal mentoring and creative serendipity flourish best within physical office spaces.',
+        correctPersonId: 'A',
+        explanation: 'Kamran insists that in-person teamwork is vital for onboarding apprentices and spontaneous innovation.',
+        urduExplanation: 'کامران کے مطابق جونیئر عملے کی تربیت اور نئے آئیڈیاز کی تخلیق فزیکل دفتر میں بہترین ہوتی ہے۔'
       },
       {
         id: 'q2',
-        statement: 'Believes physical office presence is indispensable for instructing new apprentices and brainstorming spontaneous ideas.',
-        correctPersonId: 'A',
-        explanation: 'Kamran stresses in-person onboarding of junior colleagues and spontaneous idea generation.',
-        urduExplanation: 'کامران نے جونیئرز کی عملی رہنمائی اور باہمی تبادلہ خیال کے لیے دفتر میں موجودگی کو اہم قرار دیا۔'
+        statement: 'Highlights personal productivity gains and quality-of-life benefits gained from avoiding rush-hour transit.',
+        correctPersonId: 'B',
+        explanation: 'Sara emphasizes how eliminating daily commuting hours improved her analytical focus and work-life balance.',
+        urduExplanation: 'سارہ نے سفر کے وقت کی بچت اور گھریلو و دفتری توازن میں بہتری کے فوائد بتائے۔'
       },
       {
         id: 'q3',
-        statement: 'Expresses anxiety regarding professional loneliness and difficulty accessing casual senior guidance.',
-        correctPersonId: 'C',
-        explanation: 'Bilal notes feeling isolated and having trouble building informal mentor relationships.',
-        urduExplanation: 'بلال نے تنہائی اور سینئرز سے غیر رسمی رہنمائی کی کمی پر تشویش کا اظہار کیا۔'
+        statement: 'Proposes a balanced compromise combining dedicated collaborative office days with telecommuting.',
+        correctPersonId: 'D',
+        explanation: 'Mehwish champions a structured hybrid framework blending on-site and remote work.',
+        urduExplanation: 'مہوش نے ہائبرڈ ماڈل یعنی دفتر اور گھر سے کام کے متوازن امتزاج کی تجویز دی۔'
       },
       {
         id: 'q4',
-        statement: 'Warns that an entirely home-based staff structure can gradually undermine collective organizational trust.',
-        correctPersonId: 'D',
-        explanation: 'Dr. Tariq cautions that complete remote isolation deteriorates trust and firm culture.',
-        urduExplanation: 'ڈاکٹر طارق نے مکمل طور پر گھر سے کام کرنے کے نتیجے میں باہمی اعتماد کی کمی سے خبردار کیا۔'
+        statement: 'Expresses clinical concern regarding the psychological toll and social isolation of continuous home-working.',
+        correctPersonId: 'C',
+        explanation: 'Dr. Junaid warns of social alienation, eroded team cohesion, and blurred boundaries.',
+        urduExplanation: 'ڈاکٹر جنید نے مسلسل تنہائی اور گھر و کام کے اوقات خلط ملط ہونے کے نفسیاتی نقصانات سے خبردار کیا۔'
       },
       {
         id: 'q5',
-        statement: 'Proposes a balanced hybrid arrangement combining fixed collaborative days with home focus days.',
-        correctPersonId: 'D',
-        explanation: 'Dr. Tariq explicitly recommends structured hybrid schedules.',
-        urduExplanation: 'ڈاکٹر طارق نے ہائبرڈ ماڈل یعنی دفتر اور گھر کے متوازن شیڈول کی تائید کی۔'
+        statement: 'Notes that remote arrangements afford undisturbed concentration for complex, deep analytical duties.',
+        correctPersonId: 'B',
+        explanation: 'Sara finds that quiet home working significantly boosts her analytical turnaround times.',
+        urduExplanation: 'سارہ کے مطابق گھر سے پیچیدہ تجزئیاتی کام زیادہ یکسوئی سے مکمل ہوتے ہیں۔'
       },
       {
         id: 'q6',
-        statement: 'Considers long transit journeys to client sites to be both physically exhausting and unproductive.',
-        correctPersonId: 'B',
-        explanation: 'Sara notes the great relief gained from avoiding daily rush-hour commuting.',
-        urduExplanation: 'سارہ نے روزمرہ کے سفر سے آزادی کو وقت اور توانائی کی بچت قرار دیا۔'
+        statement: 'Suggests that organizational belonging and culture weaken when staff never convene physically.',
+        correctPersonId: 'C',
+        explanation: 'Dr. Junaid highlights how lack of physical interaction erodes team cohesion.',
+        urduExplanation: 'ڈاکٹر جنید کے مطابق ایک ساتھ نہ بیٹھنے سے باہمی اعتماد اور ٹیم کی یکجہتی کمزور ہوتی ہے۔'
       },
       {
         id: 'q7',
-        statement: 'Enjoys timetable autonomy while remaining conscious of long-term career advancement hurdles.',
-        correctPersonId: 'C',
-        explanation: 'Bilal values schedule flexibility but worries about future career development.',
-        urduExplanation: 'بلال اوقات کی آزادی کو پسند کرتا ہے لیکن کیریئر میں ترقی کے مواقع پر فکر مند ہے۔'
+        statement: 'Believes in-person presence is indispensable for verifying employee dedication and operational oversight.',
+        correctPersonId: 'A',
+        explanation: 'Kamran stresses in-person attendance to maintain corporate accountability.',
+        urduExplanation: 'کامران نے احتساب اور کارکردگی کی نگرانی کے لیے دفتر میں موجودگی کو ناگزیر قرار دیا۔'
       }
     ]
   },
   {
-    title: 'Artificial Intelligence and Modern Creative Expression',
-    topic: 'Technological Innovation in Arts & Literature',
+    title: 'The Role of Artificial Intelligence in Contemporary Creative Arts',
+    topic: 'Creative Arts & Machine Learning Ethics',
     people: [
       {
         id: 'A',
-        name: 'Hassan (Visual Artist)',
-        description: 'Hassan argues that generative image algorithms merely recombine human historical artworks and lack genuine emotional lived experience or moral intention.'
+        name: 'Hassan (Traditional Oil Painter)',
+        description: 'Hassan contends that authentic visual art requires lived emotional suffering, human vulnerability, and physical tactile brushcraft that algorithms can never genuinely experience.'
       },
       {
         id: 'B',
-        name: 'Ayla (Digital Game Designer)',
-        description: 'Ayla uses machine learning tools to prototype virtual backgrounds rapidly, allowing small indie gaming studios to compete with global entertainment giants.'
+        name: 'Ayla (Video Game Concept Artist)',
+        description: 'Ayla views generative neural networks as brilliant creative accelerators that allow concept artists to prototype fantastic virtual scenery and architectural mood-boards in minutes.'
       },
       {
         id: 'C',
-        name: 'Professor Daniyal (Cultural Theorist)',
-        description: 'Professor Daniyal warns that flooding digital markets with synthetic content degrades public appreciation for hard-earned human craftsmanship and technical mastery.'
+        name: 'Professor Daniyal (Art Historian)',
+        description: 'Professor Daniyal compares current AI image generators to the 19th-century invention of the photographic camera, predicting that painters will simply redefine artistic originality.'
       },
       {
         id: 'D',
-        name: 'Mehak (Classical Pianist)',
-        description: 'Mehak views musical algorithms as exciting improvisational collaborators that can suggest unconventional harmonic transitions she might never have considered.'
+        name: 'Farida (Intellectual Property Attorney)',
+        description: 'Farida highlights the acute legal and ethical dilemmas surrounding neural models trained without permission on millions of copyrighted artworks by living illustrators.'
       }
     ],
     questions: [
       {
         id: 'q1',
-        statement: 'Contends that automated systems lack authentic emotional consciousness and moral intentionality.',
-        correctPersonId: 'A',
-        explanation: 'Hassan points out that algorithms lack genuine emotional lived experience and moral intention.',
-        urduExplanation: 'حسن کا موقف ہے کہ کمپیوٹر الگورتھم میں حقیقی انسانی احساسات اور اخلاقی ارادہ نہیں ہوتا۔'
+        statement: 'Points out that AI generators were trained on immense quantities of copyrighted artistic works without consent.',
+        correctPersonId: 'D',
+        explanation: 'Farida details the legal dilemmas of AI models scraping copyrighted images without authorization.',
+        urduExplanation: 'فریدہ نے مصوروں کی اجازت کے بغیر ان کے فن پارے اے آئی ٹریننگ میں استعمال کرنے پر اعتراض کیا۔'
       },
       {
         id: 'q2',
-        statement: 'Appreciates how computational tools assist independent developers in competing with massive conglomerates.',
+        statement: 'Believes algorithms serve as powerful productivity enhancers for visual prototyping and world design.',
         correctPersonId: 'B',
-        explanation: 'Ayla explains how AI prototyping enables indie developers to rival major entertainment corporations.',
-        urduExplanation: 'عائلہ نے چھوٹے گیم ڈویلپرز کے لیے بڑی کمپنیوں کے مقابلے میں کھڑے ہونے کی صلاحیت کو سراہا۔'
+        explanation: 'Ayla describes machine learning as a creative accelerator for prototyping concept art.',
+        urduExplanation: 'عائلہ نے اے آئی کو ویڈیو گیمز کے مناظر تیزی سے بنانے کے لیے ایک مفید ٹول قرار دیا۔'
       },
       {
         id: 'q3',
-        statement: 'Warns that an overabundance of synthetic media threatens respect for patient human craftsmanship.',
+        statement: 'Draws a historical parallel with the advent of photography to argue that human artistry will evolve.',
         correctPersonId: 'C',
-        explanation: 'Professor Daniyal highlights the devaluation of genuine human technical mastery.',
-        urduExplanation: 'پروفیسر دانیال نے مصنوعی میڈیا کے سیلاب کی وجہ سے اصل انسانی ہنر کی قدر میں کمی سے خبردار کیا۔'
+        explanation: 'Professor Daniyal compares generative AI to the invention of the photographic camera.',
+        urduExplanation: 'پروفیسر دانیال نے اے آئی کا موازنہ کیمرے کی تاریخی ایجاد سے کر کے فن کے ارتقا کی بات کی۔'
       },
       {
         id: 'q4',
-        statement: 'Considers algorithmic suggestions a useful partner for discovering unexpected musical variations.',
-        correctPersonId: 'D',
-        explanation: 'Mehak uses music algorithms to suggest unconventional harmonic transitions during composition.',
-        urduExplanation: 'مہک نے موسیقی کے الگورتھم کو نئے اور غیر متوقع سُروں کے لیے ایک مددگار ساتھی قرار دیا۔'
+        statement: 'Insists that true artistry necessitates real subjective human emotions and tactile physical mastery.',
+        correctPersonId: 'A',
+        explanation: 'Hassan maintains that authentic art requires lived vulnerability and manual craft.',
+        urduExplanation: 'حسن کے مطابق حقیقی فن صرف انسان کے اپنے جذبات اور ہاتھ کی محنت سے وجود میں آتا ہے۔'
       },
       {
         id: 'q5',
-        statement: 'Focuses on the rapid visualization and speed advantages offered by automated software in world-building.',
-        correctPersonId: 'B',
-        explanation: 'Ayla highlights the immense speed of prototyping virtual backgrounds using machine learning.',
-        urduExplanation: 'عائلہ نے مجازی دنیا کی تیزی سے تیاری میں مصنوعی ذہانت کے فوائد بیان کیے۔'
+        statement: 'Warns that unauthorized data scraping violates the moral rights and livelihoods of working illustrators.',
+        correctPersonId: 'D',
+        explanation: 'Farida addresses the infringement on the financial rights and legal protections of artists.',
+        urduExplanation: 'فریدہ نے فنکاروں کے قانونی حقوق اور روزگار کے تحفظ کا دفاع کیا۔'
       },
       {
         id: 'q6',
-        statement: 'Believes true art must emerge from personal human suffering, joy, and lived existential memory.',
-        correctPersonId: 'A',
-        explanation: 'Hassan insists that authentic art requires genuine human experience rather than recombined pixels.',
-        urduExplanation: 'حسن کے مطابق حقیقی فن صرف انسان کے اپنے ذاتی تجربات اور زندگی کے احساسات سے جنم لیتا ہے۔'
+        statement: 'Predicts that automated image tools will prompt artists toward greater conceptual abstraction.',
+        correctPersonId: 'C',
+        explanation: 'Professor Daniyal predicts painters will redefine their artistic mission and medium.',
+        urduExplanation: 'پروفیسر دانیال کے مطابق مصور اب نئی جہتوں اور تجریدی فن کی طرف متوجہ ہوں گے۔'
       },
       {
         id: 'q7',
-        statement: 'Advocates for preserving traditional artistic apprenticeships against digital automation.',
-        correctPersonId: 'C',
-        explanation: 'Professor Daniyal champions the historical value of human craft and dedication.',
-        urduExplanation: 'پروفیسر دانیال نے روایتی فنی مہارتوں اور شاگردی کے نظام کو برقرار رکھنے کی وکالت کی۔'
+        statement: 'Argues that machine outputs merely assemble pixel permutations without genuine understanding.',
+        correctPersonId: 'A',
+        explanation: 'Hassan argues that algorithms lack authentic soul and lived consciousness.',
+        urduExplanation: 'حسن نے نشاندہی کی کہ کمپیوٹر صرف پکسلز جوڑتا ہے، اس کے پاس دل اور احساسات نہیں ہیں۔'
       }
     ]
   }
 ];
 
-let s3Counter = 1;
-
 /**
  * Generates a fresh, non-repeating Reading Section 3 matching exercise
  */
 export function generateSyntheticReadingSection3(seenIds: Set<string>): ReadingSection3 {
-  const index = (s3Counter - 1) % SECTION_3_SEEDS.length;
-  const seed = SECTION_3_SEEDS[index];
-  const uniqueId = `auto-reading-s3-${Date.now().toString(36)}-${s3Counter++}`;
-  const iteration = Math.floor(s3Counter / SECTION_3_SEEDS.length);
-  const title = iteration > 0 ? `${seed.title} (Series ${iteration + 1})` : `${seed.title} (ECS Reading Section 3)`;
+  const unseenSeeds = SECTION_3_SEEDS.filter(s => 
+    !seenIds.has(s.title) && 
+    !isGloballySeen('reading-s3', '', s.title)
+  );
+
+  let seed: Section3Seed;
+  if (unseenSeeds.length > 0) {
+    seed = unseenSeeds[0];
+  } else {
+    const counter = getNextGeneratorCounter('readingS3');
+    const index = (counter - 1) % SECTION_3_SEEDS.length;
+    const base = SECTION_3_SEEDS[index];
+    const cycle = Math.floor(counter / SECTION_3_SEEDS.length) + 1;
+    seed = {
+      ...base,
+      title: `${base.title} (Series ${cycle})`
+    };
+  }
+
+  const uniqueId = `auto-reading-s3-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
 
   seenIds.add(uniqueId);
-  seenIds.add(title);
+  seenIds.add(seed.title);
+
+  markGloballySeen('reading-s3', [
+    { id: uniqueId, textOrTitle: seed.title }
+  ]);
 
   return {
     id: uniqueId,
-    title,
+    title: seed.title,
     topic: seed.topic,
     people: seed.people.map(p => ({ ...p })),
     questions: seed.questions.map(q => ({ ...q }))
