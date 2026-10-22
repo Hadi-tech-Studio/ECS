@@ -9,11 +9,13 @@
  * - Part 3: Social forum chat with 3 club members (30–40 words each)
  * - Part 4: Two emails (Task A: Informal to friend, 40–50 words;
  *                       Task B: Formal to authority, 120–150 words)
- * - Guarantees zero repetition across tests or attempts.
+ * - STRICT ZERO REPETITION across tests or attempts with global tracking
+ *   and persistent counters across page refreshes.
  * ============================================================================
  */
 
 import { AptisWritingModule, WritingPart4 } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 interface ClubThemeSeed {
   themeName: string;
@@ -98,66 +100,119 @@ const CLUB_THEME_SEEDS: ClubThemeSeed[] = [
         sampleAnswer: 'We should organize engaging family workshops that feature interactive birdwatching walks and hands-on sapling planting. Providing educational certificates and healthy refreshments will motivate parents and schoolchildren to participate enthusiastically.'
       },
       {
-        memberName: 'Kamran (Recycling Coordinator)',
-        avatarInitials: 'KC',
-        message: 'The municipality wants to convert an abandoned industrial lot into either a community garden or a solar park. Which option would you support?',
-        sampleAnswer: 'I strongly favor establishing a community organic garden. It will create immediate biodiversity, offer educational space for local schoolchildren, and foster neighborhood cohesion, which a purely fenced solar installation cannot provide.'
+        memberName: 'Hamza (Field Operations)',
+        avatarInitials: 'HO',
+        message: 'Should our club focus volunteer resources on planting native flowering shrubs or installing automated solar bird baths?',
+        sampleAnswer: 'Planting dense native flowering shrubs provides sustainable year-round nutrition and natural shelter for diverse pollinating insects. Automated baths are beneficial, but restoring biological habitat delivers significantly greater long-term conservation value.'
       }
     ]
   },
   {
-    themeName: 'Young Innovators & Robotics Technology Guild',
-    part1Context: 'You have joined the Young Innovators & Robotics Technology Guild. Answer the 5 onboarding questions from the lab director in 1–5 words each.',
+    themeName: 'Digital Photography & Visual Storytelling Guild',
+    part1Context: 'You have joined the Digital Photography & Visual Storytelling Guild. Answer the 5 onboarding questions from the club curator in 1–5 words each.',
     p1Questions: [
-      { prompt: 'What programming language or engineering skill do you know?', sampleAnswer: 'Python and circuit design.' },
-      { prompt: 'Which robotics challenge or tournament interests you most?', sampleAnswer: 'Autonomous rover navigation.' },
-      { prompt: 'How many days per week can you access our makerspace lab?', sampleAnswer: 'Two days weekly.' },
-      { prompt: 'Do you prefer working in hardware assembly or software coding?', sampleAnswer: 'Embedded software development.' },
-      { prompt: 'What academic field or career do you plan to pursue?', sampleAnswer: 'Computer systems engineering.' }
+      { prompt: 'What genre of photography do you enjoy shooting most?', sampleAnswer: 'Street and architectural photography.' },
+      { prompt: 'What camera equipment or smartphone do you use currently?', sampleAnswer: 'A mirrorless digital camera.' },
+      { prompt: 'How long have you been practicing photography as a hobby?', sampleAnswer: 'About two years.' },
+      { prompt: 'Which photo editing application do you use for post-processing?', sampleAnswer: 'Lightroom and Photoshop.' },
+      { prompt: 'What photography skill do you wish to master this year?', sampleAnswer: 'Mastering manual lighting controls.' }
     ],
-    part2FormName: 'Innovator Profile & Technology Project Goals',
-    part2Prompt: 'Please describe a technology project you would like to build in our makerspace and how automation can benefit daily life. (Write 20–30 words)',
-    part2SampleAnswer: 'I aim to build an automated soil-moisture sensor rover for vertical gardens. Practical robotics streamlines tedious repetitive tasks, conserves water resources, and enhances overall agricultural sustainability.',
-    part3ClubName: 'Robotics Innovators Guild Lounge',
-    part3Context: 'You are chatting with fellow makers in the robotics guild forum. Respond to all three messages. (Write 30–40 words for each response)',
+    part2FormName: 'Photographer Profile & Portfolio Aspiration',
+    part2Prompt: 'Please explain why you joined our visual storytelling guild and what theme you would like to explore in our upcoming member gallery. (Write 20–30 words)',
+    part2SampleAnswer: 'I joined to refine my visual composition and learn narrative storytelling from veteran photographers. I hope to exhibit a documentary photo series exploring traditional artisanal craftsmen in our historic old bazaar.',
+    part3ClubName: 'Visual Storytelling Guild Forum',
+    part3Context: 'You are chatting with fellow guild photographers in the members lounge. Respond to all three messages. (Write 30–40 words for each response)',
     part3Chats: [
       {
-        memberName: 'Hamza (Guild President)',
-        avatarInitials: 'HP',
-        message: 'Welcome to our makerspace! What inspired you to start designing mechanical systems and robotics prototypes?',
-        sampleAnswer: 'I have always been fascinated by how simple computer algorithms can breathe mechanical life into inanimate circuits. Building physical machines that solve real environmental problems inspires me to learn every single day.'
+        memberName: 'Rashid (Gallery Curator)',
+        avatarInitials: 'RC',
+        message: 'Welcome! When composing a candid street portrait, do you prefer asking for permission beforehand or capturing unposed moments?',
+        sampleAnswer: 'I prefer capturing spontaneous, unposed gestures because natural candid expressions reveal authentic human emotion. However, I always introduce myself warmly immediately afterward and ask for permission before publishing or displaying the photograph.'
       },
       {
-        memberName: 'Amina (Software Lead)',
-        avatarInitials: 'AL',
-        message: 'We are deciding whether our competition team should focus on autonomous drones or land rovers this year. What is your recommendation?',
-        sampleAnswer: 'I recommend developing land rovers first because the hardware testing is substantially safer, cheaper, and more reliable for our newer members. Rovers allow us to refine computer vision before taking on aerial flight risks.'
+        memberName: 'Maria (Technical Lead)',
+        avatarInitials: 'MT',
+        message: 'Our guild is purchasing professional lighting gear for the studio. Do you favor portable battery strobes or continuous LED panels?',
+        sampleAnswer: 'Continuous LED panels are ideal for beginners because you can preview lighting ratios and shadows in real time. Nevertheless, battery-powered strobes provide the powerful burst intensity essential for freezing rapid motion outdoors.'
       },
       {
-        memberName: 'Danish (Workshop Mentor)',
-        avatarInitials: 'DM',
-        message: 'Next month we are hosting a robotics bootcamp for underprivileged high school students. Would you like to be a mentor?',
-        sampleAnswer: 'I would be delighted to mentor students during the bootcamp. Guiding beginners through their very first circuit assembly and Python script is an extraordinarily rewarding way to give back to our local community.'
+        memberName: 'Danish (Exhibition Chair)',
+        avatarInitials: 'DE',
+        message: 'We are organizing a weekend photo walk across the old city quarter at sunrise. Will you be joining us?',
+        sampleAnswer: 'I will definitely join the dawn photowalk. Golden morning sunlight produces gorgeous directional contrast across ancient brick arches, offering magnificent visual storytelling opportunities for our upcoming guild gallery showcase.'
+      }
+    ]
+  },
+  {
+    themeName: 'Astronomy & Planetary Science Society',
+    part1Context: 'You have joined the Astronomy & Planetary Science Society. Answer the 5 onboarding questions from the observatory director in 1–5 words each.',
+    p1Questions: [
+      { prompt: 'Which astronomical body or planet fascinates you most?', sampleAnswer: 'Saturn and its rings.' },
+      { prompt: 'Do you own an optical telescope or binoculars?', sampleAnswer: 'A pair of binoculars.' },
+      { prompt: 'How often do you stargaze in dark-sky locations?', sampleAnswer: 'Once every month.' },
+      { prompt: 'What science topic would you like to hear a lecture on?', sampleAnswer: 'Exoplanets and astrobiology.' },
+      { prompt: 'Can you assist during our public telescope viewing nights?', sampleAnswer: 'Yes, on Friday evenings.' }
+    ],
+    part2FormName: 'Stargazer Registration & Observation Interests',
+    part2Prompt: 'Please describe what sparked your interest in astronomy and what observational project you hope to participate in with our society. (Write 20–30 words)',
+    part2SampleAnswer: 'Witnessing a lunar eclipse through a friend’s telescope sparked my wonder about the cosmos. I hope to learn celestial navigation and help track meteors during our society’s annual Perseid watch.',
+    part3ClubName: 'Cosmic Observers Network',
+    part3Context: 'You are chatting with fellow society astronomers in the observatory discussion room. Respond to all three messages. (Write 30–40 words for each response)',
+    part3Chats: [
+      {
+        memberName: 'Dr. Munir (Chief Astronomer)',
+        avatarInitials: 'MA',
+        message: 'Welcome to the observatory! In your opinion, what is the most effective way to combat light pollution in urban areas?',
+        sampleAnswer: 'Municipalities should mandate fully shielded streetlights that direct illumination downward rather than scattering light upward into the night sky. Switching to warmer low-intensity LED bulbs also preserves human night vision and nocturnal animal cycles.'
+      },
+      {
+        memberName: 'Asma (Equipment Officer)',
+        avatarInitials: 'AO',
+        message: 'For deep-sky viewing of nebulae, do you recommend a large aperture Dobsonian telescope or a computerized tracking refractor?',
+        sampleAnswer: 'A large aperture Dobsonian telescope gathers substantially more light, revealing faint planetary nebulae and galaxies brilliantly at an affordable price. Computerized refractors are wonderful for photography, but pure visual stargazing favors large mirrors.'
+      },
+      {
+        memberName: 'Waleed (Public Outreach)',
+        avatarInitials: 'WO',
+        message: 'We are organizing an astronomy camp for local high school students next month. How can we make it engaging?',
+        sampleAnswer: 'We should combine telescope viewing of the Moon and Jupiter with hands-on constellation-mapping games and interactive scale models of the solar system. Allowing students to photograph the Moon through eyepiece adapters will inspire them tremendously.'
       }
     ]
   }
 ];
 
-let moduleCounter = 1;
-
 /**
- * Generate a fresh, synthetic Writing Module (Parts 1, 2, 3)
+ * Generate a fresh, synthetic Writing Module when predefined pool modules are exhausted
  */
 export function generateSyntheticWritingModule(seenThemes: Set<string>): AptisWritingModule {
-  const index = (moduleCounter - 1) % CLUB_THEME_SEEDS.length;
-  const seed = CLUB_THEME_SEEDS[index];
-  const uniqueTheme = `${seed.themeName} (Edition ${Math.floor(moduleCounter / CLUB_THEME_SEEDS.length) + 1})`;
-  const idSuffix = `${Date.now().toString(36)}-${moduleCounter++}`;
+  const unseenSeeds = CLUB_THEME_SEEDS.filter(s => 
+    !seenThemes.has(s.themeName) && 
+    !isGloballySeen('writing-theme', '', s.themeName)
+  );
 
-  seenThemes.add(uniqueTheme);
+  let seed: ClubThemeSeed;
+  if (unseenSeeds.length > 0) {
+    seed = unseenSeeds[0];
+  } else {
+    const counter = getNextGeneratorCounter('writingModule');
+    const index = (counter - 1) % CLUB_THEME_SEEDS.length;
+    const base = CLUB_THEME_SEEDS[index];
+    const cycle = Math.floor(counter / CLUB_THEME_SEEDS.length) + 1;
+    seed = {
+      ...base,
+      themeName: `${base.themeName} (Edition ${cycle})`
+    };
+  }
+
+  const idSuffix = `${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
+
+  seenThemes.add(seed.themeName);
+  markGloballySeen('writing-theme', [
+    { id: `w-mod-${idSuffix}`, textOrTitle: seed.themeName }
+  ]);
 
   return {
-    themeName: uniqueTheme,
+    themeName: seed.themeName,
     part1: {
       id: `w-p1-auto-${idSuffix}`,
       context: seed.part1Context,
@@ -213,20 +268,55 @@ const SYNTHETIC_EMAIL_PAIRS = [
     formalPrompt: 'Write a formal email to the Director of Corporate Facilities (Ms. Parveen Akhtar). Detail the environmental and health benefits of commuter cycling, outline the need for secure bike storage and shower lockers, and suggest forming an implementation committee. (Write 120–150 words)',
     informalFriend: 'Saad',
     informalPrompt: 'Write an email to your colleague Saad. Tell him about your plan to cycle to work, ask if he wants to commute together on bike paths, and suggest buying safety helmets. (Write 40–50 words)'
+  },
+  {
+    formalTitle: 'Application for Environmental Community Tree Planting Grant',
+    recipientTitle: 'Municipal Sustainability Officer',
+    recipientName: 'Mr. Tariq Jamil',
+    entityName: 'City Environmental Services Department',
+    contextNotice: 'GRANT ANNOUNCEMENT: REF ENV/2026/12\nCommunity resident associations may apply for matching municipal grants to fund urban tree planting and green space revitalization projects.',
+    formalPrompt: 'Write a formal email to the Municipal Sustainability Officer (Mr. Tariq Jamil). Describe your neighborhood greening initiative, justify the environmental necessity for shade trees, itemize proposed sapling species, and request grant application guidelines. (Write 120–150 words)',
+    informalFriend: 'Bilal',
+    informalPrompt: 'Write an email to your friend Bilal. Tell him about the neighborhood tree planting project, ask if he can volunteer to help dig sapling pits this Saturday, and invite him to lunch. (Write 40–50 words)'
+  },
+  {
+    formalTitle: 'Feedback and Recommendations Regarding Public Library Digital Systems',
+    recipientTitle: 'Director of Public Library Systems',
+    recipientName: 'Mrs. Nargis Bano',
+    entityName: 'Metropolitan Public Library Network',
+    contextNotice: 'USER SATISFACTION SURVEY: REF LIB/2026/30\nThe Library Board seeks constructive patron recommendations to modernize digital catalog search algorithms and workstation reservation software.',
+    formalPrompt: 'Write a formal email to the Director of Public Library Systems (Mrs. Nargis Bano). Provide constructive appraisal of the current digital catalog, explain difficulties encountered by student researchers, and suggest software user interface upgrades. (Write 120–150 words)',
+    informalFriend: 'Zainab',
+    informalPrompt: 'Write an email to your friend Zainab. Tell her about the frustrating search system at the city library, recommend an alternative research database online, and arrange a study session. (Write 40–50 words)'
   }
 ];
-
-let emailCounter = 1;
 
 /**
  * Generate a fresh, synthetic Writing Part 4 Email task when PDF email pairs are exhausted
  */
 export function generateSyntheticPart4EmailTask(seenIds: Set<string>): WritingPart4 {
-  const index = (emailCounter - 1) % SYNTHETIC_EMAIL_PAIRS.length;
-  const pair = SYNTHETIC_EMAIL_PAIRS[index];
-  const uniqueId = `auto-part4-${Date.now().toString(36)}-${emailCounter++}`;
+  const unseenPairs = SYNTHETIC_EMAIL_PAIRS.filter(p => 
+    !seenIds.has(p.formalTitle) && 
+    !isGloballySeen('writing-p4', '', p.formalTitle)
+  );
+
+  let pair: typeof SYNTHETIC_EMAIL_PAIRS[0];
+  if (unseenPairs.length > 0) {
+    pair = unseenPairs[0];
+  } else {
+    const counter = getNextGeneratorCounter('writingPart4');
+    const index = (counter - 1) % SYNTHETIC_EMAIL_PAIRS.length;
+    pair = SYNTHETIC_EMAIL_PAIRS[index];
+  }
+
+  const uniqueId = `auto-part4-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
 
   seenIds.add(uniqueId);
+  seenIds.add(pair.formalTitle);
+
+  markGloballySeen('writing-p4', [
+    { id: uniqueId, textOrTitle: pair.formalTitle }
+  ]);
 
   return {
     id: uniqueId,
