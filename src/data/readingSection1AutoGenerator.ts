@@ -7,11 +7,13 @@
  * - 5 sequential paragraphs/gaps in a short letter, email, or notice.
  * - Exactly 3 choices (A, B, C) per gap.
  * - Comprehensive English and Urdu explanations for each gap.
- * - Guarantees zero repetition when the 50 official PDF passages are exhausted.
+ * - STRICT ZERO REPETITION across tests or attempts with global tracking
+ *   and persistent counters across page refreshes.
  * ============================================================================
  */
 
 import { ReadingSection1 } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 interface Section1Template {
   title: string;
@@ -164,18 +166,124 @@ const SECTION_1_TEMPLATES: Section1Template[] = [
         explanationUr: 'اسم: شکریہ کے ساتھ "partnership" (تعاون/شراکت) موزوں اسم ہے۔'
       }
     ]
+  },
+  {
+    title: 'Community Environmental Clean-Up Day',
+    topic: 'Civic Environmental Volunteering',
+    paragraphs: [
+      {
+        textBefore: 'Dear Residents,\nThe Town Council is pleased to announce [example] our annual lake clean-up initiative, taking place ',
+        options: ['at', 'on', 'in'],
+        correctIndex: 1,
+        textAfter: ' Saturday morning.\n',
+        explanationEn: 'Preposition of time: "on" is used before specific days of the week ("on Saturday morning").',
+        explanationUr: 'پریپوزیشن: ہفتے کے مخصوص دن کے ساتھ "on" آتا ہے۔'
+      },
+      {
+        textBefore: 'Protective gloves, high-visibility vests, and litter collection tools will be ',
+        options: ['distributed', 'distributing', 'distribution'],
+        correctIndex: 0,
+        textAfter: ' at the central gazebo.\n',
+        explanationEn: 'Passive voice: "will be distributed" is required after modal passive "will be".',
+        explanationUr: 'مجہول: "will be" کے بعد Past Participle "distributed" آئے گا۔'
+      },
+      {
+        textBefore: 'Volunteers are advised to wear sturdy footwear suitable for walking on uneven ',
+        options: ['ground', 'floor', 'carpet'],
+        correctIndex: 0,
+        textAfter: '.\n',
+        explanationEn: 'Collocation: "uneven ground" is the natural outdoor terrain expression.',
+        explanationUr: 'کولکیشن: کھردری اور غیر ہموار بیرونی زمین کے لیے "ground" استعمال ہوتا ہے۔'
+      },
+      {
+        textBefore: 'In case of inclement weather, the event will be postponed ',
+        options: ['until', 'by', 'since'],
+        correctIndex: 0,
+        textAfter: ' the following weekend.\n',
+        explanationEn: 'Preposition: "postponed until" expresses deferral to a future date.',
+        explanationUr: 'پریپوزیشن: آئندہ تاریخ تک موخر کرنے کے لیے "postponed until" آتا ہے۔'
+      },
+      {
+        textBefore: 'We look forward to working together to enhance our town’s natural ',
+        options: ['beauty', 'beautiful', 'beautify'],
+        correctIndex: 0,
+        textAfter: '.',
+        explanationEn: 'Noun form: "natural beauty" is the required noun phrase object.',
+        explanationUr: 'اسم: صفت "natural" کے بعد اسم "beauty" آتا ہے۔'
+      }
+    ]
+  },
+  {
+    title: 'Professional Development Seminar Enrollment',
+    topic: 'Workplace Training & Education',
+    paragraphs: [
+      {
+        textBefore: 'Dear Staff,\nThe Human Resources Department has scheduled [example] an interactive workshop on effective project management, designed to ',
+        options: ['boost', 'boosting', 'boosted'],
+        correctIndex: 0,
+        textAfter: ' team efficiency.\n',
+        explanationEn: 'Infinitive with to: "designed to boost" takes the bare base verb.',
+        explanationUr: 'گرائمر: "designed to" کے بعد بنیادی فعل "boost" آتا ہے۔'
+      },
+      {
+        textBefore: 'The facilitator has over fifteen years of managerial experience across various ',
+        options: ['industries', 'industrial', 'industrious'],
+        correctIndex: 0,
+        textAfter: '.\n',
+        explanationEn: 'Noun: "various industries" is the proper plural noun context.',
+        explanationUr: 'اسم: "various" کے بعد جمع اسم "industries" آئے گا۔'
+      },
+      {
+        textBefore: 'Because space is restricted, reservations will be granted on a first-come, first-served ',
+        options: ['basis', 'base', 'basic'],
+        correctIndex: 0,
+        textAfter: '.\n',
+        explanationEn: 'Fixed phrase: "on a first-come, first-served basis".',
+        explanationUr: 'محاورہ: "first-come, first-served basis" (پہلے آئیے پہلے پائیے کی بنیاد پر)۔'
+      },
+      {
+        textBefore: 'Managers should ensure that project deadlines are not ',
+        options: ['compromised', 'compromising', 'compromise'],
+        correctIndex: 0,
+        textAfter: ' during seminar hours.\n',
+        explanationEn: 'Passive voice: "are not compromised" after auxiliary "are".',
+        explanationUr: 'مجہول: "are not" کے بعد فعل کی تیسری حالت "compromised" آتی ہے۔'
+      },
+      {
+        textBefore: 'A digital certificate of participation will be issued upon ',
+        options: ['completion', 'complete', 'completing'],
+        correctIndex: 0,
+        textAfter: ' of the assessment.',
+        explanationEn: 'Prepositional object: "upon completion" uses the noun form.',
+        explanationUr: 'اسم: حرفِ ربط "upon" کے بعد اسم "completion" استعمال ہوتا ہے۔'
+      }
+    ]
   }
 ];
-
-let syntheticCounter = 1;
 
 /**
  * Generate a fresh, synthetic Reading Section 1 cloze passage when PDF items are exhausted
  */
 export function generateSyntheticReadingSection1(seenIds: Set<string>): ReadingSection1 {
-  const index = (syntheticCounter - 1) % SECTION_1_TEMPLATES.length;
-  const template = SECTION_1_TEMPLATES[index];
-  const uniqueId = `auto-reading-s1-${Date.now().toString(36)}-${syntheticCounter++}`;
+  const unseenTemplates = SECTION_1_TEMPLATES.filter(t => 
+    !seenIds.has(t.title) && 
+    !isGloballySeen('reading-s1', '', t.title)
+  );
+
+  let template: Section1Template;
+  if (unseenTemplates.length > 0) {
+    template = unseenTemplates[0];
+  } else {
+    const counter = getNextGeneratorCounter('readingS1');
+    const index = (counter - 1) % SECTION_1_TEMPLATES.length;
+    const base = SECTION_1_TEMPLATES[index];
+    template = {
+      ...base,
+      title: `${base.title} (Series ${Math.floor(counter / SECTION_1_TEMPLATES.length) + 1})`
+    };
+  }
+
+  const uniqueId = `auto-reading-s1-${Date.now().toString(36)}-${Math.floor(Math.random() * 10000)}`;
 
   const paragraphs = template.paragraphs.map((p, idx) => ({
     textBefore: p.textBefore,
@@ -194,6 +302,11 @@ export function generateSyntheticReadingSection1(seenIds: Set<string>): ReadingS
   });
 
   seenIds.add(uniqueId);
+  seenIds.add(template.title);
+
+  markGloballySeen('reading-s1', [
+    { id: uniqueId, textOrTitle: template.title }
+  ]);
 
   return {
     id: uniqueId,
