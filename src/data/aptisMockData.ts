@@ -1,5 +1,5 @@
 import { AptisTestSet, MarkingScaleLevel } from '../types';
-import { PDF_READING_SECTION_4_POOL } from './pdfReadingSection4Pool';
+import { PDF_READING_SECTION_4_POOL, ensureSixToSevenParagraphs } from './pdfReadingSection4Pool';
 
 export const APTIS_MARKING_SCALES: MarkingScaleLevel[] = [
   {
@@ -540,8 +540,8 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
     },
     section2: {
       id: 's1-r-sec2',
-      title: 'Section 2: Text Cohesion (Story / Process Re-ordering)',
-      topic: 'How an Audit Trainee Begins a New Project',
+      title: 'Section 2: Text Cohesion',
+      topic: 'Workplace Training & Modern Science',
       sentences: [
         'First, she downloaded the previous year\'s audit working papers and familiarized herself with the client\'s business operations.',
         'Upon arriving at the audit firm on Monday morning, Fatima met her engagement senior for an initial project briefing.',
@@ -550,16 +550,45 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
         'During the lunch break, she discussed complex accounting entries with the client\'s chief accountant.',
         'After the meeting, she was assigned the task of verifying current year sales revenues and inventory figures.'
       ],
-      // Correct chronological sequence:
-      // 1 (Index 1): Upon arriving...
-      // 2 (Index 5): After the meeting...
-      // 3 (Index 0): First, she downloaded...
-      // 4 (Index 3): Next, she performed...
-      // 5 (Index 4): During the lunch break...
-      // 6 (Index 2): Finally, by late afternoon...
       correctOrder: [1, 5, 0, 3, 4, 2],
       explanation: 'Chronological cohesion: Begins with morning arrival -> after meeting -> First step (download papers) -> Next step (analytical checks) -> Lunch break discussion -> Finally submitting at late afternoon.',
-      urduExplanation: 'منطقی ترتیب: صبح کی آمد (Upon arriving) -> میٹنگ کے بعد کام سونپنا -> پہلا قدم (First) -> اگلا قدم (Next) -> دوپہر کا وقفہ (Lunch) -> اور اختتام (Finally)۔'
+      urduExplanation: 'منطقی ترتیب: صبح کی آمد (Upon arriving) -> میٹنگ کے بعد کام سونپنا -> پہلا قدم (First) -> اگلا قدم (Next) -> دوپہر کا وقفہ (Lunch) -> اور اختتام (Finally)۔',
+      tasks: [
+        {
+          id: 's1-r-sec2-t1',
+          taskNumber: 1,
+          title: 'Task 1: How an Audit Trainee Begins a New Project',
+          topic: 'Professional Workplace Routine',
+          sentences: [
+            'First, she downloaded the previous year\'s audit working papers and familiarized herself with the client\'s business operations.',
+            'Upon arriving at the audit firm on Monday morning, Fatima met her engagement senior for an initial project briefing.',
+            'Finally, by late afternoon, she submitted her organized work to the senior for quality review.',
+            'Next, she performed detailed analytical checks on the inventory accounts and documented all variances.',
+            'During the lunch break, she discussed complex accounting entries with the client\'s chief accountant.',
+            'After the meeting, she was assigned the task of verifying current year sales revenues and inventory figures.'
+          ],
+          correctOrder: [1, 5, 0, 3, 4, 2],
+          explanation: 'Chronological cohesion: Begins with morning arrival -> after meeting -> First step (download papers) -> Next step (analytical checks) -> Lunch break discussion -> Finally submitting at late afternoon.',
+          urduExplanation: 'منطقی ترتیب: صبح کی آمد (Upon arriving) -> میٹنگ کے بعد کام سونپنا -> پہلا قدم (First) -> اگلا قدم (Next) -> دوپہر کا وقفہ (Lunch) -> اور اختتام (Finally)۔'
+        },
+        {
+          id: 's1-r-sec2-t2',
+          taskNumber: 2,
+          title: 'Task 2: The Invention of the Printing Press',
+          topic: 'History of Technology & Communication',
+          sentences: [
+            'In medieval Europe, books were handwritten by scribes, making them exceedingly rare and costly.',
+            'Recognizing this immense challenge, Johannes Gutenberg developed movable metal type in Mainz, Germany.',
+            'This breakthrough lowered publication costs drastically and enabled rapid distribution of scientific knowledge.',
+            'Consequently, ordinary citizens had virtually no access to educational literature or news.',
+            'By 1455, his workshop completed printing the famous Gutenberg Bible, marking the dawn of mass media.',
+            'Today, Gutenberg’s press is recognized as one of the most transformative inventions in human civilization.'
+          ],
+          correctOrder: [0, 3, 1, 4, 2, 5],
+          explanation: 'Narrative order: Starts with the historical problem of handwritten books (0), details the consequence of public illiteracy (3), introduces Gutenberg developing movable type (1), mentions the completion of the Gutenberg Bible in 1455 (4), highlights the drastic reduction in publication costs (2), and concludes with his enduring historical legacy (5).',
+          urduExplanation: 'منطقی تسلسل: قرونِ وسطیٰ میں کتابوں کی نایابی (0)، عوام کی بے خبری (3)، گٹن برگ کی دھاتی ٹائپ کی ایجاد (1)، 1455ء میں بائبل کی طباعت (4)، اشاعتی لاگت میں کمی (2) اور جدید ذرائع ابلاغ میں اس کے عظیم کردار پر اختتام (5)۔'
+        }
+      ]
     },
     section3: {
       id: 's1-r-sec3',
@@ -639,7 +668,7 @@ export const APTIS_TEST_SET_1: AptisTestSet = {
         }
       ]
     },
-    section4: PDF_READING_SECTION_4_POOL[0]
+    section4: ensureSixToSevenParagraphs(PDF_READING_SECTION_4_POOL[0])
   },
 
   writing: {
@@ -1243,7 +1272,7 @@ export const APTIS_TEST_SET_2: AptisTestSet = {
     section2: {
       id: 's2-r-sec2',
       title: 'Section 2: Text Cohesion',
-      topic: 'The Journey of an International Travel Explorer',
+      topic: 'Exploration & Medical Discovery',
       sentences: [
         'Initially, Bilal spent several weeks researching off-the-beaten-path destinations across Northern Pakistan.',
         'Having packed all necessary mountaineering equipment, he departed from Lahore on an early morning flight.',
@@ -1254,7 +1283,43 @@ export const APTIS_TEST_SET_2: AptisTestSet = {
       ],
       correctOrder: [0, 1, 3, 5, 2, 4],
       explanation: 'Chronological cohesion: 1. Researching destination -> 2. Packing and departing -> 3. Arriving at airport & meeting guide -> 4. Rigorous valley journey -> 5. Documenting folklore during trek -> 6. Compiling memoir after returning home.',
-      urduExplanation: 'منطقی ربط: سفر کی منصوبہ بندی (Initially) -> سامان پیک کرکے روانگی -> ایئرپورٹ پہنچ کر گائیڈ سے ملاقات -> وادی میں کٹھن سفر -> یادداشتیں قلمبند کرنا -> گھر واپسی پر کتاب تیار کرنا۔'
+      urduExplanation: 'منطقی ربط: سفر کی منصوبہ بندی (Initially) -> سامان پیک کرکے روانگی -> ایئرپورٹ پہنچ کر گائیڈ سے ملاقات -> وادی میں کٹھن سفر -> یادداشتیں قلمبند کرنا -> گھر واپسی پر کتاب تیار کرنا۔',
+      tasks: [
+        {
+          id: 's2-r-sec2-t1',
+          taskNumber: 1,
+          title: 'Task 1: The Journey of an International Travel Explorer',
+          topic: 'Wilderness Exploration & Narrative Record',
+          sentences: [
+            'Initially, Bilal spent several weeks researching off-the-beaten-path destinations across Northern Pakistan.',
+            'Having packed all necessary mountaineering equipment, he departed from Lahore on an early morning flight.',
+            'During the trek, he documented traditional folklore and photographed breathtaking mountain landscapes.',
+            'Upon arriving at Skardu airport, he met his local wilderness guide and finalized their trail route.',
+            'After returning home, he compiled his photographs and field notes into a widely praised travel memoir.',
+            'The journey through the rugged valleys tested his physical endurance to the absolute limit.'
+          ],
+          correctOrder: [0, 1, 3, 5, 2, 4],
+          explanation: 'Chronological cohesion: 1. Researching destination -> 2. Packing and departing -> 3. Arriving at airport & meeting guide -> 4. Rigorous valley journey -> 5. Documenting folklore during trek -> 6. Compiling memoir after returning home.',
+          urduExplanation: 'منطقی ربط: سفر کی منصوبہ بندی (Initially) -> سامان پیک کرکے روانگی -> ایئرپورٹ پہنچ کر گائیڈ سے ملاقات -> وادی میں کٹھن سفر -> یادداشتیں قلمبند کرنا -> گھر واپسی پر کتاب تیار کرنا۔'
+        },
+        {
+          id: 's2-r-sec2-t2',
+          taskNumber: 2,
+          title: 'Task 2: The Discovery of Penicillin and Antibiotic Medicine',
+          topic: 'Medical Science & Pharmacology',
+          sentences: [
+            'In the early twentieth century, even minor bacterial infections routinely resulted in fatal illnesses.',
+            'Upon returning from holiday, Alexander Fleming noticed that mold had contaminated one of his bacterial petri dishes.',
+            'Intriguingly, the area immediately surrounding the mold was entirely clear of bacterial growth.',
+            'Later, Oxford researchers Howard Florey and Ernst Chain succeeded in purifying and mass-producing the drug.',
+            'He identified the active fungal substance as penicillin and published his preliminary findings in 1929.',
+            'During the Second World War, penicillin saved millions of wounded soldiers and revolutionized global healthcare.'
+          ],
+          correctOrder: [0, 2, 4, 1, 3, 5],
+          explanation: 'Chronological progression: Establishes the historical danger of bacterial infections (0), introduces Fleming discovering mold upon return from holiday (2), describes his observation of clear halos around mold (4), names the substance penicillin in 1929 (1), explains Florey and Chain purifying the drug (3), and finishes with its impact during WWII and modern medicine (5).',
+          urduExplanation: 'تاریخی ارتقا: جراثیمی بیماریوں کا مہلک ہونا (0)، فلیمنگ کا تعطیلات سے واپسی پر فنگس دیکھنا (2)، جراثیم کا خاتمہ (4)، پینسلین کا نام اور اشاعت (1)، فلورے اور چین کی محنت (3) اور دوسری جنگِ عظیم میں لاکھوں جانوں کی بچاؤ پر اختتام (5)۔'
+        }
+      ]
     },
     section3: {
       id: 's2-r-sec3',
@@ -1334,7 +1399,7 @@ export const APTIS_TEST_SET_2: AptisTestSet = {
         }
       ]
     },
-    section4: PDF_READING_SECTION_4_POOL[1]
+    section4: ensureSixToSevenParagraphs(PDF_READING_SECTION_4_POOL[1])
   },
 
   writing: {
