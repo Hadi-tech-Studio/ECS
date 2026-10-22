@@ -23,6 +23,7 @@
  */
 
 import { GrammarQuestion } from '../types';
+import { getNextGeneratorCounter, isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 interface TemplateSeed {
   stem: (sub: string, ctx: string) => string;
@@ -444,7 +445,16 @@ const CONTEXT_VARIANTS = [
   'the environmental monitoring station'
 ];
 
-let globalMCQCounter = 1;
+const TIME_MODIFIERS = [
+  'early in the morning',
+  'during the annual conference',
+  'throughout the academic term',
+  'prior to the international summit',
+  'following the laboratory review',
+  'before the general symposium',
+  'late in the afternoon',
+  'over the weekend seminar'
+];
 
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
@@ -457,7 +467,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 /**
  * Generate a brand-new, unique Grammar Question matching the specified category and difficulty.
- * Guaranteed: checks against seenBaseKeys and NEVER returns a duplicate question.
+ * Guaranteed: checks against seenBaseKeys and global tracking, and NEVER returns a duplicate question.
  */
 export function generateSyntheticGrammarMCQ(
   category: string,
@@ -466,6 +476,7 @@ export function generateSyntheticGrammarMCQ(
 ): GrammarQuestion {
   const catTemplates = CATEGORY_TEMPLATES[category] || CATEGORY_TEMPLATES['Tenses'];
   const diffTemplates = catTemplates[difficulty] || catTemplates['Medium'] || CATEGORY_TEMPLATES['Tenses']['Medium'];
+  const counter = getNextGeneratorCounter('grammarMCQ');
 
   // Try finding an unseen combination across template permutations
   for (const template of shuffleArray(diffTemplates)) {
@@ -473,13 +484,16 @@ export function generateSyntheticGrammarMCQ(
       for (const ctx of shuffleArray(CONTEXT_VARIANTS)) {
         const stem = template.stem(sub, ctx);
         const bKey = stem.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (!seenBaseKeys.has(bKey)) {
+        if (!seenBaseKeys.has(bKey) && !isGloballySeen('grammar-mcq', '', stem)) {
           seenBaseKeys.add(bKey);
           const shuffled = shuffleArray([template.correct, ...template.distractors]);
           const correctIdx = shuffled.indexOf(template.correct);
+          const uniqueId = `auto-g-${Date.now().toString(36)}-${counter}-${Math.floor(Math.random() * 1000)}`;
+
+          markGloballySeen('grammar-mcq', [{ id: uniqueId, textOrTitle: stem }]);
 
           return {
-            id: `auto-g-${Date.now().toString(36)}-${globalMCQCounter++}`,
+            id: uniqueId,
             category,
             difficulty,
             question: stem,
@@ -493,19 +507,23 @@ export function generateSyntheticGrammarMCQ(
     }
   }
 
-  // Predefined combinatorial pool exhausted: synthesize dynamic phased variation
-  const fallbackTemplate = diffTemplates[0];
-  const sub = SUBJECT_VARIANTS[globalMCQCounter % SUBJECT_VARIANTS.length];
-  const ctx = CONTEXT_VARIANTS[globalMCQCounter % CONTEXT_VARIANTS.length];
-  const stem = `${fallbackTemplate.stem(sub, ctx)} (Phase ${globalMCQCounter})`;
+  // Combinatorial pool exhausted: synthesize dynamic contextual variation with diverse time modifiers
+  const fallbackTemplate = diffTemplates[counter % diffTemplates.length];
+  const sub = SUBJECT_VARIANTS[counter % SUBJECT_VARIANTS.length];
+  const ctx = CONTEXT_VARIANTS[(counter + 3) % CONTEXT_VARIANTS.length];
+  const timeMod = TIME_MODIFIERS[counter % TIME_MODIFIERS.length];
+  const stem = `${timeMod.charAt(0).toUpperCase() + timeMod.slice(1)}, ${fallbackTemplate.stem(sub, ctx)}`;
   const bKey = stem.toLowerCase().replace(/[^a-z0-9]/g, '');
   seenBaseKeys.add(bKey);
 
   const shuffled = shuffleArray([fallbackTemplate.correct, ...fallbackTemplate.distractors]);
   const correctIdx = shuffled.indexOf(fallbackTemplate.correct);
+  const uniqueId = `auto-g-${Date.now().toString(36)}-${counter}-${Math.floor(Math.random() * 1000)}`;
+
+  markGloballySeen('grammar-mcq', [{ id: uniqueId, textOrTitle: stem }]);
 
   return {
-    id: `auto-g-${Date.now().toString(36)}-${globalMCQCounter++}`,
+    id: uniqueId,
     category,
     difficulty,
     question: stem,
