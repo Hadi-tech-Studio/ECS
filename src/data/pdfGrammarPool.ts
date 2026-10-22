@@ -23,6 +23,7 @@
 
 import { GrammarQuestion } from '../types';
 import { generateSyntheticGrammarMCQ } from './grammarAutoGenerator';
+import { isGloballySeen, markGloballySeen } from '../lib/antiRepetitionTracker';
 
 export interface PdfGrammarItem extends GrammarQuestion {
   pdfNumber: number;
@@ -15557,11 +15558,12 @@ export function select25GrammarQuestionsFromPdf(
     ];
 
     for (const diff of diffNeeds) {
-      // Find candidate questions matching category and difficulty, not already in this test
+      // Find candidate questions matching category and difficulty, not already seen in this test or globally
       const candidates = poolForCat.filter(q => 
         q.difficulty === diff &&
         !selectedIds.has(q.id) &&
-        !selectedBaseKeys.has(q.baseSentenceKey)
+        !selectedBaseKeys.has(q.baseSentenceKey) &&
+        !isGloballySeen('grammar-mcq', q.id, q.question)
       );
 
       // Prioritize questions not seen anywhere in previous attempts
@@ -15624,6 +15626,10 @@ export function select25GrammarQuestionsFromPdf(
   markPdfGrammarSeen(
     finalQuestions.map(s => s.id),
     Array.from(selectedBaseKeys)
+  );
+  markGloballySeen(
+    'grammar-mcq',
+    finalQuestions.map(s => ({ id: s.id, textOrTitle: s.question }))
   );
 
   return finalQuestions;
