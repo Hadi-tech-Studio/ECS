@@ -166,18 +166,42 @@ export function validateReadingSection2(sec: ReadingSection2): ValidationResult 
   if (!sec || typeof sec.title !== 'string') {
     errors.push('Reading Section 2 missing title');
   }
-  if (!Array.isArray(sec.sentences) || sec.sentences.length !== 6) {
-    errors.push('Reading Section 2 must contain exactly 6 jumbled sentences');
-  }
-  if (!Array.isArray(sec.correctOrder) || sec.correctOrder.length !== 6) {
-    errors.push('Reading Section 2 correctOrder must have length 6');
+
+  // If 2 tasks are provided, validate both tasks
+  if (Array.isArray(sec.tasks) && sec.tasks.length > 0) {
+    if (sec.tasks.length !== 2) {
+      errors.push(`Reading Section 2 must contain exactly 2 tasks (found ${sec.tasks.length})`);
+    }
+    sec.tasks.forEach((task, tIdx) => {
+      if (!Array.isArray(task.sentences) || task.sentences.length !== 6) {
+        errors.push(`Task ${tIdx + 1} must contain exactly 6 jumbled sentences`);
+      }
+      if (!Array.isArray(task.correctOrder) || task.correctOrder.length !== 6) {
+        errors.push(`Task ${tIdx + 1} correctOrder must have length 6`);
+      } else {
+        const sorted = [...task.correctOrder].sort((a, b) => a - b);
+        const isValidPermutation = sorted.every((val, idx) => val === idx);
+        if (!isValidPermutation) {
+          errors.push(`Task ${tIdx + 1} correctOrder must be a valid permutation of [0, 1, 2, 3, 4, 5]`);
+        }
+      }
+    });
   } else {
-    const sorted = [...sec.correctOrder].sort((a, b) => a - b);
-    const isValidPermutation = sorted.every((val, idx) => val === idx);
-    if (!isValidPermutation) {
-      errors.push('correctOrder must be a valid permutation of [0, 1, 2, 3, 4, 5]');
+    // Single task fallback
+    if (!Array.isArray(sec.sentences) || sec.sentences.length !== 6) {
+      errors.push('Reading Section 2 must contain exactly 6 jumbled sentences');
+    }
+    if (!Array.isArray(sec.correctOrder) || sec.correctOrder.length !== 6) {
+      errors.push('Reading Section 2 correctOrder must have length 6');
+    } else {
+      const sorted = [...sec.correctOrder].sort((a, b) => a - b);
+      const isValidPermutation = sorted.every((val, idx) => val === idx);
+      if (!isValidPermutation) {
+        errors.push('correctOrder must be a valid permutation of [0, 1, 2, 3, 4, 5]');
+      }
     }
   }
+
   return { valid: errors.length === 0, errors };
 }
 
@@ -213,12 +237,12 @@ export function validateReadingSection4(sec: ReadingSection4): ValidationResult 
   if (!sec || typeof sec.title !== 'string') {
     errors.push('Reading Section 4 missing title');
   }
-  if (!Array.isArray(sec.headings) || sec.headings.length < 5) {
-    errors.push('Reading Section 4 must have at least 5-7 headings');
+  if (!Array.isArray(sec.paragraphs) || sec.paragraphs.length < 6 || sec.paragraphs.length > 7) {
+    errors.push(`Reading Section 4 must have 6 to 7 paragraphs (found ${sec?.paragraphs?.length || 0})`);
   }
-  if (!Array.isArray(sec.paragraphs) || sec.paragraphs.length < 4) {
-    errors.push('Reading Section 4 must have at least 4-7 paragraphs');
-  } else {
+  if (!Array.isArray(sec.headings) || sec.headings.length < (sec?.paragraphs?.length || 6) + 2) {
+    errors.push(`Reading Section 4 must have sufficient headings with at least 2-3 distractors (found ${sec?.headings?.length || 0})`);
+  } else if (Array.isArray(sec.paragraphs)) {
     sec.paragraphs.forEach((p, idx) => {
       if (typeof p.correctHeadingIndex !== 'number' || p.correctHeadingIndex < 0 || p.correctHeadingIndex >= sec.headings.length) {
         errors.push(`Paragraph ${idx + 1} heading index is out of bounds`);
