@@ -97,6 +97,11 @@ import {
   validateWritingModule,
   verifyCoreModule 
 } from './questionValidationService';
+import {
+  isGloballySeen,
+  markGloballySeen,
+  clearAllGlobalTracking
+} from './antiRepetitionTracker';
 import { 
   generateAiGrammarQuestions, 
   generateAiReadingSection1, 
@@ -251,6 +256,7 @@ export function clearExamHistoryAndTracking(): void {
   cachedAttemptHistory = [];
   memorySeenCache.clear();
   testSetWarmCache.clear();
+  clearAllGlobalTracking();
   if (typeof window === 'undefined') return;
   localStorage.removeItem(ATTEMPT_HISTORY_KEY);
   localStorage.removeItem('icap_exam_results');
@@ -762,16 +768,16 @@ function generateDynamicTestSetInternal(options?: {
 
   // Validate all reading sections without repeating fallback defaults
   const valR1 = validateReadingSection1(readingSec1);
-  if (!valR1.valid) readingSec1 = generateSyntheticReadingSection1(new Set());
+  if (!valR1.valid) readingSec1 = generateSyntheticReadingSection1(getSeenKeys('icap_seen_reading_s1_ids'));
 
   const valR2 = validateReadingSection2(readingSec2);
-  if (!valR2.valid) readingSec2 = generateSyntheticReadingSection2(new Set());
+  if (!valR2.valid) readingSec2 = generateSyntheticReadingSection2(getSeenKeys('icap_seen_reading_s2_ids'));
 
   const valR3 = validateReadingSection3(readingSec3);
-  if (!valR3.valid) readingSec3 = generateSyntheticReadingSection3(new Set());
+  if (!valR3.valid) readingSec3 = generateSyntheticReadingSection3(getSeenKeys('icap_seen_reading_s3_ids'));
 
   const valR4 = validateReadingSection4(readingSec4);
-  if (!valR4.valid) readingSec4 = generateSyntheticReadingSection4(new Set());
+  if (!valR4.valid) readingSec4 = generateSyntheticReadingSection4(getSeenKeys('icap_seen_reading_s4_ids'));
 
   const selectedReading = {
     section1: readingSec1,
@@ -828,7 +834,7 @@ function generateDynamicTestSetInternal(options?: {
   // Validate writing module
   const valW = validateWritingModule(selectedWriting);
   if (!valW.valid) {
-    selectedWriting = generateSyntheticWritingModule(new Set());
+    selectedWriting = generateSyntheticWritingModule(getSeenKeys('icap_seen_writing_module_ids'));
   }
 
   // CRITICAL: Ensure Part 4 is ALWAYS a truly new, non-repeating email writing task strictly using official PDF topics (1-30 Formal, 31-50 Informal)
@@ -883,16 +889,16 @@ function generateDynamicTestSetInternal(options?: {
   if (!coreVerification.verified) {
     console.warn('[ExamEngine] Pre-presentation verification found warnings, auto-healing...', coreVerification.errors);
     
-    // Auto-heal any failing grammar question from verified master pool
+    // Auto-heal any failing grammar question with procedurally synthesized fresh item
     coreModule.grammarQuestions = coreModule.grammarQuestions.map((q, idx) => {
       const gCheck = validateGrammarQuestion(q);
       if (!gCheck.valid || !q.options || !q.options[q.correctIndex] || q.options.length < 3) {
-        const replacement = UNIQUE_GRAMMAR_POOL.find(uq => 
-          !coreModule.grammarQuestions.some(existing => existing.question === uq.question)
+        const replacement = generateSyntheticGrammarMCQ(
+          q.category || 'Tenses',
+          q.difficulty || 'Medium',
+          new Set(coreModule.grammarQuestions.map(existing => existing.question.toLowerCase().replace(/[^a-z0-9]/g, '')))
         );
-        if (replacement) {
-          return shuffleMCQOptions({ ...replacement, id: `dyn-g-healed-${idx + 1}` });
-        }
+        return shuffleMCQOptions({ ...replacement, id: `dyn-g-healed-${idx + 1}` });
       }
       return q;
     });
@@ -900,6 +906,45 @@ function generateDynamicTestSetInternal(options?: {
     // Re-verify after healing
     coreVerification = verifyCoreModule(coreModule);
   }
+
+  // Intra-test deduplication pass: guarantee 0 duplicate statements in the same test
+  const seenStatementsInTest = new Set<string>();
+  coreModule.grammarQuestions = coreModule.grammarQuestions.map((q, idx) => {
+    const key = q.question.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (seenStatementsInTest.has(key)) {
+      const replacement = generateSyntheticGrammarMCQ(
+        q.category || 'Tenses',
+        q.difficulty || 'Medium',
+        seenStatementsInTest
+      );
+      seenStatementsInTest.add(replacement.question.toLowerCase().replace(/[^a-z0-9]/g, ''));
+      return shuffleMCQOptions({ ...replacement, id: `dyn-g-dup-${idx + 1}` });
+    }
+    seenStatementsInTest.add(key);
+    return q;
+  });
+
+  // Global anti-repetition registry update
+  markGloballySeen('grammar-mcq', coreModule.grammarQuestions.map(q => ({ id: q.id, textOrTitle: q.question })));
+  markGloballySeen('vocab', [
+    ...coreModule.vocabWordMatching.map(v => ({ id: v.id, textOrTitle: v.targetWord })),
+    ...coreModule.vocabDefinitions.map(v => ({ id: v.id, textOrTitle: v.correctWord })),
+    ...coreModule.vocabCollocations.map(v => ({ id: v.id, textOrTitle: v.sentence })),
+    ...coreModule.vocabSentenceCompletion.map(v => ({ id: v.id, textOrTitle: v.sentence })),
+    ...coreModule.vocabContextMatching.map(v => ({ id: v.id, textOrTitle: v.targetWord }))
+  ]);
+  markGloballySeen('reading-s1', [{ id: selectedReading.section1.id, textOrTitle: selectedReading.section1.title }]);
+  if (selectedReading.section2.tasks) {
+    selectedReading.section2.tasks.forEach(t => {
+      markGloballySeen('reading-s2', [{ id: t.id, textOrTitle: t.title }]);
+    });
+  }
+  markGloballySeen('reading-s3', [{ id: selectedReading.section3.id, textOrTitle: selectedReading.section3.title }]);
+  markGloballySeen('reading-s4', [{ id: selectedReading.section4.id, textOrTitle: selectedReading.section4.title }]);
+  markGloballySeen('writing-task', [
+    { id: `w-${selectedWriting.themeName}`, textOrTitle: selectedWriting.themeName },
+    { id: selectedWriting.part4.id, textOrTitle: selectedWriting.part4.scenarioTopic || '' }
+  ]);
 
   const generatedTestSet: AptisTestSet = {
     id: testId,
