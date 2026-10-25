@@ -110,7 +110,8 @@ function getGlobalSeenSignatures(): Set<string> {
       return cachedSignatures;
     }
     const arr = JSON.parse(raw);
-    cachedSignatures = new Set<string>(Array.isArray(arr) ? arr : []);
+    const cleanList = Array.isArray(arr) ? arr.filter((s: string) => typeof s === 'string' && !s.toLowerCase().includes('synthetic_')) : [];
+    cachedSignatures = new Set<string>(cleanList);
     return cachedSignatures;
   } catch {
     cachedSignatures = new Set<string>();
@@ -138,14 +139,18 @@ export function isGloballySeen(category: string, id: string, textOrTitle: string
   // Check exact ID
   if (id && signatures.has(`id:${id}`)) return true;
 
-  // Check semantic signature
+  // Check exact semantic signature
   if (textOrTitle) {
     const sig = computeItemSignature(category, textOrTitle);
     if (sig && signatures.has(sig)) return true;
 
-    // Check similarity against student history
-    const simCheck = isQuestionSubstantiallySimilar(textOrTitle, category as any, undefined, 0.65);
-    if (simCheck.isSimilar) return true;
+    // For vocab, exact signature matching is sufficient and prevents prompt templates
+    // (e.g. "Choose the closest synonym of ...") from falsely matching all other vocab questions.
+    // For non-vocab categories (grammar, reading, writing), check conceptual similarity with high threshold (0.85).
+    if (category !== 'vocab' && !category.startsWith('vocab')) {
+      const simCheck = isQuestionSubstantiallySimilar(textOrTitle, category as any, undefined, 0.85);
+      if (simCheck.isSimilar) return true;
+    }
   }
 
   return false;
