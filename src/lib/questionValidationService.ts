@@ -83,12 +83,18 @@ export function validateVocabWordMatch(item: any): ValidationResult {
   if (!item || word.trim().length < 2) {
     errors.push('Word must be non-empty and at least 2 characters');
   }
+  if (word.toLowerCase().includes('synthetic_') || word.includes('_')) {
+    errors.push('Word must be an authentic English word and cannot be a synthetic token');
+  }
   if (!Array.isArray(item.options) || item.options.length < 3) {
     errors.push('Options must contain at least 3 choices');
   } else {
     const uniqueOptions = new Set(item.options.map((o: any) => String(o).trim().toLowerCase()));
     if (uniqueOptions.size !== item.options.length) {
       errors.push('Options must not contain duplicate choices');
+    }
+    if (item.options.some((o: any) => String(o).toLowerCase().includes('synthetic_') || String(o).includes('_'))) {
+      errors.push('Options must not contain synthetic tokens');
     }
   }
   if (typeof item.correctMatch !== 'string' || !item.options?.includes(item.correctMatch)) {
@@ -122,8 +128,13 @@ export function validateVocabCollocation(item: any): ValidationResult {
   if (!item || typeof item.sentence !== 'string' || item.sentence.trim().length < 3) {
     errors.push('Sentence must be non-empty');
   }
+  if (item?.sentence && (item.sentence.includes('synthetic_') || item.sentence.includes('Researchers developed a method to'))) {
+    errors.push('Sentence must be authentic and cannot contain synthetic tokens');
+  }
   if (!Array.isArray(item.options) || item.options.length < 3) {
     errors.push('Options must contain at least 3 choices');
+  } else if (item.options.some((o: any) => String(o).toLowerCase().includes('synthetic_') || String(o).includes('_'))) {
+    errors.push('Options must not contain synthetic tokens');
   }
   if (
     typeof item.correctIndex !== 'number' || 
