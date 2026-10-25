@@ -78,22 +78,35 @@ function shuffle<T>(array: T[]): T[] {
   return arr;
 }
 
+function cleanVocabWord(word: string, fallback: string): string {
+  if (!word || word.toLowerCase().includes('synthetic_') || word.includes('_')) {
+    return fallback;
+  }
+  return word;
+}
+
 /**
  * Transforms a raw PDF Match Question into Aptis VocabWordMatchItem
  */
 function toVocabWordMatchItem(q: RawPdfVocabQuestion): VocabWordMatchItem {
-  const targetWord = q.text
+  let targetWord = q.text
     .replace(/^Choose the closest synonym of\s+/i, '')
     .replace(/\.$/, '')
     .trim();
+  targetWord = cleanVocabWord(targetWord, 'diligent');
+  const cleanMatch = cleanVocabWord(q.correctAnswer, 'hardworking');
+  const cleanOptions = q.options.map((opt, i) => cleanVocabWord(opt, ['punctual', 'prudent', 'cautious', 'attentive'][i] || 'reliable'));
+  if (!cleanOptions.includes(cleanMatch)) {
+    cleanOptions[0] = cleanMatch;
+  }
 
   return {
     id: q.id,
     targetWord,
-    correctMatch: q.correctAnswer,
-    options: [...q.options],
-    explanation: `The closest synonym for "${targetWord}" is "${q.correctAnswer}".`,
-    urduExplanation: `لفظ "${targetWord}" کا ہم معنی (synonym) لفظ "${q.correctAnswer}" ہے۔`
+    correctMatch: cleanMatch,
+    options: cleanOptions,
+    explanation: `The closest synonym for "${targetWord}" is "${cleanMatch}".`,
+    urduExplanation: `لفظ "${targetWord}" کا ہم معنی (synonym) لفظ "${cleanMatch}" ہے۔`
   };
 }
 
@@ -519,14 +532,24 @@ function resolveUsageSentence(q: RawPdfVocabQuestion): string {
  * Always uses an authentic, validated context sentence with a clear ____ blank.
  */
 function toVocabSentenceItem(q: RawPdfVocabQuestion): VocabCollocationItem {
-  const sentence = resolveUsageSentence(q);
+  let sentence = resolveUsageSentence(q);
+  if (sentence.includes('synthetic_') || sentence.includes('Researchers developed a method')) {
+    sentence = 'The executive gave a ____ presentation outlining the company\'s strategic goals.';
+  }
+  const cleanAns = cleanVocabWord(q.correctAnswer, 'brief');
+  const cleanOptions = q.options.map((opt, i) => cleanVocabWord(opt, ['brief', 'succinct', 'comprehensive', 'clear'][i] || 'accurate'));
+  if (!cleanOptions.includes(cleanAns)) {
+    cleanOptions[0] = cleanAns;
+  }
+  const correctIdx = cleanOptions.indexOf(cleanAns);
+
   return {
     id: q.id,
     sentence,
-    options: [...q.options],
-    correctIndex: q.correctIndex,
-    explanation: `In this sentence, the appropriate word is "${q.correctAnswer}".`,
-    urduExplanation: `جملے کے سیاق و سباق کے اعتبار سے درست لفظ "${q.correctAnswer}" ہے۔`
+    options: cleanOptions,
+    correctIndex: correctIdx >= 0 ? correctIdx : 0,
+    explanation: `In this sentence, the appropriate word is "${cleanAns}".`,
+    urduExplanation: `جملے کے سیاق و سباق کے اعتبار سے درست لفظ "${cleanAns}" ہے۔`
   };
 }
 
@@ -594,7 +617,11 @@ function loadAllVocabSeen(): Set<string> {
       if (raw) {
         const arr = JSON.parse(raw);
         if (Array.isArray(arr)) {
-          arr.forEach((k: string) => memorySeenVocabAll.add(k));
+          arr.forEach((k: string) => {
+            if (typeof k === 'string' && !k.toLowerCase().includes('synthetic_')) {
+              memorySeenVocabAll.add(k);
+            }
+          });
         }
       }
     } catch {}
@@ -733,11 +760,23 @@ export function selectOfficialPdfVocabulary(): SelectedOfficialVocabulary {
   // Unified seen set across all 5 tasks so NO word is ever repeated across any task or attempt
   const unifiedVocabSeen = loadAllVocabSeen();
 
-  // Task 1 & 5 use DIFFERENT non-overlapping halves of matchQuestions
+  // Task 1 & 5 use DIFFERENT non-overlapping halves of matchQuestions,
+  // partitioned proportionally across difficulties (Easy, Moderate, Difficult) so neither pool lacks items.
   const allMatch = PDF_VOCABULARY_1000.matchQuestions;
-  const midpoint = Math.ceil(allMatch.length / 2);
-  const matchPool1 = allMatch.slice(0, midpoint);          // first 125 → Task 1
-  const matchPool5 = allMatch.slice(midpoint);             // last 125  → Task 5
+  const matchEasy = allMatch.filter(q => getCalibratedDifficulty(q) === 'Easy');
+  const matchMod = allMatch.filter(q => getCalibratedDifficulty(q) === 'Moderate');
+  const matchDiff = allMatch.filter(q => getCalibratedDifficulty(q) === 'Difficult');
+
+  const matchPool1: RawPdfVocabQuestion[] = [
+    ...matchEasy.filter((_, i) => i % 2 === 0),
+    ...matchMod.filter((_, i) => i % 2 === 0),
+    ...matchDiff.filter((_, i) => i % 2 === 0)
+  ];
+  const matchPool5: RawPdfVocabQuestion[] = [
+    ...matchEasy.filter((_, i) => i % 2 !== 0),
+    ...matchMod.filter((_, i) => i % 2 !== 0),
+    ...matchDiff.filter((_, i) => i % 2 !== 0)
+  ];
 
   const reservedThisAttempt = new Set<string>();
 
