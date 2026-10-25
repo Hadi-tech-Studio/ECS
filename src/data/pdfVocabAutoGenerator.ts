@@ -297,104 +297,105 @@ function generateProceduralVocab(
   reservedInAttempt: Set<string>,
   namespace: string
 ): RawPdfVocabQuestion {
-  let proceduralCounter = getNextGeneratorCounter('vocabProcedural');
-  // Find an expanded word not yet seen
-  const unseenWords = EXPANDED_WORDS_DICTIONARY.filter(item => 
+  const counter = getNextGeneratorCounter('vocabProcedural');
+
+  // Filter dictionary items not seen globally and not in current attempt
+  let candidateList = EXPANDED_WORDS_DICTIONARY.filter(item => 
     !seenSet.has(`word:${item.word.toLowerCase()}`) && 
     !reservedInAttempt.has(`word:${item.word.toLowerCase()}`) &&
     !seenSet.has(`word:${item.syn.toLowerCase()}`) &&
     !reservedInAttempt.has(`word:${item.syn.toLowerCase()}`)
   );
 
-  let selectedWord = '';
-  let selectedSyn = '';
-  let selectedDef = '';
-  let selectedCol = '';
-  let selectedUse = '';
-
-  if (unseenWords.length > 0) {
-    const item = unseenWords[Math.floor(Math.random() * unseenWords.length)];
-    selectedWord = item.word;
-    selectedSyn = item.syn;
-    selectedDef = item.def;
-    selectedCol = item.col;
-    selectedUse = item.use;
-  } else {
-    // Infinite generator: construct distinct academic target words ensuring zero duplicates
-    const roots = ['quant', 'struct', 'dynam', 'system', 'chron', 'graph', 'log', 'therm', 'bio', 'geo', 'psych', 'morph', 'neuro', 'astro', 'hydro', 'spectro'];
-    const affixes = ['ify', 'ize', 'ate', 'istic', 'ation', 'ological', 'itude', 'ence', 'ency', 'able', 'ive', 'ment'];
-    let offset = 0;
-    while (offset < 1000) {
-      const idx = proceduralCounter + offset;
-      const r = roots[idx % roots.length];
-      const a = affixes[Math.floor(idx / roots.length) % affixes.length];
-      const candidate = `${r}${a}`;
-      if (!seenSet.has(`word:${candidate.toLowerCase()}`) && !reservedInAttempt.has(`word:${candidate.toLowerCase()}`)) {
-        selectedWord = candidate;
-        selectedSyn = `systematic ${r}`;
-        selectedDef = `Relating to or characterized by ${r}-based properties.`;
-        selectedCol = `advanced ${selectedWord}`;
-        selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
-        break;
-      }
-      offset++;
-    }
-    if (!selectedWord) {
-      selectedWord = `synthetic_${Date.now().toString(36)}_${proceduralCounter}`;
-      selectedSyn = `systematic function`;
-      selectedDef = `Relating to or characterized by specialized properties.`;
-      selectedCol = `advanced ${selectedWord}`;
-      selectedUse = `Researchers developed a method to ${selectedWord} the experimental data.`;
-    }
+  // If globally exhausted, prioritize items not yet used in this current attempt
+  if (candidateList.length === 0) {
+    candidateList = EXPANDED_WORDS_DICTIONARY.filter(item => 
+      !reservedInAttempt.has(`word:${item.word.toLowerCase()}`) &&
+      !reservedInAttempt.has(`word:${item.syn.toLowerCase()}`)
+    );
   }
 
-  const uniqueId = `${namespace}-proc-${selectedWord}-${Date.now().toString(36)}-${proceduralCounter++}`;
+  // Final fallback: any dictionary item
+  if (candidateList.length === 0) {
+    candidateList = EXPANDED_WORDS_DICTIONARY;
+  }
+
+  const selectedItem = candidateList[counter % candidateList.length];
+  const selectedWord = selectedItem.word;
+  const selectedSyn = selectedItem.syn;
+  const selectedDef = selectedItem.def;
+  const selectedCol = selectedItem.col;
+  const selectedUse = selectedItem.use;
+
+  // Pick 3 authentic, realistic distractors from other words in the dictionary
+  const otherItems = EXPANDED_WORDS_DICTIONARY.filter(it => it.word !== selectedWord);
+  const shuffledOthers = shuffle(otherItems);
+
+  const uniqueId = `${namespace}-proc-${selectedWord}-${Date.now().toString(36)}-${counter}`;
   seenSet.add(`word:${selectedWord.toLowerCase()}`);
   seenSet.add(`word:${selectedSyn.toLowerCase()}`);
   reservedInAttempt.add(`word:${selectedWord.toLowerCase()}`);
   reservedInAttempt.add(`word:${selectedSyn.toLowerCase()}`);
   reservedInAttempt.add(uniqueId);
 
-  const fallbackDistractors: [string, string, string] = ['unrelated', 'secondary', 'marginal'];
-
   if (category === 'Word Matching') {
+    const distractors: [string, string, string] = [
+      shuffledOthers[0]?.syn || 'intricate',
+      shuffledOthers[1]?.syn || 'temporary',
+      shuffledOthers[2]?.syn || 'fundamental'
+    ];
     return buildMcq(
       uniqueId,
       'Word Matching',
       difficulty,
       `Choose the closest synonym of ${selectedWord}.`,
       selectedSyn,
-      fallbackDistractors,
+      distractors,
       1
     );
   } else if (category === 'Word Definition') {
+    const distractors: [string, string, string] = [
+      shuffledOthers[0]?.word || 'pragmatic',
+      shuffledOthers[1]?.word || 'lucid',
+      shuffledOthers[2]?.word || 'resilient'
+    ];
     return buildMcq(
       uniqueId,
       'Word Definition',
       difficulty,
       selectedDef,
       selectedWord,
-      fallbackDistractors,
+      distractors,
       1
     );
   } else if (category === 'Word Combination') {
+    const distractors: [string, string, string] = [
+      shuffledOthers[0]?.word || 'pragmatic',
+      shuffledOthers[1]?.word || 'lucid',
+      shuffledOthers[2]?.word || 'resilient'
+    ];
     return buildMcq(
       uniqueId,
       'Word Combination',
       difficulty,
       `Choose the word or phrase that best completes the collocation: ${selectedCol.replace(selectedWord, '____')}.`,
       selectedWord,
-      fallbackDistractors,
+      distractors,
       1
     );
   } else {
+    const distractors: [string, string, string] = [
+      shuffledOthers[0]?.word || 'pragmatic',
+      shuffledOthers[1]?.word || 'lucid',
+      shuffledOthers[2]?.word || 'resilient'
+    ];
     return buildMcq(
       uniqueId,
       'Word Usage',
       difficulty,
       selectedUse.replace(new RegExp(`\\b${selectedWord}\\b`, 'i'), '____'),
       selectedWord,
-      fallbackDistractors,
+      distractors,
       1
     );
   }
