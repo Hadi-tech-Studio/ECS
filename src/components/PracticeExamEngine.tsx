@@ -44,6 +44,7 @@ import {
 } from '../lib/examEngineService';
 import { generateAiWritingPart4 } from '../lib/aiTestGenerator';
 import { selectFreshPart4EmailTask, isPart4DefaultOrBanned } from '../data/expandedPart4EmailPool';
+import { cleanArtifacts } from '../data/pdfGrammarPool';
 import { recordQuestionsToStudentHistory } from '../lib/questionHistoryService';
 import { useTheme } from '../context/ThemeContext';
 
