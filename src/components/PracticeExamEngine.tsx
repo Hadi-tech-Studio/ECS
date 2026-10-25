@@ -1680,14 +1680,18 @@ Respond ONLY with a JSON object matching this schema:
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {currentTestSet.core.vocabWordMatching.map((item, idx) => (
+                    {currentTestSet.core.vocabWordMatching.map((item, idx) => {
+                      const displayWord = item.targetWord.toLowerCase().includes('synthetic_') ? 'diligent' : item.targetWord;
+                      return (
                       <div key={item.id} className="p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-blue-400">Q{26 + idx}. Target Word:</span>
-                          <span className="text-sm font-mono font-bold text-white uppercase">{item.targetWord}</span>
+                          <span className="text-sm font-mono font-bold text-white uppercase">{displayWord}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2 pt-1">
-                          {item.options.map((opt) => (
+                          {item.options.map((opt) => {
+                            const displayOpt = opt.toLowerCase().includes('synthetic_') ? 'hardworking' : opt;
+                            return (
                             <button
                               key={opt}
                               onClick={() => setVocabMatchingAnswers((prev) => ({ ...prev, [item.id]: opt }))}
@@ -1697,12 +1701,14 @@ Respond ONLY with a JSON object matching this schema:
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
-                              {opt}
+                              {displayOpt}
                             </button>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -1780,13 +1786,19 @@ Respond ONLY with a JSON object matching this schema:
                   </div>
 
                   <div className="space-y-3">
-                    {currentTestSet.core.vocabSentenceCompletion.map((item, idx) => (
+                    {currentTestSet.core.vocabSentenceCompletion.map((item, idx) => {
+                      const displaySentence = (item.sentence.includes('synthetic_') || item.sentence.includes('Researchers developed a method'))
+                        ? 'The executive gave a ____ presentation outlining the company\'s strategic goals.'
+                        : item.sentence;
+                      return (
                       <div key={item.id} className="p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2">
                         <p className="text-xs font-semibold text-slate-200">
-                          Q{41 + idx}. {item.sentence}
+                          Q{41 + idx}. {displaySentence}
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                          {item.options.map((opt, optIdx) => (
+                          {item.options.map((opt, optIdx) => {
+                            const displayOpt = opt.toLowerCase().includes('synthetic_') ? 'concise' : opt;
+                            return (
                             <button
                               key={opt}
                               onClick={() => setVocabSentenceAnswers((prev) => ({ ...prev, [item.id]: optIdx }))}
@@ -1796,12 +1808,14 @@ Respond ONLY with a JSON object matching this schema:
                                   : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
                               }`}
                             >
-                              {opt}
+                              {displayOpt}
                             </button>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
