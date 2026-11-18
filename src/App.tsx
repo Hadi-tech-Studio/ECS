@@ -13,8 +13,10 @@ import { AudioHub } from './components/AudioHub';
 import { Dashboard } from './components/Dashboard';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { Footer } from './components/Footer';
+import { MaintenanceScreen } from './components/MaintenanceScreen';
 import { registerKeyModalHandler, checkServerGeminiStatus } from './lib/api-handler';
 import { useTheme } from './context/ThemeContext';
+import { MAINTENANCE_CONFIG } from './config/maintenance';
 
 export default function App() {
   const { theme } = useTheme();
@@ -61,6 +63,11 @@ export default function App() {
     setHasApiKey(!!(newKey && newKey.trim().length > 0));
   };
 
+  // If Maintenance Mode is enabled in config, show maintenance screen to all visitors
+  if (MAINTENANCE_CONFIG.enabled) {
+    return <MaintenanceScreen />;
+  }
+
   return (
     <div className={`min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 overflow-x-hidden w-full ${
       theme === 'sepia'
@@ -69,7 +76,6 @@ export default function App() {
         ? 'bg-[#f0f4fa] text-[#0a1636]'
         : 'bg-[#060b18] text-slate-100'
     }`}>
-      
       {/* Navigation Header */}
       <Navbar
         activeTab={activeTab}
