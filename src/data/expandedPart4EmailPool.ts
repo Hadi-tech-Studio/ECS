@@ -1,18 +1,8 @@
+// ICAP ECS Exam System - Part 4 Email Pool
+// Sourced from official Writing Question Bank (35 authentic tests)
 import { WritingPart4 } from '../types';
-import { 
-  PDF_TOPIC_PAIRS, 
-  createPart4FromPdfTopics, 
-  selectFreshPdfPart4EmailTask, 
-  getSeenPdfEmailTopics,
-  PDF_FORMAL_EMAIL_TOPICS,
-  PDF_INFORMAL_EMAIL_TOPICS
-} from './aptisPdfEmailTopics';
+import { WRITING_TESTS } from './writingQuestionBank';
 
-/**
- * Checks if a Part 4 task contains the banned default question
- * (such as Central Community Library, Zoom for 3 months, 15% fee increase, Mr. Harrison)
- * or prohibited accounting/auditing topics.
- */
 export function isPart4DefaultOrBanned(part4: {
   contextNotice?: string;
   taskA?: { prompt?: string };
@@ -21,50 +11,30 @@ export function isPart4DefaultOrBanned(part4: {
   scenarioTopic?: string;
 }): boolean {
   if (!part4) return true;
-  const text = `${part4.clubName || ''} ${part4.scenarioTopic || ''} ${part4.contextNotice || ''} ${part4.taskA?.prompt || ''} ${part4.taskB?.prompt || ''}`.toLowerCase();
-  
-  // Banned default prompts
-  const isDefault = (
-    text.includes('central community library') ||
-    text.includes('zoom for the next three months') ||
-    text.includes('shifted online via zoom') ||
-    text.includes('mr. harrison') ||
-    (text.includes('15%') && text.includes('membership subscription')) ||
-    (text.includes('city book club') && text.includes('zoom'))
-  );
-
-  // Banned accounting/auditing topics per user instruction
-  const isAccountingOrAuditing = (
-    text.includes('audit') ||
-    text.includes('auditor') ||
-    text.includes('auditing') ||
-    text.includes('chartered accountant') ||
-    text.includes('ledger') ||
-    text.includes('ifrs') ||
-    text.includes('isa 505') ||
-    text.includes('isa 230') ||
-    text.includes('balance sheet') ||
-    text.includes('statutory financial') ||
-    text.includes('unrecorded liability') ||
-    text.includes('petty cash voucher')
-  );
-
-  return isDefault || isAccountingOrAuditing;
+  if (!part4.contextNotice || part4.contextNotice.length < 20) return true;
+  if (!part4.taskA?.prompt || !part4.taskB?.prompt) return true;
+  return false;
 }
 
-/**
- * Canonical pool of 30 authentic Aptis General Part 4 email tasks generated
- * strictly from the 30 Formal and 20 Informal email topics in the attached PDF.
- * Free of accounting or auditing topics.
- */
-export const EXPANDED_PART4_EMAIL_POOL: WritingPart4[] = PDF_TOPIC_PAIRS.map(pair => 
-  createPart4FromPdfTopics(pair.formalNum, pair.informalNum)
-);
+export const EXPANDED_PART4_EMAIL_POOL: WritingPart4[] = WRITING_TESTS.map(t => t.part4);
 
-/**
- * Select a fresh, non-repeating Part 4 email task strictly from the PDF topics.
- * Guarantees a different random topic for every new test and avoids repetition across attempts.
- */
 export function selectFreshPart4EmailTask(seenSet?: Set<string | number>): WritingPart4 {
-  return selectFreshPdfPart4EmailTask(seenSet);
+  if (EXPANDED_PART4_EMAIL_POOL.length === 0) {
+    return {
+      id: 'empty-w-part4',
+      clubName: '',
+      contextNotice: '',
+      taskA: { prompt: '', minWords: 40, maxWords: 60, sampleAnswer: '' },
+      taskB: { prompt: '', minWords: 120, maxWords: 150, sampleAnswer: '' }
+    };
+  }
+
+  // Filter for unseen
+  const unseen = seenSet 
+    ? EXPANDED_PART4_EMAIL_POOL.filter(p => !seenSet.has(p.id) && !seenSet.has(p.clubName))
+    : EXPANDED_PART4_EMAIL_POOL;
+
+  const pool = unseen.length > 0 ? unseen : EXPANDED_PART4_EMAIL_POOL;
+  const selected = pool[Math.floor(Math.random() * pool.length)];
+  return { ...selected };
 }

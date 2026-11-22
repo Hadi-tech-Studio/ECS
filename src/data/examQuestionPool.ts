@@ -19,6 +19,7 @@ import {
   READING_SECTION_3_BANK,
   READING_SECTION_4_BANK
 } from './readingQuestionBank';
+import { WRITING_TESTS } from './writingQuestionBank';
 
 export function mapToIcapCategory(cat: string = '', questionText: string = ''): IcapCoreCategory {
   const c = cat.toLowerCase();
@@ -111,4 +112,4 @@ export const EXPANDED_READING_SECTIONS: {
   section4: READING_SECTION_4_BANK
 };
 
-export const EXPANDED_WRITING_MODULES: AptisWritingModule[] = [];
+export const EXPANDED_WRITING_MODULES: AptisWritingModule[] = WRITING_TESTS;

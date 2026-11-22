@@ -850,7 +850,7 @@ function generateDynamicTestSetInternal(options?: {
 
   if (optionsObj?.aiWritingPart4 && !isPart4DefaultOrBanned(optionsObj.aiWritingPart4)) {
     selectedWriting.part4 = { ...optionsObj.aiWritingPart4 };
-  } else {
+  } else if (!selectedWriting.part4 || isPart4DefaultOrBanned(selectedWriting.part4)) {
     // Select a fresh, non-repeating email task strictly from the attached PDF topics
     const freshPart4 = selectFreshPart4EmailTask(part4Seen);
     selectedWriting.part4 = { ...freshPart4 };
