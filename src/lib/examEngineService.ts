@@ -72,6 +72,7 @@ import { generateSyntheticReadingSection2 } from '../data/readingSection2AutoGen
 import { generateSyntheticReadingSection3 } from '../data/readingSection3AutoGenerator';
 import { generateSyntheticReadingSection4 } from '../data/readingSection4AutoGenerator';
 import { generateSyntheticWritingModule } from '../data/writingAutoGenerator';
+import { generateSyntheticGrammarMCQ } from '../data/grammarAutoGenerator';
 import { 
   select25GrammarQuestionsFromPdf, 
   getSeenPdfGrammarIds, 
@@ -754,14 +755,19 @@ function generateDynamicTestSetInternal(options?: {
   // 3. Select Reading Sections (Strictly from official PDF pool for Section 1 Sentence Comprehension)
   let readingSec1: ReadingSection1 = selectOfficialPdfReadingSection1();
   
-  // Generate 2 different Text Cohesion tasks in every test matching official pattern
-  let readingSec2: ReadingSection2 = generateSyntheticReadingSection2(getSeenKeys('icap_seen_reading_s2_ids'));
+  // Select official Reading Section 2 from the question bank
+  let readingSec2: ReadingSection2 = selectFreshReadingSection(
+    EXPANDED_READING_SECTIONS.section2,
+    'icap_seen_reading_s2_ids',
+    EXPANDED_READING_SECTIONS.section2[0],
+    'reading-s2'
+  );
   markSeenKeys('icap_seen_reading_s2_ids', [readingSec2.id, ...(readingSec2.tasks?.map(t => t.id) || [])], 50000);
 
   let readingSec3: ReadingSection3 = selectFreshReadingSection(
     EXPANDED_READING_SECTIONS.section3, 
     'icap_seen_reading_s3_ids', 
-    APTIS_TEST_SET_1.reading.section3,
+    EXPANDED_READING_SECTIONS.section3[0],
     'reading-s3'
   );
   let readingSec4: ReadingSection4 = selectFreshPdfReadingSection4(getSeenKeys('icap_seen_reading_s4_ids'));
